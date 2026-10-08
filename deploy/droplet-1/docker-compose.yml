@@ -1,0 +1,77 @@
+# DROPLET 1: máquina de acceso.
+#   - nginx: balanceador de carga + front (único puerto público: 80)
+#   - api:   nodo 1 de la API
+#   - db:    PostgreSQL, la única base SQL del sistema
+#
+# Los droplets 2 y 3 se conectan a esta base por la red privada (VPC) de
+# DigitalOcean; PostgreSQL solo escucha en la IP privada, nunca en la pública.
+#
+#   cd deploy/droplet-1 && cp .env.example .env && docker compose up -d --build
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: canchas-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: canchas
+    ports:
+      - "${IP_PRIVADA}:5432:5432"
+    volumes:
+      - datos_postgres:/var/lib/postgresql/data
+      - ../../database/empresas.sql:/docker-entrypoint-initdb.d/01-empresas.sql:ro
+      - ../../database/canchas.sql:/docker-entrypoint-initdb.d/02-canchas.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - red_canchas
+
+  api:
+    build: ../..
+    container_name: canchas-api
+    restart: unless-stopped
+    environment:
+      DROPLET: droplet-1
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: canchas
+      DB_SSL: "false"
+      MONGO_URI: ${MONGO_URI:-}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - red_canchas
+
+  nginx:
+    build:
+      context: ../..
+      dockerfile: nginx/Dockerfile
+    container_name: canchas-nginx
+    restart: unless-stopped
+    environment:
+      NODO1: api:3000                    # API de este mismo droplet
+      NODO2: ${IP_DROPLET2}:3000         # API del droplet 2 (IP privada)
+      NODO3: ${IP_DROPLET3}:3000         # API del droplet 3 (IP privada)
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - red_canchas
+
+networks:
+  red_canchas:
+    driver: bridge
+
+volumes:
+  datos_postgres:

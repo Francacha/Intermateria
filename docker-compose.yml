@@ -1,0 +1,116 @@
+# Simulación LOCAL de los 3 droplets en una sola máquina (para probar y para la demo).
+# El despliegue real en DigitalOcean está en deploy/ (un compose por droplet).
+#
+#   navegador ──► nginx:8080 (acceso) ──┬──► api1 (droplet-1) ─┐
+#                                       ├──► api2 (droplet-2) ─┼──► db (PostgreSQL, Docker)
+#                                       └──► api3 (droplet-3) ─┘
+#                                                  └──────────────► mongo (NoSQL)
+#
+# En los droplets la base NoSQL es MongoDB Atlas (vía web); acá se simula con
+# un contenedor "mongo" para poder probar sin conexión a internet.
+#
+# Solo Nginx publica un puerto hacia afuera; la API y PostgreSQL quedan en la
+# red interna "red_canchas".
+
+# Configuración común a todas las réplicas de la API
+x-api: &api
+  build: .
+  restart: unless-stopped
+  environment: &api-env
+    PORT: 3000
+    DB_HOST: db                 # nombre del servicio de PostgreSQL
+    DB_PORT: 5432
+    DB_USER: postgres
+    DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    DB_NAME: canchas
+    DB_SSL: "false"
+    MONGO_URI: mongodb://mongo:27017/
+    JWT_SECRET: ${JWT_SECRET:-clave_solo_para_pruebas_locales}
+  depends_on:
+    db:
+      condition: service_healthy
+    mongo:
+      condition: service_started
+  networks:
+    - red_canchas
+
+services:
+  # Base SQL única, compartida por todas las réplicas
+  db:
+    image: postgres:16-alpine
+    container_name: canchas-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: canchas
+    volumes:
+      - datos_postgres:/var/lib/postgresql/data              # persistencia
+      - ./database/empresas.sql:/docker-entrypoint-initdb.d/01-empresas.sql:ro
+      - ./database/canchas.sql:/docker-entrypoint-initdb.d/02-canchas.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - red_canchas
+
+  # Base NoSQL: perfiles de los complejos (en producción, MongoDB Atlas)
+  mongo:
+    image: mongo:7
+    container_name: canchas-mongo
+    restart: unless-stopped
+    volumes:
+      - datos_mongo:/data/db
+    networks:
+      - red_canchas
+
+  # Réplicas de la API (misma imagen, distinto contenedor). DROPLET es el
+  # nombre que se ve en el pie de página del front.
+  api1:
+    <<: *api
+    container_name: canchas-api1
+    environment:
+      <<: *api-env
+      DROPLET: droplet-1
+  api2:
+    <<: *api
+    container_name: canchas-api2
+    environment:
+      <<: *api-env
+      DROPLET: droplet-2
+  api3:
+    <<: *api
+    container_name: canchas-api3
+    environment:
+      <<: *api-env
+      DROPLET: droplet-3
+
+  # Máquina de acceso: balanceador de carga + front
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    container_name: canchas-nginx
+    restart: unless-stopped
+    environment:
+      NODO1: api1:3000
+      NODO2: api2:3000
+      NODO3: api3:3000
+    ports:
+      - "8080:80"
+    depends_on:
+      - api1
+      - api2
+      - api3
+    networks:
+      - red_canchas
+
+networks:
+  red_canchas:
+    driver: bridge
+
+volumes:
+  datos_postgres:
+  datos_mongo:

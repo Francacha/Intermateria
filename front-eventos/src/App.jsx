@@ -1,41 +1,52 @@
-import { Link, Route, Routes } from 'react-router-dom'
+import { Link, Navigate, Route, Routes } from 'react-router-dom'
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import { useAuth } from './context/auth'
+import Inicio from './pages/Inicio'
+import Registro from './pages/Registro'
+import Ingresar from './pages/Ingresar'
+import Panel from './pages/Panel'
+import Empresas from './pages/Empresas'
+import EmpresasForm from './pages/EmpresasForm'
+import './App.css'
 
-function Empresas() {
-  return (
-    <main>
-      <h1>Empresas</h1>
-      <p>La página de empresas todavía no está implementada.</p>
-      <Link to="/empresas/nueva">Crear empresa</Link>
-    </main>
-  )
+// Solo deja pasar a una empresa logueada
+function RutaPrivada({ children }) {
+  const { empresa } = useAuth()
+  return empresa ? children : <Navigate to="/ingresar" replace />
 }
 
-function EmpresaForm() {
-  return (
-    <main>
-      <h1>Empresa</h1>
-      <p>El formulario todavía no está implementado.</p>
-      <Link to="/">Volver a empresas</Link>
-    </main>
-  )
+// Si ya inició sesión, no tiene sentido mostrar login/registro
+function RutaPublica({ children }) {
+  const { empresa } = useAuth()
+  return empresa ? <Navigate to="/panel" replace /> : children
 }
 
 function NoEncontrada() {
   return (
-    <main>
+    <main className="contenedor vacio">
       <h1>Página no encontrada</h1>
-      <Link to="/">Volver al inicio</Link>
+      <Link className="boton" to="/">Volver al inicio</Link>
     </main>
   )
 }
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Empresas />} />
-      <Route path="/empresas/nueva" element={<EmpresaForm />} />
-      <Route path="/empresas/:id/editar" element={<EmpresaForm />} />
-      <Route path="*" element={<NoEncontrada />} />
-    </Routes>
+    <div className="app">
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Inicio />} />
+        <Route path="/registro" element={<RutaPublica><Registro /></RutaPublica>} />
+        <Route path="/ingresar" element={<RutaPublica><Ingresar /></RutaPublica>} />
+        <Route path="/panel" element={<RutaPrivada><Panel /></RutaPrivada>} />
+        {/* CRUD de empresas de la consigna (administración) */}
+        <Route path="/empresas" element={<Empresas />} />
+        <Route path="/empresas/nueva" element={<EmpresasForm />} />
+        <Route path="/empresas/:id/editar" element={<EmpresasForm />} />
+        <Route path="*" element={<NoEncontrada />} />
+      </Routes>
+      <Footer />
+    </div>
   )
 }

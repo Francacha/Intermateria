@@ -1,184 +1,1066 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-}
-
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#center {
+/* ---------- Estructura ---------- */
+.app {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 25px;
-  place-content: center;
+}
+
+.app > main {
+  flex: 1;
+}
+
+.contenedor {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.texto-suave {
+  color: var(--texto-suave);
+  margin: 4px 0 0;
+}
+
+.centrado {
+  text-align: center;
+}
+
+.etiqueta {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primario);
+  margin-bottom: 6px;
+}
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+.vacio {
+  text-align: center;
+  padding: 40px 16px;
+}
+
+.alerta {
+  background: var(--peligro-suave);
+  color: var(--peligro);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 12px 0;
+  font-size: 0.95rem;
+}
+
+.alerta-texto {
+  color: var(--peligro);
+}
+
+.ok-texto {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+/* ---------- Botones ---------- */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--primario);
+  color: var(--primario-texto);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.boton:hover {
+  background: var(--primario-hover);
+}
+
+.boton:active {
+  transform: scale(0.98);
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.boton-grande {
+  padding: 13px 26px;
+  font-size: 1.05rem;
+}
+
+.boton-ancho {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.boton-secundario,
+.boton-fantasma {
+  background: transparent;
+  color: var(--texto);
+  border-color: var(--borde);
+}
+
+.boton-secundario:hover,
+.boton-fantasma:hover {
+  background: var(--fondo-alt);
+}
+
+.boton-icono {
+  display: inline-grid;
   place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: transparent;
+  color: var(--texto-suave);
+  text-decoration: none;
+  cursor: pointer;
 }
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+.boton-icono:hover {
+  color: var(--texto);
+  background: var(--fondo-alt);
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+.boton-icono.peligro:hover {
+  color: var(--peligro);
+  background: var(--peligro-suave);
+  border-color: transparent;
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
+.acciones {
   display: flex;
   gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
+  align-items: center;
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+/* ---------- Navbar ---------- */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--fondo) 85%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--borde);
 }
 
-.ticks {
+.navbar-interno {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+  flex-wrap: wrap;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--texto);
+  text-decoration: none;
+}
+
+.marca-logo {
+  width: 28px;
+  height: 20px;
+  border-radius: 4px;
+  background:
+    linear-gradient(var(--primario-texto), var(--primario-texto)) center / 2px 100% no-repeat,
+    var(--primario);
+  box-shadow: inset 0 0 0 2px var(--primario-texto), 0 0 0 2px var(--primario);
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.navbar-links a:not(.boton) {
+  color: var(--texto-suave);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.navbar-links a.active,
+.navbar-links a:not(.boton):hover {
+  color: var(--texto);
+}
+
+.navbar-empresa {
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--fondo-alt);
+}
+
+/* ---------- Footer con el droplet ---------- */
+.footer {
+  margin-top: 48px;
+  border-top: 1px solid var(--borde);
+  background: var(--superficie);
+}
+
+.footer-interno {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.footer-marca {
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.droplet {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.9rem;
+  padding: 6px 8px 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  background: var(--fondo);
+}
+
+.droplet strong {
+  color: var(--primario);
+}
+
+.droplet-punto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--peligro);
+}
+
+.droplet-punto.activo {
+  background: var(--futbol);
+  box-shadow: 0 0 0 4px var(--futbol-suave);
+}
+
+.droplet-boton {
+  border: none;
+  background: var(--fondo-alt);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.droplet-boton:hover {
+  background: var(--primario);
+  color: var(--primario-texto);
+}
+
+/* ---------- Inicio ---------- */
+.hero {
+  background:
+    radial-gradient(circle at 85% 20%, var(--futbol-suave), transparent 45%),
+    radial-gradient(circle at 70% 90%, var(--padel-suave), transparent 40%);
+  border-bottom: 1px solid var(--borde);
+}
+
+.hero-interno {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  padding-top: 72px;
+  padding-bottom: 72px;
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 800;
+}
+
+.hero p {
+  font-size: 1.15rem;
+  color: var(--texto-suave);
+  max-width: 34ch;
+}
+
+.resaltado-futbol {
+  color: var(--futbol);
+}
+
+.resaltado-padel {
+  color: var(--padel);
+}
+
+.hero-acciones {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.hero-canchas {
+  display: grid;
+  gap: 18px;
+}
+
+/* Canchas dibujadas solo con CSS */
+.cancha-dibujo {
   position: relative;
+  aspect-ratio: 2 / 1;
+  border-radius: 12px;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  outline: 10px solid var(--superficie);
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
+
+.cancha-futbol {
+  background: repeating-linear-gradient(90deg, #1f9d4c 0 10%, #23ab53 10% 20%);
+  transform: rotate(-3deg);
+}
+
+.cancha-padel {
+  width: 78%;
+  justify-self: end;
+  background: #2563eb;
+  transform: rotate(3deg);
+}
+
+.cancha-dibujo span {
+  position: absolute;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+.linea-media {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  border-width: 0 0 0 2px !important;
+}
+
+.circulo-central {
+  left: 50%;
+  top: 50%;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.area {
+  top: 25%;
+  bottom: 25%;
+  width: 14%;
+}
+
+.area-izq {
+  left: -2px;
+}
+
+.area-der {
+  right: -2px;
+}
+
+.red {
+  left: 50%;
+  top: -2px;
+  bottom: -2px;
+  border-width: 0 0 0 4px !important;
+  border-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.linea-saque {
+  top: 50%;
+  width: 28%;
+  border-width: 2px 0 0 0 !important;
+}
+
+.saque-izq {
+  left: 22%;
+}
+
+.saque-der {
+  right: 22%;
+}
+
+.saque-izq::before,
+.saque-der::before {
+  content: "";
+  position: absolute;
+  top: -50vh;
+  height: 100vh;
+  border-left: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+.saque-izq::before {
+  left: -2px;
+}
+
+.saque-der::before {
+  right: -2px;
+}
+
+.seccion {
+  padding-top: 56px;
+}
+
+.seccion-titulo {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+}
+
+.pasos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.paso {
+  padding: 24px;
+}
+
+.paso h3 {
+  margin: 14px 0 6px;
+}
+
+.paso p {
+  margin: 0;
+  color: var(--texto-suave);
+}
+
+.paso-numero {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--acento);
+  color: #1b2a22;
+  font-weight: 800;
+}
+
+/* ---------- Formularios ---------- */
+.pagina-auth {
+  display: flex;
+  justify-content: center;
+  padding-top: 48px;
+}
+
+.formulario-auth,
+.formulario-registro {
   width: 100%;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+.formulario-auth {
+  max-width: 440px;
+}
+
+.formulario-registro {
+  max-width: 720px;
+}
+
+.formulario-auth h1,
+.formulario-registro h1 {
+  font-size: 2rem;
+}
+
+.subtitulo {
+  font-size: 1.05rem;
+  margin-top: 14px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.campo small {
+  font-weight: 400;
+  color: var(--texto-suave);
+}
+
+.campo-titulo {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 14px 0 8px;
+}
+
+.campo input,
+.campo select,
+.campo textarea,
+.horario-horas input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: var(--fondo);
+  font-weight: 400;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.campo textarea {
+  resize: vertical;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus,
+.horario-horas input:focus {
+  border-color: var(--primario);
+  box-shadow: 0 0 0 3px var(--futbol-suave);
+}
+
+.campo-check {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.campo-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primario);
+}
+
+.grilla-campos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: end;
+}
+
+/* Selección de deporte en el registro */
+.deportes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.deporte {
+  border: 2px solid var(--borde);
+  border-radius: var(--radio);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.deporte-futbol.elegido {
+  border-color: var(--futbol);
+  background: var(--futbol-suave);
+}
+
+.deporte-padel.elegido {
+  border-color: var(--padel);
+  background: var(--padel-suave);
+}
+
+.deporte-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.deporte-cabecera small {
+  display: block;
+  color: var(--texto-suave);
+}
+
+.check {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--borde);
+  font-weight: 800;
+}
+
+.deporte-futbol.elegido .check {
+  background: var(--futbol);
+  border-color: var(--futbol);
+  color: #fff;
+}
+
+.deporte-padel.elegido .check {
+  background: var(--padel);
+  border-color: var(--padel);
+  color: #fff;
+}
+
+.icono-deporte {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.icono-futbol {
+  background: var(--futbol);
+}
+
+.icono-padel {
+  background: var(--padel);
+}
+
+/* Pelota dentro del ícono */
+.icono-deporte::after {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.icono-padel::after {
+  background: var(--acento);
+}
+
+.deporte-detalle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+.contador {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--fondo);
+  overflow: hidden;
+}
+
+.contador button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.contador button:hover {
+  background: var(--fondo-alt);
+}
+
+.contador span {
+  font-weight: 700;
+}
+
+/* ---------- Panel ---------- */
+.panel {
+  padding-top: 36px;
+}
+
+.panel-cabecera h1,
+.panel h1 {
+  font-size: 2.2rem;
+}
+
+.estadisticas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 24px 0;
+}
+
+.estadistica {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.estadistica span {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.estadistica strong {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.estadistica-futbol {
+  border-top: 4px solid var(--futbol);
+}
+
+.estadistica-padel {
+  border-top: 4px solid var(--padel);
+}
+
+.pestanas {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--borde);
+  margin-bottom: 20px;
+}
+
+.pestanas button {
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  font-weight: 600;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+
+.pestanas button small {
+  font-weight: 500;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--fondo-alt);
+  margin-left: 6px;
+}
+
+.pestanas button.activo {
+  color: var(--texto);
+  border-bottom-color: var(--primario);
+}
+
+.barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.segmentado {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--fondo-alt);
+  border: 1px solid var(--borde);
+}
+
+.segmentado button {
+  padding: 7px 16px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-weight: 500;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+
+.segmentado button.activo {
+  background: var(--superficie);
+  color: var(--texto);
+  box-shadow: var(--sombra);
+}
+
+.grilla-canchas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.cancha {
+  overflow: hidden;
+  transition: transform 0.15s;
+}
+
+.cancha:hover {
+  transform: translateY(-2px);
+}
+
+.cancha-franja {
+  height: 64px;
+}
+
+.cancha-futbol .cancha-franja {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)) center / 2px 100% no-repeat,
+    repeating-linear-gradient(90deg, #1f9d4c 0 12%, #23ab53 12% 24%);
+}
+
+.cancha-padel .cancha-franja {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) center / 4px 100% no-repeat,
+    #2563eb;
+}
+
+.cancha-cuerpo {
+  padding: 16px 18px 18px;
+}
+
+.cancha-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.cancha-titulo h3 {
+  font-size: 1.15rem;
+}
+
+.insignia {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.insignia-futbol {
+  background: var(--futbol-suave);
+  color: var(--futbol);
+}
+
+.insignia-padel {
+  background: var(--padel-suave);
+  color: var(--padel);
+}
+
+.cancha-datos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 14px;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.cancha-datos li + li::before {
+  content: "·";
+  margin-right: 8px;
+}
+
+.cancha-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.precio {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.precio small {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--texto-suave);
+}
+
+.cancha-acciones {
+  display: flex;
+  gap: 6px;
+}
+
+/* Modal */
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(5, 12, 9, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.modal {
+  width: 100%;
+  max-width: 520px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* Perfil (MongoDB) */
+.perfil {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  padding: 24px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  background: transparent;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.chip.activo {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: var(--primario-texto);
+}
+
+.horarios {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.horario {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--fondo);
+  min-height: 52px;
+}
+
+.horario.cerrado {
+  opacity: 0.7;
+}
+
+.horario-horas {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texto-suave);
+}
+
+.horario-horas input {
+  width: auto;
+  padding: 6px 8px;
+}
+
+.perfil-pie {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--borde);
+  padding-top: 16px;
+}
+
+/* Tabla del CRUD de empresas */
+.tabla-contenedor {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.tabla th,
+.tabla td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--borde);
+}
+
+.tabla th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--texto-suave);
+}
+
+.tabla tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 800px) {
+  .hero-interno,
+  .perfil {
+    grid-template-columns: 1fr;
   }
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
+  .hero-interno {
+    padding-top: 40px;
+    padding-bottom: 40px;
   }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+
+  .pasos,
+  .deportes {
+    grid-template-columns: 1fr;
+  }
+
+  .estadisticas {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .grilla-campos,
+  .deporte-detalle {
+    grid-template-columns: 1fr;
+  }
+
+  .formulario-auth,
+  .formulario-registro {
+    padding: 22px;
+  }
+
+  .navbar-empresa {
+    display: none;
   }
 }
