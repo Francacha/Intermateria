@@ -6,9 +6,8 @@ const pool = new pg.Pool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: {
-    rejectUnauthorized: false // Esto es fundamental para que Supabase acepte la conexión
-  }
+  // Supabase (vía web) exige SSL; el PostgreSQL del contenedor no lo usa
+  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false
 });
 
 export default pool;

@@ -1,0 +1,24 @@
+# DROPLETS 2 y 3: nodos de la API.
+# El mismo archivo sirve para los dos; lo que cambia es el .env (DROPLET e IP).
+# La API escucha solo en la IP privada: únicamente Nginx (droplet 1) le habla.
+#
+#   cd deploy/droplet-nodo && cp .env.example .env && docker compose up -d --build
+
+services:
+  api:
+    build: ../..
+    container_name: canchas-api
+    restart: unless-stopped
+    environment:
+      DROPLET: ${DROPLET}                # droplet-2 o droplet-3
+      PORT: 3000
+      DB_HOST: ${IP_DROPLET1}            # PostgreSQL del droplet 1 (IP privada)
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: canchas
+      DB_SSL: "false"
+      MONGO_URI: ${MONGO_URI:-}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "${IP_PRIVADA}:3000:3000"
