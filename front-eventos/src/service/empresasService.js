@@ -1,6 +1,9 @@
 import api from "./api";
 
+// Administración de empresas (rol admin)
 export const obtenerEmpresas = () => api.get("/empresas");
+
+export const obtenerResumen = () => api.get("/empresas/resumen");
 
 export const obtenerEmpresa = (id) => api.get(`/empresas/${id}`);
 

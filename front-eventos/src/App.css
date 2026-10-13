@@ -924,7 +924,7 @@
   margin-top: 6px;
 }
 
-/* Perfil (MongoDB) */
+/* Perfil del complejo */
 .perfil {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1027,6 +1027,709 @@
   border-bottom: none;
 }
 
+/* ---------- Utilidades ---------- */
+.sin-margen {
+  margin: 0;
+}
+
+.con-margen {
+  margin-top: 32px;
+}
+
+.seccion-titulo.sin-margen {
+  margin: 0;
+}
+
+.volver {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: var(--texto-suave);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.volver:hover {
+  color: var(--texto);
+}
+
+.boton-chico {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.buscador,
+.selector,
+.navegador-fecha input {
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  background: var(--superficie);
+  outline: none;
+}
+
+.buscador {
+  flex: 1;
+  min-width: 220px;
+  max-width: 380px;
+}
+
+.buscador:focus,
+.selector:focus {
+  border-color: var(--primario);
+}
+
+.barra-filtros {
+  margin-top: 20px;
+}
+
+.punto {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.punto-futbol {
+  background: var(--futbol);
+}
+
+.punto-padel {
+  background: var(--padel);
+}
+
+.insignia-torneo {
+  background: rgba(181, 230, 29, 0.25);
+  color: #4d6b00;
+}
+
+.titulo-con-estado {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.formulario-mediano {
+  max-width: 600px;
+}
+
+.centrado-flex {
+  justify-content: center;
+}
+
+/* Estados */
+.estado-inscripcion,
+.turno-reservada {
+  background: rgba(234, 179, 8, 0.16);
+  color: #a16207;
+}
+
+.estado-en_curso,
+.turno-confirmada {
+  background: var(--padel-suave);
+  color: var(--padel);
+}
+
+.estado-finalizado,
+.turno-jugada {
+  background: var(--futbol-suave);
+  color: var(--futbol);
+}
+
+.estado-cancelado,
+.turno-cancelada {
+  background: var(--peligro-suave);
+  color: var(--peligro);
+}
+
+.fila-cancelada td {
+  opacity: 0.55;
+}
+
+/* ---------- Catálogo de complejos ---------- */
+.lista-complejos {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.complejo {
+  padding: 22px;
+}
+
+.complejo-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.complejo-cabecera h2 {
+  font-size: 1.4rem;
+}
+
+.complejo-descripcion {
+  margin: 10px 0 0;
+  color: var(--texto-suave);
+}
+
+.chips-chicos {
+  margin: 12px 0 0;
+}
+
+.chips-chicos .chip {
+  cursor: default;
+  font-size: 0.8rem;
+  padding: 3px 10px;
+}
+
+.complejo-canchas {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+}
+
+.mini-cancha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--fondo);
+  border: 1px solid transparent;
+  color: var(--texto);
+  text-decoration: none;
+  font-size: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.mini-cancha:hover {
+  border-color: var(--primario);
+}
+
+.mini-cancha .texto-suave {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.mini-precio {
+  margin-left: auto;
+  font-weight: 700;
+}
+
+/* ---------- Ficha del complejo / torneo ---------- */
+.detalle-grilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 24px;
+  align-items: start;
+  margin-top: 20px;
+}
+
+.lateral {
+  padding: 20px;
+  position: sticky;
+  top: 84px;
+}
+
+.lateral > p:first-child {
+  margin-top: 0;
+}
+
+.lista-horarios {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.lista-horarios li {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--borde);
+}
+
+.lista-equipos {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lista-equipos small {
+  display: block;
+}
+
+/* ---------- Reserva de turnos ---------- */
+.modal-ancho {
+  max-width: 680px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.dias {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.dia {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--borde);
+  background: var(--fondo);
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+}
+
+.dia.activo {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: var(--primario-texto);
+}
+
+.horarios-grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 8px;
+}
+
+.horario-boton {
+  padding: 9px 0;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: var(--superficie);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.horario-boton:hover:not(:disabled) {
+  border-color: var(--primario);
+}
+
+.horario-boton:disabled {
+  background: var(--fondo-alt);
+  color: var(--texto-suave);
+  text-decoration: line-through;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.horario-boton.activo {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: var(--primario-texto);
+}
+
+.reserva-pie {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.reserva-pie > span:first-child {
+  margin-right: auto;
+}
+
+.exito-icono {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--futbol-suave);
+  color: var(--futbol);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+/* ---------- Mis reservas ---------- */
+.lista-reservas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reserva {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 18px;
+  border-left: 5px solid var(--futbol);
+}
+
+.reserva-padel {
+  border-left-color: var(--padel);
+}
+
+.reserva-fecha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+  text-transform: capitalize;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.reserva-fecha strong {
+  font-size: 1.4rem;
+  color: var(--texto);
+}
+
+.reserva-cuerpo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reserva-cuerpo h3 {
+  font-size: 1.05rem;
+}
+
+.reserva-acciones {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ---------- Turnos del complejo ---------- */
+.navegador-fecha {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.subtitulo-dia {
+  font-size: 1.3rem;
+  text-transform: capitalize;
+}
+
+.estadisticas-chicas {
+  margin: 14px 0 18px;
+}
+
+.estadisticas-chicas strong {
+  font-size: 1.4rem;
+}
+
+.estadisticas-seis {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.selector-estado {
+  padding: 5px 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: none;
+}
+
+.campo-sena {
+  width: 96px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+  background: var(--fondo);
+}
+
+/* ---------- Torneos ---------- */
+.grilla-torneos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.torneo-tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  color: var(--texto);
+  text-decoration: none;
+  border-top: 4px solid var(--futbol);
+  transition: transform 0.15s;
+}
+
+.torneo-padel {
+  border-top-color: var(--padel);
+}
+
+.torneo-tarjeta:hover {
+  transform: translateY(-2px);
+}
+
+.torneo-tarjeta h3 {
+  font-size: 1.2rem;
+  margin-top: 6px;
+}
+
+.torneo-tarjeta .cancha-datos {
+  margin: 4px 0 8px;
+}
+
+.torneo-tarjeta-cabecera {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.info-torneo {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.info-torneo li {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  font-weight: 600;
+}
+
+.info-torneo small {
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.campeon {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 22px;
+  border-radius: var(--radio);
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.22), rgba(181, 230, 29, 0.22));
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  margin-bottom: 12px;
+}
+
+.campeon > span {
+  font-size: 2rem;
+}
+
+.campeon small {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--texto-suave);
+}
+
+.campeon strong {
+  font-size: 1.3rem;
+}
+
+.inscripcion {
+  padding: 22px;
+  margin-bottom: 8px;
+}
+
+.inscripcion > p {
+  margin: 0;
+}
+
+.form-inscripcion {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-inscripcion h2 {
+  font-size: 1.2rem;
+}
+
+.fixture {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ronda {
+  padding: 16px 18px;
+}
+
+.ronda h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.partido {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--borde);
+}
+
+.ronda h3 + div .partido {
+  border-top: none;
+}
+
+.partido-equipo {
+  font-weight: 500;
+}
+
+.partido-equipo.derecha {
+  text-align: right;
+}
+
+.partido-equipo.ganador {
+  font-weight: 800;
+}
+
+.partido-resultado {
+  min-width: 64px;
+  text-align: center;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 8px;
+  background: var(--fondo-alt);
+}
+
+.partido-programa {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+  text-transform: capitalize;
+}
+
+.partido-libre {
+  display: flex;
+  justify-content: space-between;
+}
+
+.partido-marcador {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.partido-marcador input {
+  width: 52px;
+  padding: 6px;
+  text-align: center;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+  background: var(--fondo);
+}
+
+.partido-editable.jugado .partido-marcador input {
+  border-color: var(--futbol);
+  background: var(--futbol-suave);
+}
+
+.partido-editable .partido-programa {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  text-transform: none;
+}
+
+.partido-editable .partido-programa select,
+.partido-editable .partido-programa input {
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--borde);
+  background: var(--fondo);
+  font-size: 0.85rem;
+}
+
+.form-equipo {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1.4fr auto;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.form-equipo input {
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: var(--fondo);
+  min-width: 0;
+}
+
+.tabla-posiciones td:first-child,
+.tabla-posiciones th:first-child {
+  width: 36px;
+  color: var(--texto-suave);
+}
+
+/* Elegir torneo o campeonato */
+.opcion {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 2px solid var(--borde);
+  border-radius: var(--radio);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.opcion small {
+  color: var(--texto-suave);
+}
+
+.opcion.elegida {
+  border-color: var(--primario);
+  background: var(--futbol-suave);
+}
+
+.opcion:disabled,
+.segmentado button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Activa / de baja en el panel del administrador */
+.interruptor {
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  background: var(--peligro-suave);
+  color: var(--peligro);
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.interruptor.encendido {
+  background: var(--futbol-suave);
+  color: var(--futbol);
+}
+
 /* ---------- Celular ---------- */
 @media (max-width: 800px) {
   .hero-interno,
@@ -1044,8 +1747,25 @@
     grid-template-columns: 1fr;
   }
 
-  .estadisticas {
+  .estadisticas,
+  .estadisticas-seis {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .detalle-grilla {
+    grid-template-columns: 1fr;
+  }
+
+  .lateral {
+    position: static;
+  }
+
+  .form-equipo {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .reserva {
+    flex-wrap: wrap;
   }
 }
 

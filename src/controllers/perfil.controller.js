@@ -1,19 +1,10 @@
-import { buscarPerfil, guardarPerfil, mongoActivo } from "../data/mongo.js";
+import { buscarPerfil, DIAS, guardarPerfil } from "../data/perfiles.js";
 
-const DIAS = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"];
 const HORA = /^([01]\d|2[0-3]):[0-5]\d$/;
-
-const perfilVacio = (idEmpresa) => ({
-  id_empresa: idEmpresa,
-  descripcion: "",
-  servicios: [],
-  horarios: Object.fromEntries(DIAS.map((dia) => [dia, { abierto: true, abre: "09:00", cierra: "23:00" }])),
-  redes: { instagram: "", whatsapp: "" }
-});
 
 const texto = (valor, max) => String(valor ?? "").trim().slice(0, max);
 
-// Se arma el documento solo con los campos conocidos, para no guardar cualquier cosa
+// Se arma el perfil solo con los campos conocidos, para no guardar cualquier cosa
 const limpiarPerfil = (body) => {
   const horarios = {};
   for (const dia of DIAS) {
@@ -36,13 +27,9 @@ const limpiarPerfil = (body) => {
   };
 };
 
-const sinMongo = (res) => res.status(503).json({ mensaje: "La base NoSQL no está configurada" });
-
 export const obtenerPerfil = async (req, res) => {
-  if (!mongoActivo) return sinMongo(res);
   try {
-    const perfil = await buscarPerfil(req.empresa.id_empresa);
-    res.json(perfil ?? perfilVacio(req.empresa.id_empresa));
+    res.json(await buscarPerfil(req.empresa.id_empresa));
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al obtener el perfil" });
@@ -50,7 +37,6 @@ export const obtenerPerfil = async (req, res) => {
 };
 
 export const actualizarPerfil = async (req, res) => {
-  if (!mongoActivo) return sinMongo(res);
   try {
     const perfil = await guardarPerfil(req.empresa.id_empresa, limpiarPerfil(req.body ?? {}));
     res.json(perfil);

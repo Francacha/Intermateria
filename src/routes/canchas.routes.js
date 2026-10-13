@@ -5,11 +5,11 @@ import {
   actualizarCancha,
   eliminarCancha
 } from "../controllers/canchas.controller.js";
-import { requiereLogin } from "../middlewares/auth.js";
+import { requiereEmpresa } from "../middlewares/auth.js";
 
 const router = Router();
 
-router.use(requiereLogin);
+router.use(requiereEmpresa);
 
 router.get("/", obtenerCanchas);
 router.post("/", crearCancha);

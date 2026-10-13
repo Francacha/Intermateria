@@ -152,7 +152,8 @@ export default function Registro() {
             : `Registrar complejo${total ? ` con ${total} cancha${total > 1 ? "s" : ""}` : ""}`}
         </button>
         <p className="texto-suave centrado">
-          ¿Ya tenés cuenta? <Link to="/ingresar">Ingresá</Link>
+          ¿Ya tenés cuenta? <Link to="/ingresar">Ingresá</Link> · ¿Sos jugador?{" "}
+          <Link to="/registro-cliente">Creá tu cuenta acá</Link>
         </p>
       </form>
     </main>

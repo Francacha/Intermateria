@@ -6,6 +6,11 @@ import empresasRoutes from "./routes/empresas.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import canchasRoutes from "./routes/canchas.routes.js";
 import perfilRoutes from "./routes/perfil.routes.js";
+import turnosRoutes from "./routes/turnos.routes.js";
+import torneosRoutes from "./routes/torneos.routes.js";
+import reservasRoutes from "./routes/reservas.routes.js";
+import inscripcionesRoutes from "./routes/inscripciones.routes.js";
+import publicoRoutes from "./routes/publico.routes.js";
 
 if (!process.env.JWT_SECRET) {
   console.error("Falta la variable de entorno JWT_SECRET");
@@ -29,10 +34,15 @@ app.get("/api/instancia", (req, res) => {
   res.json({ droplet: DROPLET });
 });
 
-app.use("/api/empresas", empresasRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/canchas", canchasRoutes);
-app.use("/api/perfil", perfilRoutes);
+app.use("/api/publico", publicoRoutes);               // sin login
+app.use("/api/empresas", empresasRoutes);             // admin
+app.use("/api/canchas", canchasRoutes);               // complejo
+app.use("/api/perfil", perfilRoutes);                 // complejo
+app.use("/api/turnos", turnosRoutes);                 // complejo
+app.use("/api/torneos", torneosRoutes);               // complejo
+app.use("/api/reservas", reservasRoutes);             // cliente
+app.use("/api/inscripciones", inscripcionesRoutes);   // cliente
 
 app.use((req, res) => {
   res.status(404).json({ mensaje: "Ruta no encontrada" });

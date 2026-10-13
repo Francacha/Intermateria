@@ -11,7 +11,7 @@ const DIAS = [
   ["viernes", "Viernes"], ["sabado", "Sábado"], ["domingo", "Domingo"]
 ];
 
-// Perfil del complejo: se guarda como un documento en MongoDB (base NoSQL)
+// Perfil del complejo: descripción, servicios, horarios (definen cuándo se puede reservar) y redes
 export default function PerfilComplejo() {
   const [perfil, setPerfil] = useState(null);
   const [error, setError] = useState("");

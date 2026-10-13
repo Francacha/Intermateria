@@ -4,13 +4,12 @@
 #   navegador ──► nginx:8080 (acceso) ──┬──► api1 (droplet-1) ─┐
 #                                       ├──► api2 (droplet-2) ─┼──► db (PostgreSQL, Docker)
 #                                       └──► api3 (droplet-3) ─┘
-#                                                  └──────────────► mongo (NoSQL)
 #
-# En los droplets la base NoSQL es MongoDB Atlas (vía web); acá se simula con
-# un contenedor "mongo" para poder probar sin conexión a internet.
+# Todos los datos (empresas, canchas, turnos, torneos, clientes) están en PostgreSQL.
 #
-# Solo Nginx publica un puerto hacia afuera; la API y PostgreSQL quedan en la
-# red interna "red_canchas".
+# Solo Nginx publica un puerto hacia afuera; la API queda en la red interna
+# "red_canchas". PostgreSQL además escucha en 127.0.0.1:5432 (solo esta PC) para
+# poder correr la API con "npm run dev" usando el .env.
 
 # Configuración común a todas las réplicas de la API
 x-api: &api
@@ -24,13 +23,10 @@ x-api: &api
     DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     DB_NAME: canchas
     DB_SSL: "false"
-    MONGO_URI: mongodb://mongo:27017/
     JWT_SECRET: ${JWT_SECRET:-clave_solo_para_pruebas_locales}
   depends_on:
     db:
       condition: service_healthy
-    mongo:
-      condition: service_started
   networks:
     - red_canchas
 
@@ -44,25 +40,18 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: canchas
+    ports:
+      - "127.0.0.1:5432:5432"                                 # solo accesible desde esta PC
     volumes:
       - datos_postgres:/var/lib/postgresql/data              # persistencia
       - ./database/empresas.sql:/docker-entrypoint-initdb.d/01-empresas.sql:ro
       - ./database/canchas.sql:/docker-entrypoint-initdb.d/02-canchas.sql:ro
+      - ./database/torneos.sql:/docker-entrypoint-initdb.d/03-torneos.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 10
-    networks:
-      - red_canchas
-
-  # Base NoSQL: perfiles de los complejos (en producción, MongoDB Atlas)
-  mongo:
-    image: mongo:7
-    container_name: canchas-mongo
-    restart: unless-stopped
-    volumes:
-      - datos_mongo:/data/db
     networks:
       - red_canchas
 
@@ -113,4 +102,3 @@ networks:
 
 volumes:
   datos_postgres:
-  datos_mongo:

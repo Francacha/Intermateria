@@ -1,22 +1,44 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import pool from "../data/db.js";
+import { crearToken } from "../middlewares/auth.js";
 
 // Columnas públicas de una empresa: nunca se devuelve password_hash
 export const COLUMNAS_EMPRESA =
   "id_empresa, nombre, cuit, email, telefono, direccion, activo, fecha_creacion";
 
+const COLUMNAS_CLIENTE = "id_cliente, nombre, apellido, telefono, email, fecha_alta";
+
 const MAX_CANCHAS = 30;
 
-const crearToken = (empresa) =>
-  jwt.sign(
-    { id_empresa: empresa.id_empresa, nombre: empresa.nombre },
-    process.env.JWT_SECRET,
-    { expiresIn: "8h" }
-  );
-
 const cantidadValida = (n) => Number.isInteger(n) && n >= 0 && n <= MAX_CANCHAS;
+const emailValido = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email ?? "");
 
+// El email es el usuario para iniciar sesión: no puede repetirse entre
+// administradores, empresas y clientes.
+export const emailEnUso = async (db, email) => {
+  const { rows } = await db.query(
+    `SELECT 1 FROM administradores WHERE email = LOWER($1)
+     UNION ALL SELECT 1 FROM empresas WHERE email = LOWER($1)
+     UNION ALL SELECT 1 FROM clientes WHERE email = LOWER($1)`,
+    [email]
+  );
+  return rows.length > 0;
+};
+
+// Datos del usuario logueado que se mandan al front (sin contraseña)
+const datosUsuario = async (rol, id) => {
+  const consultas = {
+    admin: "SELECT id_admin, nombre, email FROM administradores WHERE id_admin = $1",
+    empresa: `SELECT ${COLUMNAS_EMPRESA} FROM empresas WHERE id_empresa = $1`,
+    cliente: `SELECT ${COLUMNAS_CLIENTE} FROM clientes WHERE id_cliente = $1`
+  };
+  const { rows } = await pool.query(consultas[rol], [id]);
+  return rows[0] ? { rol, ...rows[0] } : null;
+};
+
+const sesion = (rol, id, nombre, usuario) => ({ token: crearToken(rol, id, nombre), usuario });
+
+// Registro de un complejo: la empresa y sus canchas se crean juntas
 export const registrar = async (req, res) => {
   const { nombre, cuit, email, password, telefono, direccion, canchas } = req.body ?? {};
   const futbol = Number(canchas?.futbol ?? 0);
@@ -26,6 +48,9 @@ export const registrar = async (req, res) => {
 
   if (!nombre || !cuit || !email || !password) {
     return res.status(400).json({ mensaje: "Nombre, CUIT, email y contraseña son obligatorios" });
+  }
+  if (!emailValido(email)) {
+    return res.status(400).json({ mensaje: "El email no es válido" });
   }
   if (password.length < 8) {
     return res.status(400).json({ mensaje: "La contraseña debe tener al menos 8 caracteres" });
@@ -39,10 +64,14 @@ export const registrar = async (req, res) => {
     return res.status(400).json({ mensaje: "El precio por hora no puede ser negativo" });
   }
 
-  // La empresa y sus canchas se crean juntas: o se guarda todo o nada
+  // O se guarda todo o nada
   const cliente = await pool.connect();
   try {
     await cliente.query("BEGIN");
+    if (await emailEnUso(cliente, email)) {
+      await cliente.query("ROLLBACK");
+      return res.status(400).json({ mensaje: "Ese email ya está registrado" });
+    }
     const hash = await bcrypt.hash(password, 10);
     const { rows } = await cliente.query(
       `INSERT INTO empresas (nombre, cuit, email, password_hash, telefono, direccion)
@@ -64,7 +93,7 @@ export const registrar = async (req, res) => {
     }
 
     await cliente.query("COMMIT");
-    res.status(201).json({ token: crearToken(empresa), empresa });
+    res.status(201).json(sesion("empresa", empresa.id_empresa, empresa.nombre, { rol: "empresa", ...empresa }));
   } catch (error) {
     await cliente.query("ROLLBACK");
     if (error.code === "23505") {
@@ -77,6 +106,44 @@ export const registrar = async (req, res) => {
   }
 };
 
+// Registro de un jugador
+export const registrarCliente = async (req, res) => {
+  const { nombre, apellido, telefono, email, password } = req.body ?? {};
+
+  if (!nombre || !apellido || !telefono || !email || !password) {
+    return res.status(400).json({ mensaje: "Nombre, apellido, teléfono, email y contraseña son obligatorios" });
+  }
+  if (!emailValido(email)) {
+    return res.status(400).json({ mensaje: "El email no es válido" });
+  }
+  if (password.length < 8) {
+    return res.status(400).json({ mensaje: "La contraseña debe tener al menos 8 caracteres" });
+  }
+
+  try {
+    if (await emailEnUso(pool, email)) {
+      return res.status(400).json({ mensaje: "Ese email ya está registrado" });
+    }
+    const hash = await bcrypt.hash(password, 10);
+    const { rows } = await pool.query(
+      `INSERT INTO clientes (nombre, apellido, telefono, email, password_hash)
+       VALUES ($1, $2, $3, LOWER($4), $5) RETURNING ${COLUMNAS_CLIENTE}`,
+      [nombre.trim(), apellido.trim(), telefono.trim(), email, hash]
+    );
+    const nuevo = rows[0];
+    res.status(201).json(
+      sesion("cliente", nuevo.id_cliente, `${nuevo.nombre} ${nuevo.apellido}`, { rol: "cliente", ...nuevo })
+    );
+  } catch (error) {
+    if (error.code === "23505") {
+      return res.status(400).json({ mensaje: "Ese email ya está registrado" });
+    }
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al registrarte" });
+  }
+};
+
+// Un único login para los tres tipos de usuario: se busca el email en las tres tablas
 export const iniciarSesion = async (req, res) => {
   const { email, password } = req.body ?? {};
   if (!email || !password) {
@@ -85,21 +152,34 @@ export const iniciarSesion = async (req, res) => {
 
   try {
     const { rows } = await pool.query(
-      `SELECT ${COLUMNAS_EMPRESA}, password_hash FROM empresas WHERE email = LOWER($1)`,
+      `SELECT 'admin' AS rol, id_admin AS id, nombre, password_hash, TRUE AS activo
+         FROM administradores WHERE email = LOWER($1)
+       UNION ALL
+       SELECT 'empresa', id_empresa, nombre, password_hash, activo
+         FROM empresas WHERE email = LOWER($1)
+       UNION ALL
+       SELECT 'cliente', id_cliente, nombre || ' ' || apellido, password_hash, TRUE
+         FROM clientes WHERE email = LOWER($1)`,
       [email]
     );
-    const encontrada = rows[0];
-    const valida = encontrada?.password_hash && (await bcrypt.compare(password, encontrada.password_hash));
+
+    let encontrado = null;
+    for (const fila of rows) {
+      if (fila.password_hash && (await bcrypt.compare(password, fila.password_hash))) {
+        encontrado = fila;
+        break;
+      }
+    }
     // Mismo mensaje si no existe el email o si la contraseña es incorrecta
-    if (!valida) {
+    if (!encontrado) {
       return res.status(401).json({ mensaje: "Email o contraseña incorrectos" });
     }
-    if (!encontrada.activo) {
+    if (!encontrado.activo) {
       return res.status(403).json({ mensaje: "La empresa está dada de baja" });
     }
 
-    const { password_hash, ...empresa } = encontrada;
-    res.json({ token: crearToken(empresa), empresa });
+    const usuario = await datosUsuario(encontrado.rol, encontrado.id);
+    res.json(sesion(encontrado.rol, encontrado.id, encontrado.nombre, usuario));
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al iniciar sesión" });
@@ -108,14 +188,11 @@ export const iniciarSesion = async (req, res) => {
 
 export const obtenerSesion = async (req, res) => {
   try {
-    const { rows } = await pool.query(
-      `SELECT ${COLUMNAS_EMPRESA} FROM empresas WHERE id_empresa = $1`,
-      [req.empresa.id_empresa]
-    );
-    if (rows.length === 0) {
-      return res.status(401).json({ mensaje: "La empresa ya no existe" });
+    const usuario = await datosUsuario(req.usuario.rol, req.usuario.id);
+    if (!usuario) {
+      return res.status(401).json({ mensaje: "El usuario ya no existe" });
     }
-    res.json(rows[0]);
+    res.json(usuario);
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al obtener la sesión" });

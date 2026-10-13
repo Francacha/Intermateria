@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/auth";
+import { inicioDe, useAuth } from "../context/auth";
 import { iniciarSesion } from "../service/complejoService";
 import { mensajeDeError } from "../service/api";
 
@@ -19,7 +19,7 @@ export default function Ingresar() {
     try {
       const { data } = await iniciarSesion(email, password);
       entrar(data);
-      navigate("/panel");
+      navigate(inicioDe(data.usuario));
     } catch (err) {
       setError(mensajeDeError(err, "No se pudo iniciar sesión"));
     } finally {
@@ -31,7 +31,7 @@ export default function Ingresar() {
     <main className="contenedor pagina-auth">
       <form className="tarjeta formulario-auth" onSubmit={enviar}>
         <h1>Ingresar</h1>
-        <p className="texto-suave">Entrá con el email de tu complejo.</p>
+        <p className="texto-suave">Jugadores, complejos y administradores entran desde acá.</p>
         {error && <p className="alerta">{error}</p>}
 
         <label className="campo">
@@ -47,7 +47,8 @@ export default function Ingresar() {
           {enviando ? "Ingresando..." : "Ingresar"}
         </button>
         <p className="texto-suave centrado">
-          ¿No tenés cuenta? <Link to="/registro">Registrá tu complejo</Link>
+          ¿No tenés cuenta? <Link to="/registro-cliente">Creá tu cuenta de jugador</Link>
+          {" "}o <Link to="/registro">registrá tu complejo</Link>
         </p>
       </form>
     </main>

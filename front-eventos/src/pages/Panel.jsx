@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import CanchaModal from "../components/CanchaModal";
 import PerfilComplejo from "../components/PerfilComplejo";
+import TurnosPanel from "../components/TurnosPanel";
+import TorneosPanel from "../components/TorneosPanel";
 import {
   actualizarCancha,
   crearCancha,
@@ -9,9 +12,14 @@ import {
   obtenerCanchas
 } from "../service/complejoService";
 import { mensajeDeError } from "../service/api";
+import { pesos } from "../utils/formato";
 
-const pesos = (n) =>
-  Number(n).toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+const PESTANAS = [
+  ["turnos", "Turnos"],
+  ["canchas", "Canchas"],
+  ["torneos", "Torneos"],
+  ["perfil", "Perfil del complejo"]
+];
 
 const FILTROS = [
   ["todas", "Todas"],
@@ -25,7 +33,10 @@ export default function Panel() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [filtro, setFiltro] = useState("todas");
-  const [pestana, setPestana] = useState("canchas");
+  // La pestaña va en la URL (?tab=torneos) para volver a ella desde un torneo
+  const [params, setParams] = useSearchParams();
+  const pestana = PESTANAS.some(([id]) => id === params.get("tab")) ? params.get("tab") : "turnos";
+  const setPestana = (tab) => setParams({ tab }, { replace: true });
   // undefined = modal cerrado, null = nueva cancha, objeto = editar esa cancha
   const [editando, setEditando] = useState(undefined);
 
@@ -98,19 +109,21 @@ export default function Panel() {
       </div>
 
       <div className="pestanas">
-        <button className={pestana === "canchas" ? "activo" : ""} onClick={() => setPestana("canchas")}>
-          Canchas <small>PostgreSQL</small>
-        </button>
-        <button className={pestana === "perfil" ? "activo" : ""} onClick={() => setPestana("perfil")}>
-          Perfil del complejo <small>MongoDB</small>
-        </button>
+        {PESTANAS.map(([id, nombre]) => (
+          <button key={id} className={pestana === id ? "activo" : ""} onClick={() => setPestana(id)}>
+            {nombre}
+          </button>
+        ))}
       </div>
 
-      {pestana === "perfil" ? (
+      {pestana === "turnos" && <TurnosPanel canchas={canchas} />}
+      {pestana === "torneos" && <TorneosPanel />}
+      {pestana === "perfil" && (
         <section className="tarjeta">
           <PerfilComplejo />
         </section>
-      ) : (
+      )}
+      {pestana === "canchas" && (
         <section>
           <div className="barra">
             <div className="segmentado">

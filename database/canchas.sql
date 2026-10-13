@@ -1,5 +1,4 @@
--- Sistema de reservas de canchas deportivas (multitenant)
--- Cada empresa es un complejo deportivo y solo trabaja con sus propios datos.
+-- Canchas, clientes y turnos (reservas).
 -- Requiere que exista la tabla empresas (database/empresas.sql).
 
 -- Permite combinar "=" con rangos en una restricción EXCLUDE (ver reservas)
@@ -19,35 +18,38 @@ CREATE TABLE IF NOT EXISTS canchas (
     UNIQUE (id_cancha, id_empresa)         -- para la FK compuesta de reservas
 );
 
+-- Jugadores que se registran en la plataforma: ven todos los complejos y
+-- sacan turnos en cualquiera de ellos.
 CREATE TABLE IF NOT EXISTS clientes (
     id_cliente SERIAL PRIMARY KEY,
-    id_empresa INT NOT NULL REFERENCES empresas(id_empresa) ON DELETE CASCADE,
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
     telefono VARCHAR(30) NOT NULL,
-    email VARCHAR(150),
-    fecha_alta TIMESTAMP DEFAULT NOW(),
-    UNIQUE (id_empresa, telefono),         -- el mismo cliente puede estar en varios complejos
-    UNIQUE (id_cliente, id_empresa)
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password_hash VARCHAR(100) NOT NULL,
+    fecha_alta TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS reservas (
     id_reserva SERIAL PRIMARY KEY,
     id_empresa INT NOT NULL,
     id_cancha INT NOT NULL,
-    id_cliente INT NOT NULL,
+    -- Turno sacado por un cliente registrado...
+    id_cliente INT REFERENCES clientes(id_cliente) ON DELETE SET NULL,
+    -- ...o cargado a mano por el complejo (cliente por teléfono / mostrador)
+    contacto_nombre VARCHAR(100),
+    contacto_telefono VARCHAR(30),
     fecha DATE NOT NULL,
     hora_inicio TIME NOT NULL,
-    hora_fin TIME NOT NULL,
+    hora_fin TIME NOT NULL,                -- puede ser 24:00 (medianoche)
     estado VARCHAR(20) NOT NULL DEFAULT 'reservada'
         CHECK (estado IN ('reservada', 'confirmada', 'cancelada', 'jugada')),
     precio_total NUMERIC(10, 2) NOT NULL CHECK (precio_total >= 0),
     sena NUMERIC(10, 2) DEFAULT 0 CHECK (sena >= 0),
     fecha_creacion TIMESTAMP DEFAULT NOW(),
     CHECK (hora_fin > hora_inicio),
-    -- FKs compuestas: la cancha y el cliente tienen que ser de la MISMA empresa
+    -- FK compuesta: la cancha tiene que ser de la MISMA empresa del turno
     FOREIGN KEY (id_cancha, id_empresa) REFERENCES canchas(id_cancha, id_empresa) ON DELETE CASCADE,
-    FOREIGN KEY (id_cliente, id_empresa) REFERENCES clientes(id_cliente, id_empresa) ON DELETE CASCADE,
     -- Una cancha no puede tener dos reservas que se superpongan en el mismo día.
     -- La valida la base de datos, así que vale aunque dos réplicas de la API
     -- intenten reservar el mismo horario al mismo tiempo.
@@ -58,6 +60,7 @@ CREATE TABLE IF NOT EXISTS reservas (
 );
 
 CREATE INDEX IF NOT EXISTS idx_reservas_empresa_fecha ON reservas (id_empresa, fecha);
+CREATE INDEX IF NOT EXISTS idx_reservas_cliente ON reservas (id_cliente);
 
 -- Datos de prueba (usan las empresas 1, 2 y 3 de empresas.sql)
 INSERT INTO canchas (id_empresa, nombre, deporte, jugadores, superficie, techada, precio_hora) VALUES
@@ -70,9 +73,13 @@ INSERT INTO canchas (id_empresa, nombre, deporte, jugadores, superficie, techada
 (3, 'Pádel 1', 'padel', 4, 'cemento', FALSE, 18000)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO clientes (id_empresa, nombre, apellido, telefono, email) VALUES
-(1, 'Lucas', 'Gómez', '351-5550001', 'lucas@mail.com'),
-(1, 'Martina', 'Pérez', '351-5550002', NULL),
-(2, 'Lucas', 'Gómez', '351-5550001', 'lucas@mail.com'),
-(3, 'Sofía', 'Rodríguez', '351-5550003', 'sofia@mail.com')
-ON CONFLICT DO NOTHING;
+-- Clientes de demo (contraseña demo1234)
+INSERT INTO clientes (nombre, apellido, telefono, email, password_hash) VALUES
+('Lucas', 'Gómez', '351-5550001', 'lucas@mail.com', '$2b$10$qjJoUHwz8Yy/BVUjLxY.bOjnfAmUdxASdtRwXhpM2zxMDm/vKTeqy'),
+('Sofía', 'Rodríguez', '351-5550003', 'sofia@mail.com', '$2b$10$qjJoUHwz8Yy/BVUjLxY.bOjnfAmUdxASdtRwXhpM2zxMDm/vKTeqy')
+ON CONFLICT (email) DO NOTHING;
+
+INSERT INTO reservas (id_empresa, id_cancha, id_cliente, contacto_nombre, contacto_telefono, fecha, hora_inicio, hora_fin, precio_total) VALUES
+(1, 1, 1, NULL, NULL, CURRENT_DATE + 1, '20:00', '21:00', 30000),
+(1, 2, NULL, 'Martina Pérez', '351-5550002', CURRENT_DATE + 1, '21:00', '22:00', 35000),
+(2, 4, 2, NULL, NULL, CURRENT_DATE + 2, '18:00', '19:30', 30000);

@@ -4,9 +4,19 @@ import { CLAVE_SESION } from "../service/api";
 
 const leerSesion = () => {
   try {
-    return JSON.parse(localStorage.getItem(CLAVE_SESION));
+    const sesion = JSON.parse(localStorage.getItem(CLAVE_SESION));
+    // Las sesiones viejas (sin rol) no sirven: hay que volver a ingresar
+    return sesion?.usuario?.rol ? sesion : null;
   } catch {
     return null;
+  }
+};
+
+const borrarSesion = () => {
+  try {
+    localStorage.removeItem(CLAVE_SESION);
+  } catch {
+    // nada que borrar
   }
 };
 
@@ -23,30 +33,25 @@ export default function AuthProvider({ children }) {
   };
 
   const salir = () => {
-    try {
-      localStorage.removeItem(CLAVE_SESION);
-    } catch {
-      // nada que borrar
-    }
+    borrarSesion();
     setSesion(null);
   };
 
   // api.js avisa cuando el token venció
   useEffect(() => {
     const alExpirar = () => {
-      try {
-        localStorage.removeItem(CLAVE_SESION);
-      } catch {
-        // nada que borrar
-      }
+      borrarSesion();
       setSesion(null);
     };
     window.addEventListener("sesion-expirada", alExpirar);
     return () => window.removeEventListener("sesion-expirada", alExpirar);
   }, []);
 
+  const usuario = sesion?.usuario ?? null;
+  const empresa = usuario?.rol === "empresa" ? usuario : null;
+
   return (
-    <AuthContext.Provider value={{ empresa: sesion?.empresa, token: sesion?.token, entrar, salir }}>
+    <AuthContext.Provider value={{ usuario, empresa, token: sesion?.token, entrar, salir }}>
       {children}
     </AuthContext.Provider>
   );
