@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import CanchaModal from "../components/CanchaModal";
 import PerfilComplejo from "../components/PerfilComplejo";
+import CambiarPassword from "../components/CambiarPassword";
 import TurnosPanel from "../components/TurnosPanel";
 import TorneosPanel from "../components/TorneosPanel";
 import {
@@ -13,6 +14,7 @@ import {
 } from "../service/complejoService";
 import { mensajeDeError } from "../service/api";
 import { pesos } from "../utils/formato";
+import PrimerosPasos from "../components/PrimerosPasos";
 
 const PESTANAS = [
   ["turnos", "Turnos"],
@@ -39,6 +41,13 @@ export default function Panel() {
   const setPestana = (tab) => setParams({ tab }, { replace: true });
   // undefined = modal cerrado, null = nueva cancha, objeto = editar esa cancha
   const [editando, setEditando] = useState(undefined);
+
+  useEffect(() => {
+    document.title = "Mi complejo · Reservas de Canchas";
+    return () => {
+      document.title = "Reservas de Canchas";
+    };
+  }, []);
 
   useEffect(() => {
     obtenerCanchas()
@@ -84,10 +93,12 @@ export default function Panel() {
       <div className="panel-cabecera">
         <div>
           <span className="etiqueta">Mi complejo</span>
-          <h1>{empresa.nombre}</h1>
+          <h1 tabIndex={-1}>{empresa.nombre}</h1>
           {empresa.direccion && <p className="texto-suave">{empresa.direccion}</p>}
         </div>
       </div>
+
+      {!cargando && <PrimerosPasos idEmpresa={empresa.id_empresa} canchas={canchas} onIr={setPestana} />}
 
       <div className="estadisticas">
         <div className="tarjeta estadistica">
@@ -119,9 +130,13 @@ export default function Panel() {
       {pestana === "turnos" && <TurnosPanel canchas={canchas} />}
       {pestana === "torneos" && <TorneosPanel />}
       {pestana === "perfil" && (
-        <section className="tarjeta">
-          <PerfilComplejo />
-        </section>
+        <>
+          <section className="tarjeta">
+            <PerfilComplejo />
+          </section>
+          <h2 className="seccion-titulo con-margen">Tu cuenta</h2>
+          <CambiarPassword />
+        </>
       )}
       {pestana === "canchas" && (
         <section>

@@ -2,8 +2,12 @@ import { Link } from "react-router-dom";
 import {
   DEPORTE,
   ESTADO_TORNEO,
-  TIPO_TORNEO,
+  FORMATO,
+  capitalizar,
+  cuandoEmpieza,
+  diasHasta,
   fechaCorta,
+  fechaLarga,
   hora,
   nombreRonda,
   pesos,
@@ -16,13 +20,115 @@ export function EstadoTorneo({ estado }) {
   return <span className={`insignia estado-${estado}`}>{ESTADO_TORNEO[estado]}</span>;
 }
 
+// Renglón de un torneo para las listas (inicio y página de torneos).
+// detallado suma dirección, fechas, premio y precio por pareja/equipo.
+export function FilaTorneo({ torneo, detallado = false }) {
+  const inicio = new Date(`${torneo.fecha_inicio.slice(0, 10)}T12:00:00`);
+  const parte = (opcion) => inicio.toLocaleDateString("es-AR", opcion).replace(".", "");
+  const pareja = torneo.deporte === "padel";
+  const quienes = pareja ? "parejas" : "equipos";
+  const lugares = torneo.cupo - torneo.inscriptos;
+  const abierto = torneo.estado === "inscripcion";
+  const cobra = Number(torneo.precio_inscripcion) > 0;
+  const precio = cobra ? pesos(torneo.precio_inscripcion) : "Gratis";
+  const pocos = abierto && lugares > 0 && lugares <= 2;
+  // La cuenta regresiva solo sirve si todavía hay lugar; a 3 días o menos se resalta
+  const empieza = abierto && lugares > 0 ? cuandoEmpieza(torneo.fecha_inicio) : "";
+  const pronto = empieza && diasHasta(torneo.fecha_inicio) <= 3;
+  const textoCupo = lugares <= 0
+    ? "Cupo completo"
+    : pocos
+      ? lugares === 1 ? "Queda 1 lugar" : "Quedan 2 lugares"
+      : `Quedan ${lugares} de ${torneo.cupo} ${quienes}`;
+  // El lector de pantalla escucha una frase completa en vez de "vie16oct..."
+  const descripcion = [
+    torneo.nombre,
+    `${DEPORTE[torneo.deporte]}, ${FORMATO[torneo.tipo].toLowerCase()}${torneo.categoria ? `, ${torneo.categoria}` : ""}`,
+    `Empieza el ${fechaLarga(torneo.fecha_inicio.slice(0, 10))}`,
+    torneo.complejo,
+    abierto ? textoCupo : ESTADO_TORNEO[torneo.estado],
+    abierto && `Inscripción ${precio === "Gratis" ? "gratis" : `${precio} por ${pareja ? "pareja" : "equipo"}`}`
+  ]
+    .filter(Boolean)
+    .join(". ");
+  const hasta = torneo.fecha_fin
+    ? new Date(`${torneo.fecha_fin.slice(0, 10)}T12:00:00`).toLocaleDateString("es-AR", { day: "numeric", month: "short" }).replace(".", "")
+    : "";
+
+  return (
+    <li>
+      <Link
+        to={`/torneos/${torneo.id_torneo}`}
+        className={`renglon renglon-enlace renglon-${torneo.deporte}`}
+        aria-label={descripcion}
+      >
+        <span className="fecha-torneo">
+          <span>{parte({ weekday: "short" })}</span>
+          <strong>{parte({ day: "numeric" })}</strong>
+          <span>{parte({ month: "short" })}</span>
+        </span>
+        <div className="renglon-info">
+          <strong className="renglon-nombre">{torneo.nombre}</strong>
+          <span className="texto-suave">
+            {DEPORTE[torneo.deporte]} · {FORMATO[torneo.tipo]}
+            {torneo.categoria && ` · ${torneo.categoria}`}
+            {!detallado && ` · ${torneo.complejo}`}
+          </span>
+          {detallado && (
+            <span className="texto-suave">
+              {torneo.complejo}
+              {torneo.direccion && <span className="renglon-direccion"> · {torneo.direccion}</span>}
+              {hasta && ` · hasta el ${hasta}`}
+            </span>
+          )}
+          {empieza && <span className={`renglon-cuando ${pronto ? "pronto" : ""}`}>{empieza}</span>}
+          {detallado && torneo.premio && <span className="renglon-premio">Premio: {torneo.premio}</span>}
+        </div>
+        <div className="cupo">
+          {abierto ? (
+            <>
+              {/* Un casillero por equipo; con cupos grandes, una barra proporcional */}
+              {torneo.cupo <= 16 ? (
+                <span className="cupo-lugares" aria-hidden="true">
+                  {Array.from({ length: torneo.cupo }, (_, i) => (
+                    <span key={i} className={i < torneo.inscriptos ? "ocupado" : ""} />
+                  ))}
+                </span>
+              ) : (
+                <span className="cupo-barra" aria-hidden="true">
+                  <span style={{ width: `${Math.min(100, (torneo.inscriptos / torneo.cupo) * 100)}%` }} />
+                </span>
+              )}
+              <span className={`cupo-texto ${lugares > 0 ? "" : "cupo-lleno"} ${pocos ? "cupo-pocos" : ""}`}>
+                {textoCupo}
+                {!detallado && ` · ${precio}`}
+              </span>
+            </>
+          ) : (
+            <>
+              <EstadoTorneo estado={torneo.estado} />
+              <span className="cupo-texto">{torneo.inscriptos} {quienes}</span>
+            </>
+          )}
+          {detallado && abierto && (
+            <span className="cupo-precio">
+              {precio}
+              {cobra && <small> por {pareja ? "pareja" : "equipo"}</small>}
+            </span>
+          )}
+        </div>
+      </Link>
+    </li>
+  );
+}
+
 export function TarjetaTorneo({ torneo, enlace, mostrarComplejo = false }) {
   const lleno = torneo.inscriptos >= torneo.cupo;
   return (
     <Link to={enlace} className={`tarjeta torneo-tarjeta torneo-${torneo.deporte}`}>
       <div className="torneo-tarjeta-cabecera">
         <span className={`insignia insignia-${torneo.deporte}`}>
-          {TIPO_TORNEO[torneo.tipo]} · {DEPORTE[torneo.deporte]}
+          {FORMATO[torneo.tipo]} · {DEPORTE[torneo.deporte]}
         </span>
         <EstadoTorneo estado={torneo.estado} />
       </div>
@@ -119,16 +225,28 @@ export function Partido({ partido }) {
       </span>
       <span className={`partido-equipo derecha ${gana("visitante") ? "ganador" : ""}`}>{partido.visitante}</span>
       <span className="partido-programa">
-        {partido.fecha ? `${fechaCorta(partido.fecha)} ${hora(partido.hora)} · ${partido.cancha ?? ""}` : "A programar"}
+        {partido.fecha ? `${capitalizar(fechaCorta(partido.fecha))} ${hora(partido.hora)} · ${partido.cancha ?? ""}` : "A programar"}
       </span>
     </div>
   );
 }
 
+// Los equipos que no juegan en una fecha de campeonato (con cantidad impar, uno por fecha)
+const libresDeLaFecha = (torneo, partidos) =>
+  torneo.tipo === "campeonato"
+    ? torneo.equipos.filter((e) => !partidos.some((p) => p.id_local === e.id_equipo || p.id_visitante === e.id_equipo))
+    : [];
+
 // Partidos agrupados por fecha (campeonato) o ronda (torneo)
 export function Fixture({ torneo, renderPartido = (p) => <Partido partido={p} /> }) {
   if (!torneo.partidos.length) {
-    return <p className="tarjeta vacio">El fixture se arma cuando se cierra la inscripción.</p>;
+    return (
+      <p className="tablero tablero-estado">
+        {torneo.tipo === "torneo"
+          ? "La llave se sortea cuando se cierra la inscripción."
+          : "El fixture se arma cuando se cierra la inscripción."}
+      </p>
+    );
   }
   const rondas = [...new Set(torneo.partidos.map((p) => p.ronda))];
   const total = rondasDeLlave(torneo.equipos.length);
@@ -142,6 +260,12 @@ export function Fixture({ torneo, renderPartido = (p) => <Partido partido={p} />
             .map((p) => (
               <div key={p.id_partido}>{renderPartido(p)}</div>
             ))}
+          {libresDeLaFecha(torneo, torneo.partidos.filter((p) => p.ronda === ronda)).map((e) => (
+            <div key={e.id_equipo} className="partido partido-libre">
+              <span className="partido-equipo">{e.nombre}</span>
+              <span className="texto-suave">libre esta fecha</span>
+            </div>
+          ))}
         </section>
       ))}
     </div>
@@ -152,15 +276,40 @@ export function Fixture({ torneo, renderPartido = (p) => <Partido partido={p} />
 export function InfoTorneo({ torneo }) {
   return (
     <ul className="info-torneo">
-      <li><small>Formato</small>{torneo.tipo === "torneo" ? "Eliminación directa" : "Todos contra todos"}</li>
+      <li><small>Formato</small>{FORMATO[torneo.tipo]}</li>
+      {(torneo.direccion || torneo.telefono) && (
+        <li className="info-donde">
+          <small>Dónde</small>
+          {torneo.direccion && (
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(torneo.direccion)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {torneo.direccion}
+            </a>
+          )}
+          {torneo.telefono && (
+            <a href={`tel:${torneo.telefono.replace(/[^\d+]/g, "")}`}>{torneo.telefono}</a>
+          )}
+        </li>
+      )}
       <li><small>Deporte</small>{DEPORTE[torneo.deporte]}{torneo.categoria ? ` · ${torneo.categoria}` : ""}</li>
       <li>
-        <small>Fechas</small>
-        {fechaCorta(torneo.fecha_inicio)}
-        {torneo.fecha_fin ? ` al ${fechaCorta(torneo.fecha_fin)}` : ""}
+        <small>{torneo.fecha_fin ? "Fechas" : "Empieza"}</small>
+        {capitalizar(fechaLarga(torneo.fecha_inicio.slice(0, 10)))}
+        {torneo.fecha_fin ? ` al ${fechaLarga(torneo.fecha_fin.slice(0, 10))}` : ""}
       </li>
-      <li><small>Inscriptos</small>{torneo.inscriptos} de {torneo.cupo}</li>
-      <li><small>Inscripción</small>{Number(torneo.precio_inscripcion) > 0 ? pesos(torneo.precio_inscripcion) : "Gratis"}</li>
+      <li>
+        <small>Inscriptos</small>
+        {torneo.inscriptos} de {torneo.cupo} {torneo.deporte === "padel" ? "parejas" : "equipos"}
+      </li>
+      <li>
+        <small>Inscripción</small>
+        {Number(torneo.precio_inscripcion) > 0
+          ? `${pesos(torneo.precio_inscripcion)} por ${torneo.deporte === "padel" ? "pareja" : "equipo"}`
+          : "Gratis"}
+      </li>
       {torneo.premio && <li><small>Premio</small>{torneo.premio}</li>}
     </ul>
   );

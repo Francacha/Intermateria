@@ -35,7 +35,8 @@ export default function ComplejoDetalle() {
   }
   if (!complejo) return <main className="contenedor panel"><p className="texto-suave">Cargando...</p></main>;
 
-  // La cancha a reservar va en la URL (?cancha=4) para poder compartir el link
+  // La cancha a reservar va en la URL (?cancha=4) para poder compartir el link;
+  // desde el inicio también llegan el día y la hora tocados (&fecha=2026-10-15&hora=21:30)
   const canchaElegida = complejo.canchas.find((c) => String(c.id_cancha) === params.get("cancha"));
   const abrirReserva = (cancha) => setParams({ cancha: cancha.id_cancha });
   const cerrarReserva = () => setParams({});
@@ -138,7 +139,16 @@ export default function ComplejoDetalle() {
         </aside>
       </div>
 
-      {canchaElegida && <ReservaModal cancha={canchaElegida} complejo={complejo.nombre} onCerrar={cerrarReserva} />}
+      {canchaElegida && (
+        <ReservaModal
+          key={`${canchaElegida.id_cancha}-${params.get("fecha")}-${params.get("hora")}`}
+          cancha={canchaElegida}
+          complejo={complejo.nombre}
+          fechaInicial={params.get("fecha")}
+          horaInicial={params.get("hora")}
+          onCerrar={cerrarReserva}
+        />
+      )}
     </main>
   );
 }

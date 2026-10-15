@@ -145,7 +145,9 @@ export const actualizarTorneo = async (req, res) => {
         "SELECT COUNT(*)::int AS total FROM equipos WHERE id_torneo = $1",
         [actual.id_torneo]
       );
-      if (d.cupo < total) throw new ErrorHttp(400, `Ya hay ${total} equipos inscriptos: el cupo no puede ser menor`);
+      if (d.cupo < total) {
+        throw new ErrorHttp(400, `Ya hay ${total} ${d.deporte === "padel" ? "parejas inscriptas" : "equipos inscriptos"}: el cupo no puede ser menor`);
+      }
 
       await db.query(
         `UPDATE torneos SET nombre = $1, tipo = $2, deporte = $3, categoria = $4, descripcion = $5,
@@ -194,7 +196,7 @@ export const quitarEquipo = async (req, res) => {
     await enTransaccion(async (db) => {
       const torneo = await torneoPropio(db, req);
       if (torneo.estado !== "inscripcion") {
-        throw new ErrorHttp(400, "Con el fixture armado ya no se pueden quitar equipos");
+        throw new ErrorHttp(400, `Con el fixture armado ya no se pueden quitar ${torneo.deporte === "padel" ? "parejas" : "equipos"}`);
       }
       if (!idValido(req.params.idEquipo)) throw new ErrorHttp(404, "Equipo no encontrado");
       const resultado = await db.query("DELETE FROM equipos WHERE id_equipo = $1 AND id_torneo = $2", [
@@ -255,14 +257,18 @@ export const actualizarPartido = async (req, res) => {
           throw new ErrorHttp(400, "Esa ronda ya está cerrada: no se puede cambiar el resultado");
         }
 
-        const vacio = (v) => v === null || v === "";
+        const vacio = (v) => v === null || v === undefined || v === "";
         let local = null;
         let visitante = null;
-        if (!vacio(body.resultado_local) || !vacio(body.resultado_visitante)) {
+        // Un solo lado cargado no es un resultado (antes se tomaba el vacío como 0 y cerraba la ronda)
+        if (vacio(body.resultado_local) !== vacio(body.resultado_visitante)) {
+          throw new ErrorHttp(400, `Cargá el resultado de ${torneo.deporte === "padel" ? "las dos parejas" : "los dos equipos"}`);
+        }
+        if (!vacio(body.resultado_local)) {
           local = Number(body.resultado_local);
           visitante = Number(body.resultado_visitante);
           if (![local, visitante].every((n) => Number.isInteger(n) && n >= 0 && n <= 99)) {
-            throw new ErrorHttp(400, "Cargá el resultado de los dos equipos");
+            throw new ErrorHttp(400, "El resultado tiene que ser un número entre 0 y 99");
           }
           if (local === visitante && (torneo.tipo === "torneo" || torneo.deporte === "padel")) {
             throw new ErrorHttp(400, "En este torneo no puede haber empate");

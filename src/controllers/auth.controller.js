@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import pool from "../data/db.js";
 import { crearToken } from "../middlewares/auth.js";
+import { normalizarCuit } from "../utils/comun.js";
 
 // Columnas públicas de una empresa: nunca se devuelve password_hash
 export const COLUMNAS_EMPRESA =
@@ -45,12 +46,21 @@ export const registrar = async (req, res) => {
   const padel = Number(canchas?.padel ?? 0);
   const precioFutbol = Number(canchas?.precio_futbol ?? 0);
   const precioPadel = Number(canchas?.precio_padel ?? 0);
+  // Fútbol 5, 7 u 11 (jugadores por equipo); si no viene, fútbol 5
+  const jugadoresFutbol = Number(canchas?.jugadores_futbol ?? 5);
 
   if (!nombre || !cuit || !email || !password) {
     return res.status(400).json({ mensaje: "Nombre, CUIT, email y contraseña son obligatorios" });
   }
   if (!emailValido(email)) {
     return res.status(400).json({ mensaje: "El email no es válido" });
+  }
+  const cuitNormalizado = normalizarCuit(cuit);
+  if (!cuitNormalizado) {
+    return res.status(400).json({ mensaje: "El CUIT no es válido: revisá los 11 números" });
+  }
+  if (![5, 7, 11].includes(jugadoresFutbol)) {
+    return res.status(400).json({ mensaje: "Las canchas de fútbol tienen que ser de 5, 7 u 11" });
   }
   if (password.length < 8) {
     return res.status(400).json({ mensaje: "La contraseña debe tener al menos 8 caracteres" });
@@ -76,12 +86,12 @@ export const registrar = async (req, res) => {
     const { rows } = await cliente.query(
       `INSERT INTO empresas (nombre, cuit, email, password_hash, telefono, direccion)
        VALUES ($1, $2, LOWER($3), $4, $5, $6) RETURNING ${COLUMNAS_EMPRESA}`,
-      [nombre, cuit, email, hash, telefono || null, direccion || null]
+      [nombre, cuitNormalizado, email, hash, telefono || null, direccion || null]
     );
     const empresa = rows[0];
 
     const nuevas = [
-      ...Array.from({ length: futbol }, (_, i) => [`Fútbol ${i + 1}`, "futbol", 5, precioFutbol]),
+      ...Array.from({ length: futbol }, (_, i) => [`Fútbol ${i + 1}`, "futbol", jugadoresFutbol, precioFutbol]),
       ...Array.from({ length: padel }, (_, i) => [`Pádel ${i + 1}`, "padel", 4, precioPadel])
     ];
     for (const [nombreCancha, deporte, jugadores, precio] of nuevas) {
@@ -97,7 +107,10 @@ export const registrar = async (req, res) => {
   } catch (error) {
     await cliente.query("ROLLBACK");
     if (error.code === "23505") {
-      return res.status(400).json({ mensaje: "Ya existe una empresa con ese CUIT o email" });
+      const porCuit = String(error.constraint ?? error.detail ?? "").includes("cuit");
+      return res.status(400).json({
+        mensaje: porCuit ? "Ya hay un complejo registrado con ese CUIT" : "Ese email ya está registrado"
+      });
     }
     console.error(error);
     res.status(500).json({ mensaje: "Error al registrar la empresa" });
@@ -196,5 +209,37 @@ export const obtenerSesion = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al obtener la sesión" });
+  }
+};
+
+// Tabla y columna de id de cada rol, para cambiar la contraseña propia
+const TABLA_DEL_ROL = {
+  admin: ["administradores", "id_admin"],
+  empresa: ["empresas", "id_empresa"],
+  cliente: ["clientes", "id_cliente"]
+};
+
+// El usuario logueado cambia su contraseña: tiene que confirmar la actual
+export const cambiarPassword = async (req, res) => {
+  const { actual, nueva } = req.body ?? {};
+  if (!actual || !nueva) {
+    return res.status(400).json({ mensaje: "Completá la contraseña actual y la nueva" });
+  }
+  if (String(nueva).length < 8) {
+    return res.status(400).json({ mensaje: "La contraseña nueva debe tener al menos 8 caracteres" });
+  }
+  const [tabla, columna] = TABLA_DEL_ROL[req.usuario.rol];
+  try {
+    const { rows } = await pool.query(`SELECT password_hash FROM ${tabla} WHERE ${columna} = $1`, [req.usuario.id]);
+    if (rows.length === 0) return res.status(404).json({ mensaje: "No encontramos tu cuenta" });
+    if (!rows[0].password_hash || !(await bcrypt.compare(String(actual), rows[0].password_hash))) {
+      return res.status(400).json({ mensaje: "La contraseña actual no es correcta" });
+    }
+    const hash = await bcrypt.hash(String(nueva), 10);
+    await pool.query(`UPDATE ${tabla} SET password_hash = $1 WHERE ${columna} = $2`, [hash, req.usuario.id]);
+    res.json({ mensaje: "Contraseña actualizada" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al cambiar la contraseña" });
   }
 };

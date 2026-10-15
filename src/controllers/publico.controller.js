@@ -98,6 +98,42 @@ export const disponibilidad = async (req, res) => {
   }
 };
 
+// Horarios ocupados de todas las canchas activas en un día, en una sola consulta.
+// La usan el inicio y el catálogo para no pedir la disponibilidad cancha por cancha.
+export const disponibilidadDelDia = async (req, res) => {
+  const { fecha } = req.query;
+  const deporte = DEPORTES.includes(req.query.deporte) ? req.query.deporte : null;
+  try {
+    if (!fechaValida(fecha)) throw new ErrorHttp(400, "La fecha no es válida");
+    const { rows } = await pool.query(
+      `SELECT c.id_cancha, p.horarios,
+              COALESCE(
+                json_agg(json_build_object(
+                  'desde', to_char(r.hora_inicio, 'HH24:MI'),
+                  'hasta', CASE WHEN r.hora_fin = '24:00' THEN '24:00' ELSE to_char(r.hora_fin, 'HH24:MI') END
+                ) ORDER BY r.hora_inicio) FILTER (WHERE r.id_reserva IS NOT NULL),
+                '[]'
+              ) AS ocupados
+         FROM canchas c
+         JOIN empresas e ON e.id_empresa = c.id_empresa AND e.activo
+         LEFT JOIN perfiles p ON p.id_empresa = c.id_empresa
+         LEFT JOIN reservas r ON r.id_cancha = c.id_cancha AND r.fecha = $1 AND r.estado <> 'cancelada'
+        WHERE c.activa AND ($2::text IS NULL OR c.deporte = $2)
+        GROUP BY c.id_cancha, p.horarios`,
+      [fecha, deporte]
+    );
+    res.json(
+      rows.map((fila) => ({
+        id_cancha: fila.id_cancha,
+        horario: horarioDeFecha(fila.horarios, fecha),
+        ocupados: fila.ocupados
+      }))
+    );
+  } catch (error) {
+    responderError(res, error, "Error al consultar la disponibilidad");
+  }
+};
+
 // Torneos y campeonatos de todos los complejos activos
 export const listarTorneos = async (req, res) => {
   const deporte = DEPORTES.includes(req.query.deporte) ? req.query.deporte : null;

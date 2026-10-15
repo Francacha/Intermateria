@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  cambiarPassword,
   iniciarSesion,
   obtenerSesion,
   registrar,
@@ -13,5 +14,6 @@ router.post("/registro", registrar);                 // complejo
 router.post("/registro-cliente", registrarCliente);  // jugador
 router.post("/login", iniciarSesion);                // los tres roles
 router.get("/sesion", requiere("admin", "empresa", "cliente"), obtenerSesion);
+router.put("/password", requiere("admin", "empresa", "cliente"), cambiarPassword);
 
 export default router;

@@ -1,25 +1,72 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import { obtenerDisponibilidad } from "../service/publicoService";
 import { reservar } from "../service/clienteService";
 import { mensajeDeError } from "../service/api";
-import { DEPORTE, aHora, aMinutos, fechaCorta, fechaLarga, hoyISO, pesos, sumarDias } from "../utils/formato";
+import {
+  DEPORTE,
+  aHora,
+  aMinutos,
+  duracionPorDefecto,
+  etiquetaDia,
+  fechaLarga,
+  horariosDelDia,
+  hoyISO,
+  pesos,
+  sumarDias
+} from "../utils/formato";
 
 const DURACIONES = [60, 90, 120];
 const DIAS_VISIBLES = 14;
 
-// Grilla de horarios libres de una cancha para sacar un turno
-export default function ReservaModal({ cancha, complejo, onCerrar }) {
+// Días que se pueden reservar, desde hoy
+const diasVisibles = () => Array.from({ length: DIAS_VISIBLES }, (_, i) => sumarDias(hoyISO(), i));
+
+// Grilla de horarios libres de una cancha para sacar un turno.
+// fechaInicial y horaInicial llegan cuando se toca un horario desde la página de inicio.
+export default function ReservaModal({ cancha, complejo, onCerrar, fechaInicial, horaInicial }) {
   const { usuario } = useAuth();
-  const [fecha, setFecha] = useState(hoyISO);
-  const [duracion, setDuracion] = useState(cancha.deporte === "padel" ? 90 : 60);
+  const [fecha, setFecha] = useState(() => (diasVisibles().includes(fechaInicial) ? fechaInicial : hoyISO()));
+  const [duracion, setDuracion] = useState(duracionPorDefecto(cancha.deporte));
   const [disponibilidad, setDisponibilidad] = useState(null);
-  const [elegido, setElegido] = useState("");
+  const [elegido, setElegido] = useState(horaInicial ?? "");
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [reservado, setReservado] = useState(null);
   const [recargas, setRecargas] = useState(0);
+  const { pathname } = useLocation();
+  const ventana = useRef(null);
+  // onCerrar cambia en cada render del padre; el ref evita reiniciar el diálogo por eso
+  const cerrar = useRef(onCerrar);
+  useEffect(() => {
+    cerrar.current = onCerrar;
+  });
+
+  // Diálogo: al abrir, el foco entra; Tab no se escapa; Escape cierra; al cerrar, el foco vuelve
+  useEffect(() => {
+    const anterior = document.activeElement;
+    ventana.current?.focus();
+    const teclas = (e) => {
+      if (e.key === "Escape") return cerrar.current();
+      if (e.key !== "Tab" || !ventana.current) return;
+      const enfocables = [...ventana.current.querySelectorAll("button:not(:disabled), a[href]")];
+      const primero = enfocables[0];
+      const ultimo = enfocables[enfocables.length - 1];
+      if (e.shiftKey && (document.activeElement === primero || document.activeElement === ventana.current)) {
+        e.preventDefault();
+        ultimo?.focus();
+      } else if (!e.shiftKey && document.activeElement === ultimo) {
+        e.preventDefault();
+        primero?.focus();
+      }
+    };
+    document.addEventListener("keydown", teclas);
+    return () => {
+      document.removeEventListener("keydown", teclas);
+      anterior?.focus?.();
+    };
+  }, []);
 
   useEffect(() => {
     let vigente = true;
@@ -39,29 +86,24 @@ export default function ReservaModal({ cancha, complejo, onCerrar }) {
   };
 
   // Horarios posibles: cada media hora, entre la apertura y el cierre
-  const horarios = [];
-  if (disponibilidad?.horario.abierto) {
-    const { abre, cierra } = disponibilidad.horario;
-    const inicio = aMinutos(abre);
-    let fin = aMinutos(cierra);
-    if (fin <= inicio) fin = 1440;
-    const ahora = new Date();
-    const minutosAhora = ahora.getHours() * 60 + ahora.getMinutes();
-    const ocupados = disponibilidad.ocupados.map((o) => [aMinutos(o.desde), aMinutos(o.hasta)]);
-    for (let m = Math.ceil(inicio / 30) * 30; m + duracion <= fin; m += 30) {
-      const pasado = fecha === hoyISO() && m <= minutosAhora;
-      const choca = ocupados.some(([desde, hasta]) => m < hasta && m + duracion > desde);
-      horarios.push({ hora: aHora(m), libre: !pasado && !choca });
-    }
-  }
+  const horarios = horariosDelDia(disponibilidad, fecha, duracion);
+  // Si el horario elegido ya no está libre (lo reservó otro, o pasó), no queda elegido
+  const seleccion = horarios.some((h) => h.hora === elegido && h.libre) ? elegido : "";
+
+  // Con un horario ya elegido, la grilla se desplaza hasta mostrarlo
+  useEffect(() => {
+    if (disponibilidad) document.querySelector(".horario-boton.activo")?.scrollIntoView({ block: "nearest" });
+  }, [disponibilidad]);
 
   const precio = (Number(cancha.precio_hora) * duracion) / 60;
+  // Para ingresar sin perder lo elegido: después del login se vuelve a esta misma reserva
+  const volver = `${pathname}?cancha=${cancha.id_cancha}&fecha=${fecha}${seleccion ? `&hora=${seleccion}` : ""}`;
 
   const confirmar = async () => {
     setEnviando(true);
     setError("");
     try {
-      const { data } = await reservar({ id_cancha: cancha.id_cancha, fecha, hora_inicio: elegido, duracion });
+      const { data } = await reservar({ id_cancha: cancha.id_cancha, fecha, hora_inicio: seleccion, duracion });
       setReservado(data);
     } catch (err) {
       setError(mensajeDeError(err, "No se pudo reservar"));
@@ -75,9 +117,17 @@ export default function ReservaModal({ cancha, complejo, onCerrar }) {
   if (reservado) {
     return (
       <div className="modal-fondo" onClick={onCerrar}>
-        <div className="tarjeta modal centrado" onClick={(e) => e.stopPropagation()}>
+        <div
+          ref={ventana}
+          className="tarjeta modal centrado"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="titulo-reserva"
+          tabIndex={-1}
+          onClick={(e) => e.stopPropagation()}
+        >
           <span className="exito-icono" aria-hidden="true">✓</span>
-          <h2>¡Turno reservado!</h2>
+          <h2 id="titulo-reserva">¡Turno reservado!</h2>
           <p>
             <strong>{cancha.nombre}</strong> en {complejo}
             <br />
@@ -96,28 +146,42 @@ export default function ReservaModal({ cancha, complejo, onCerrar }) {
 
   return (
     <div className="modal-fondo" onClick={onCerrar}>
-      <div className="tarjeta modal modal-ancho" onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={ventana}
+        className="tarjeta modal modal-ancho"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-reserva"
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div>
           <span className="etiqueta">{complejo}</span>
-          <h2>Reservar {cancha.nombre}</h2>
+          <h2 id="titulo-reserva">Reservar {cancha.nombre}</h2>
           <p className="texto-suave">
             {DEPORTE[cancha.deporte]} · {pesos(cancha.precio_hora)} la hora
           </p>
         </div>
 
-        <div className="dias">
-          {Array.from({ length: DIAS_VISIBLES }, (_, i) => sumarDias(hoyISO(), i)).map((dia) => (
-            <button key={dia} className={`dia ${dia === fecha ? "activo" : ""}`} onClick={() => cambiarFecha(dia)}>
-              {fechaCorta(dia)}
+        <div className="dias" role="group" aria-label="Día">
+          {diasVisibles().map((dia) => (
+            <button
+              key={dia}
+              className={`dia ${dia === fecha ? "activo" : ""}`}
+              aria-pressed={dia === fecha}
+              onClick={() => cambiarFecha(dia)}
+            >
+              {etiquetaDia(dia)}
             </button>
           ))}
         </div>
 
-        <div className="segmentado">
+        <div className="segmentado" role="group" aria-label="Duración">
           {DURACIONES.map((d) => (
             <button
               key={d}
               className={duracion === d ? "activo" : ""}
+              aria-pressed={duracion === d}
               onClick={() => {
                 setDuracion(d);
                 setElegido("");
@@ -143,7 +207,8 @@ export default function ReservaModal({ cancha, complejo, onCerrar }) {
               {horarios.map((h) => (
                 <button
                   key={h.hora}
-                  className={`horario-boton ${elegido === h.hora ? "activo" : ""}`}
+                  className={`horario-boton ${seleccion === h.hora ? "activo" : ""}`}
+                  aria-pressed={seleccion === h.hora}
                   disabled={!h.libre}
                   onClick={() => setElegido(h.hora)}
                 >
@@ -156,20 +221,20 @@ export default function ReservaModal({ cancha, complejo, onCerrar }) {
         )}
 
         <div className="modal-acciones reserva-pie">
-          {elegido && (
+          {seleccion && (
             <span>
-              {elegido} a {aHora(aMinutos(elegido) + duracion)} · <strong>{pesos(precio)}</strong>
+              {seleccion} a {aHora(aMinutos(seleccion) + duracion)} · <strong>{pesos(precio)}</strong>
             </span>
           )}
           <button className="boton boton-fantasma" onClick={onCerrar}>Cancelar</button>
           {usuario?.rol === "cliente" ? (
-            <button className="boton" disabled={!elegido || enviando} onClick={confirmar}>
+            <button className="boton" disabled={!seleccion || enviando} onClick={confirmar}>
               {enviando ? "Reservando..." : "Confirmar reserva"}
             </button>
           ) : usuario ? (
             <span className="texto-suave">Solo los jugadores pueden reservar</span>
           ) : (
-            <Link className="boton" to="/ingresar">Ingresá para reservar</Link>
+            <Link className="boton" to={`/ingresar?volver=${encodeURIComponent(volver)}`}>Ingresá para reservar</Link>
           )}
         </div>
       </div>

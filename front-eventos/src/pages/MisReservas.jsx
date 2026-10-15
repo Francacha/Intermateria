@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import CambiarPassword from "../components/CambiarPassword";
 import { EstadoTorneo } from "../components/Torneo";
 import {
   cancelarReserva,
@@ -164,6 +165,9 @@ export default function MisReservas() {
           </div>
         </>
       )}
+
+      <h2 className="seccion-titulo con-margen">Tu cuenta</h2>
+      <CambiarPassword />
     </main>
   );
 }

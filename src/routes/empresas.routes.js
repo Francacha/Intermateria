@@ -5,6 +5,7 @@ import {
   crearEmpresa,
   actualizarEmpresa,
   eliminarEmpresa,
+  cambiarPasswordEmpresa,
   obtenerResumen
 } from "../controllers/empresas.controller.js";
 import { requiereAdmin } from "../middlewares/auth.js";
@@ -19,6 +20,7 @@ router.get("/resumen", obtenerResumen);
 router.get("/:id", obtenerEmpresaPorId);
 router.post("/", crearEmpresa);
 router.put("/:id", actualizarEmpresa);
+router.put("/:id/password", cambiarPasswordEmpresa);
 router.delete("/:id", eliminarEmpresa);
 
 export default router;

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth";
+import { Cargando, ConError } from "../components/Estados";
 import { Campeon, EstadoTorneo, Fixture, InfoTorneo, TablaPosiciones } from "../components/Torneo";
 import { obtenerTorneoPublico } from "../service/publicoService";
 import { inscribirEquipo } from "../service/clienteService";
 import { mensajeDeError } from "../service/api";
+import { fechaLarga, pesos } from "../utils/formato";
 
 // Página pública de un torneo: info, equipos, fixture, tabla e inscripción
 export default function TorneoDetalle() {
@@ -15,58 +17,75 @@ export default function TorneoDetalle() {
   const [recargas, setRecargas] = useState(0);
 
   useEffect(() => {
+    let vigente = true;
     obtenerTorneoPublico(id)
-      .then(({ data }) => setTorneo(data))
-      .catch((err) => setError(mensajeDeError(err, "No se pudo cargar el torneo")));
+      .then(({ data }) => vigente && setTorneo(data))
+      .catch((err) => vigente && setError(mensajeDeError(err, "No pudimos cargar el torneo.")));
+    return () => {
+      vigente = false;
+    };
   }, [id, recargas]);
 
-  if (error && !torneo) {
+  const reintentar = () => {
+    setError("");
+    setRecargas((n) => n + 1);
+  };
+
+  if (!torneo) {
     return (
       <main className="contenedor panel">
-        <p className="alerta">{error}</p>
-        <Link to="/torneos">← Volver a los torneos</Link>
+        <Link to="/torneos" className="volver">← Todos los torneos</Link>
+        {error ? <ConError mensaje={error} onReintentar={reintentar} /> : <Cargando filas={3} etiqueta="Cargando el torneo" />}
       </main>
     );
   }
-  if (!torneo) return <main className="contenedor panel"><p className="texto-suave">Cargando...</p></main>;
 
   const yaInscripto = usuario?.rol === "cliente" && torneo.equipos.some((e) => e.id_cliente === usuario.id_cliente);
   const hayCupo = torneo.inscriptos < torneo.cupo;
+  const quien = torneo.deporte === "padel" ? "pareja" : "equipo";
+  // Para ingresar o crear la cuenta sin perder el torneo: después se vuelve acá
+  const volver = encodeURIComponent(`/torneos/${torneo.id_torneo}`);
 
   return (
     <main className="contenedor panel">
       <Link to="/torneos" className="volver">← Todos los torneos</Link>
       <div className="panel-cabecera">
-        <span className="etiqueta">
-          <Link to={`/complejos/${torneo.id_empresa}`}>{torneo.complejo}</Link>
-        </span>
         <div className="titulo-con-estado">
           <h1>{torneo.nombre}</h1>
           <EstadoTorneo estado={torneo.estado} />
         </div>
+        <p className="torneo-organiza">
+          Organiza <Link to={`/complejos/${torneo.id_empresa}`}>{torneo.complejo}</Link>
+        </p>
         {torneo.descripcion && <p className="texto-suave">{torneo.descripcion}</p>}
       </div>
 
+      <div className="detalle-intro">
       <InfoTorneo torneo={torneo} />
       <Campeon campeon={torneo.campeon} />
 
       {torneo.estado === "inscripcion" && (
         <section className="tarjeta inscripcion">
           {yaInscripto ? (
-            <p className="ok-texto">✓ Ya inscribiste a tu equipo. Lo ves en <Link to="/mis-reservas">Mis reservas</Link>.</p>
+            <p className="ok-texto">✓ Ya inscribiste a tu {quien}. Lo ves en <Link to="/mis-reservas">Mis reservas</Link>.</p>
           ) : !hayCupo ? (
-            <p>No quedan cupos.</p>
+            <p>Cupo completo: ya se anotaron {torneo.cupo} {quien === "pareja" ? "parejas" : "equipos"}.</p>
           ) : usuario?.rol === "cliente" ? (
             <FormInscripcion torneo={torneo} onInscripto={() => setRecargas((n) => n + 1)} />
           ) : usuario ? (
             <p className="texto-suave">Solo los jugadores pueden inscribirse.</p>
           ) : (
-            <p>
-              <Link to="/ingresar">Ingresá</Link> o <Link to="/registro-cliente">creá tu cuenta</Link> para inscribir a tu equipo.
-            </p>
+            <div className="inscripcion-anonimo">
+              <p>Para inscribir a tu {quien} necesitás una cuenta de jugador; crearla te lleva un minuto.</p>
+              <div className="acciones-vacio">
+                <Link className="boton boton-grande" to={`/ingresar?volver=${volver}`}>Ingresá para inscribirte</Link>
+                <Link className="boton boton-grande boton-fantasma" to={`/registro-cliente?volver=${volver}`}>Creá tu cuenta</Link>
+              </div>
+            </div>
           )}
         </section>
       )}
+      </div>
 
       <div className="detalle-grilla">
         <section>
@@ -80,7 +99,9 @@ export default function TorneoDetalle() {
           )}
         </section>
         <aside className="tarjeta lateral">
-          <span className="campo-titulo">{torneo.deporte === "padel" ? "Parejas" : "Equipos"} ({torneo.inscriptos})</span>
+          <h2 className="lateral-titulo">
+            {torneo.deporte === "padel" ? "Parejas inscriptas" : "Equipos inscriptos"} <span className="grupo-cantidad">{torneo.inscriptos}</span>
+          </h2>
           {torneo.equipos.length === 0 ? (
             <p className="texto-suave">Todavía no hay inscriptos.</p>
           ) : (
@@ -130,15 +151,28 @@ function FormInscripcion({ torneo, onInscripto }) {
           <input name="nombre" value={datos.nombre} onChange={cambiar} required maxLength={80} placeholder={pareja ? "Gómez / Pérez" : "Los Pibes FC"} />
         </label>
         <label className="campo">
-          Teléfono de contacto <small>(si no, el de tu cuenta)</small>
-          <input name="contacto_telefono" value={datos.contacto_telefono} onChange={cambiar} maxLength={30} />
+          Teléfono de contacto
+          <input
+            name="contacto_telefono"
+            value={datos.contacto_telefono}
+            onChange={cambiar}
+            maxLength={30}
+            aria-describedby="ayuda-telefono"
+          />
+          <small id="ayuda-telefono">Si lo dejás vacío, usamos el de tu cuenta.</small>
         </label>
       </div>
       <label className="campo">
         Integrantes
         <input name="integrantes" value={datos.integrantes} onChange={cambiar} maxLength={500} placeholder="Nombres separados por coma" />
       </label>
-      <div className="modal-acciones">
+      <div className="modal-acciones inscripcion-pie">
+        <p className="inscripcion-resumen">
+          Empieza el {fechaLarga(torneo.fecha_inicio.slice(0, 10))} ·{" "}
+          {Number(torneo.precio_inscripcion) > 0
+            ? `${pesos(torneo.precio_inscripcion)} por ${pareja ? "pareja" : "equipo"}. Consultá con el complejo cómo se paga.`
+            : "Inscripción gratis."}
+        </p>
         <button className="boton" disabled={enviando}>{enviando ? "Inscribiendo..." : "Inscribirme"}</button>
       </div>
     </form>

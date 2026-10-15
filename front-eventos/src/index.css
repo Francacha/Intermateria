@@ -3,6 +3,8 @@
   --fondo-alt: #e9eee6;
   --superficie: #ffffff;
   --borde: #dfe5db;
+  /* Borde de los campos de formulario: tiene que distinguirse del fondo (≥3:1) */
+  --borde-campo: #7a8a80;
   --texto: #1b2a22;
   --texto-suave: #5d6b63;
   --primario: #15803d;
@@ -11,13 +13,27 @@
   --acento: #b5e61d;
   --futbol: #16a34a;
   --futbol-suave: rgba(22, 163, 74, 0.12);
+  --futbol-texto: #15803d;
+  /* Para texto chico sobre el tinte del deporte (insignias): contraste AA */
+  --futbol-fuerte: #166534;
   --padel: #2563eb;
   --padel-suave: rgba(37, 99, 235, 0.12);
+  --padel-fuerte: #1d4ed8;
   --peligro: #dc2626;
   --peligro-suave: rgba(220, 38, 38, 0.1);
+  --peligro-texto: #b91c1c;
+  /* Aviso cálido (pocos lugares, empieza pronto): no es un error */
+  --aviso: #854d0e;
+  --aviso-suave: rgba(234, 179, 8, 0.18);
   --ok: #15803d;
   --sombra: 0 1px 2px rgba(16, 32, 24, 0.06), 0 8px 24px rgba(16, 32, 24, 0.06);
   --radio: 14px;
+  --banda-fondo: #0f2a1b;
+  --banda-superficie: #163a26;
+  --banda-texto: #eef6f0;
+  --banda-suave: #b4cfbd;
+  --banda-borde: transparent;
+  --salida: cubic-bezier(0.16, 1, 0.3, 1);
 
   font-family: "Outfit", system-ui, "Segoe UI", Roboto, sans-serif;
   font-size: 16px;
@@ -34,6 +50,7 @@
     --fondo-alt: #121d18;
     --superficie: #16221d;
     --borde: #26362e;
+    --borde-campo: #6b8276;
     --texto: #e7efe9;
     --texto-suave: #93a59a;
     --primario: #22c55e;
@@ -41,12 +58,21 @@
     --primario-texto: #06210f;
     --futbol: #22c55e;
     --futbol-suave: rgba(34, 197, 94, 0.15);
+    --futbol-texto: #4ade80;
+    --futbol-fuerte: #4ade80;
     --padel: #60a5fa;
     --padel-suave: rgba(96, 165, 250, 0.15);
+    --padel-fuerte: #93c5fd;
     --peligro: #f87171;
     --peligro-suave: rgba(248, 113, 113, 0.12);
+    --peligro-texto: #f87171;
+    --aviso: #facc15;
+    --aviso-suave: rgba(250, 204, 21, 0.14);
     --ok: #4ade80;
     --sombra: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
+    --banda-fondo: #17392a;
+    --banda-superficie: #1e4633;
+    --banda-borde: #2a5440;
     color-scheme: dark;
   }
 }
@@ -71,6 +97,33 @@ h3 {
 
 a {
   color: var(--primario);
+  text-underline-offset: 3px;
+}
+
+/* Foco visible solo con teclado, del color de la marca */
+:focus-visible {
+  outline: 3px solid var(--primario);
+  outline-offset: 3px;
+}
+
+/* Texto solo para lectores de pantalla */
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+::placeholder {
+  color: var(--texto-suave);
+  opacity: 1;
+}
+
+::selection {
+  background: var(--acento);
+  color: #14210f;
 }
 
 input,

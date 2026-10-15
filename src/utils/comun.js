@@ -67,3 +67,15 @@ export const cierreEnMinutos = (abre, cierra) => {
   const fin = aMinutos(cierra);
   return fin <= aMinutos(abre) ? 1440 : fin;
 };
+
+// CUIT argentino: 11 dígitos con dígito verificador (módulo 11). Devuelve "30-12345678-1" o null si no es válido.
+export const normalizarCuit = (valor) => {
+  const digitos = String(valor ?? "").replace(/\D/g, "");
+  if (digitos.length !== 11) return null;
+  const pesos = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+  const suma = pesos.reduce((total, peso, i) => total + peso * Number(digitos[i]), 0);
+  const resto = 11 - (suma % 11);
+  const verificador = resto === 11 ? 0 : resto;
+  if (verificador === 10 || verificador !== Number(digitos[10])) return null;
+  return `${digitos.slice(0, 2)}-${digitos.slice(2, 10)}-${digitos[10]}`;
+};

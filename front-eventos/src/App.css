@@ -49,7 +49,7 @@
 
 .alerta {
   background: var(--peligro-suave);
-  color: var(--peligro);
+  color: var(--peligro-texto);
   border-radius: 10px;
   padding: 10px 14px;
   margin: 12px 0;
@@ -57,7 +57,18 @@
 }
 
 .alerta-texto {
-  color: var(--peligro);
+  color: var(--peligro-texto);
+}
+
+/* Aviso informativo (no es un error): sesión vencida, etc. */
+.aviso {
+  background: var(--aviso-suave);
+  color: var(--aviso);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .ok-texto {
@@ -93,6 +104,12 @@
 .boton:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+.boton[aria-busy="true"]:disabled,
+.boton[aria-disabled="true"] {
+  opacity: 1;
+  cursor: progress;
 }
 
 .boton-grande {
@@ -211,6 +228,76 @@
   background: var(--fondo-alt);
 }
 
+.navbar-menu,
+.navbar-fondo {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .navbar-interno {
+    min-height: 60px;
+    flex-wrap: nowrap;
+  }
+
+  .navbar-menu {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--borde);
+    background: var(--superficie);
+    color: var(--texto);
+    cursor: pointer;
+  }
+
+  .navbar-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 8px 16px 20px;
+    background: var(--fondo);
+    border-bottom: 1px solid var(--borde);
+    box-shadow: 0 18px 32px -18px rgba(16, 32, 24, 0.3);
+  }
+
+  .navbar-links.abierto {
+    display: flex;
+    z-index: 2;
+  }
+
+  .navbar-fondo {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    height: 100vh;
+    background: rgba(13, 21, 18, 0.35);
+  }
+
+  .navbar-links a:not(.boton) {
+    padding: 12px 4px;
+    font-size: 1.05rem;
+  }
+
+  .navbar-links .boton {
+    padding: 12px 18px;
+    margin-top: 8px;
+  }
+
+  .navbar-empresa {
+    align-self: flex-start;
+    margin: 8px 0 0;
+  }
+}
+
 /* ---------- Footer con el droplet ---------- */
 .footer {
   margin-top: 48px;
@@ -253,6 +340,10 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
+  background: var(--texto-suave);
+}
+
+.droplet-punto.caido {
   background: var(--peligro);
 }
 
@@ -262,13 +353,21 @@
 }
 
 .droplet-boton {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
   border: none;
   background: var(--fondo-alt);
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
-  font-size: 1rem;
+}
+
+.droplet-boton::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
 }
 
 .droplet-boton:hover {
@@ -276,36 +375,47 @@
   color: var(--primario-texto);
 }
 
+/* Título de sección que usan varias páginas (la página de inicio lo agranda) */
+.seccion-titulo {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+}
+
 /* ---------- Inicio ---------- */
 .hero {
   background:
-    radial-gradient(circle at 85% 20%, var(--futbol-suave), transparent 45%),
-    radial-gradient(circle at 70% 90%, var(--padel-suave), transparent 40%);
+    radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--futbol) 9%, transparent), transparent 42%),
+    radial-gradient(circle at 72% 92%, color-mix(in srgb, var(--padel) 9%, transparent), transparent 40%);
   border-bottom: 1px solid var(--borde);
+  overflow: hidden;
 }
 
 .hero-interno {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 48px;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 56px;
   align-items: center;
-  padding-top: 72px;
-  padding-bottom: 72px;
+  padding-top: 88px;
+  padding-bottom: 96px;
 }
 
 .hero h1 {
-  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-size: clamp(2.15rem, 5.2vw, 4.1rem);
   font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
 }
 
-.hero p {
-  font-size: 1.15rem;
+.hero-bajada {
+  font-size: 1.2rem;
   color: var(--texto-suave);
-  max-width: 34ch;
+  max-width: 44ch;
+  margin: 22px 0 0;
 }
 
 .resaltado-futbol {
-  color: var(--futbol);
+  color: var(--futbol-texto);
 }
 
 .resaltado-padel {
@@ -316,50 +426,85 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  margin-top: 28px;
+  margin-top: 32px;
 }
 
+/* Oferta real: cuántos complejos y canchas hay cargados */
+.hero-oferta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  min-height: 1.6em;
+  margin: 28px 0 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-oferta-deporte {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--texto-suave);
+  font-weight: 500;
+}
+
+.hero-oferta .mini-dibujo {
+  width: 28px;
+  border-width: 1.5px;
+  border-radius: 3px;
+}
+
+/* Canchas dibujadas solo con CSS, las dos del mismo tamaño */
 .hero-canchas {
   display: grid;
-  gap: 18px;
 }
 
-/* Canchas dibujadas solo con CSS */
-.cancha-dibujo {
+.dibujo {
   position: relative;
+  width: 86%;
   aspect-ratio: 2 / 1;
   border-radius: 12px;
-  border: 3px solid rgba(255, 255, 255, 0.85);
+  border: 3px solid rgba(255, 255, 255, 0.9);
   outline: 10px solid var(--superficie);
-  box-shadow: var(--sombra);
+  box-shadow: 0 2px 4px rgba(16, 32, 24, 0.08), 0 28px 48px -16px rgba(16, 32, 24, 0.3);
   overflow: hidden;
+  transform: rotate(var(--giro));
+  animation: llegar 0.9s var(--salida) both;
 }
 
-.cancha-futbol {
+.dibujo-futbol {
+  --giro: -4deg;
   background: repeating-linear-gradient(90deg, #1f9d4c 0 10%, #23ab53 10% 20%);
-  transform: rotate(-3deg);
 }
 
-.cancha-padel {
-  width: 78%;
+.dibujo-padel {
+  --giro: 3deg;
   justify-self: end;
+  margin-top: -10%;
   background: #2563eb;
-  transform: rotate(3deg);
+  animation-delay: 0.12s;
 }
 
-.cancha-dibujo span {
+@keyframes llegar {
+  from {
+    transform: translateY(32px) rotate(0deg);
+  }
+}
+
+.dibujo span {
   position: absolute;
   border: 2px solid rgba(255, 255, 255, 0.85);
 }
 
-.linea-media {
+.dibujo .linea-media {
   left: 50%;
   top: 0;
   bottom: 0;
-  border-width: 0 0 0 2px !important;
+  border-width: 0 0 0 2px;
 }
 
-.circulo-central {
+.dibujo .circulo-central {
   left: 50%;
   top: 50%;
   width: 22%;
@@ -368,103 +513,1215 @@
   transform: translate(-50%, -50%);
 }
 
-.area {
+.dibujo .area {
   top: 25%;
   bottom: 25%;
   width: 14%;
 }
 
-.area-izq {
+.dibujo .area-izq {
   left: -2px;
 }
 
-.area-der {
+.dibujo .area-der {
   right: -2px;
 }
 
-.red {
+/* Pádel: red al medio, líneas de saque y línea central entre ellas */
+.dibujo .red {
   left: 50%;
-  top: -2px;
-  bottom: -2px;
-  border-width: 0 0 0 4px !important;
-  border-color: rgba(255, 255, 255, 0.95) !important;
+  top: 0;
+  bottom: 0;
+  border-width: 0 0 0 4px;
+  border-color: rgba(255, 255, 255, 0.95);
+  transform: translateX(-2px);
 }
 
-.linea-saque {
+.dibujo .servicio {
+  top: 0;
+  bottom: 0;
+  border-width: 0 0 0 2px;
+}
+
+.dibujo .servicio-izq {
+  left: 15%;
+}
+
+.dibujo .servicio-der {
+  left: 85%;
+}
+
+.dibujo .linea-central {
   top: 50%;
-  width: 28%;
-  border-width: 2px 0 0 0 !important;
+  left: 15%;
+  right: 15%;
+  border-width: 2px 0 0 0;
 }
 
-.saque-izq {
-  left: 22%;
-}
-
-.saque-der {
-  right: 22%;
-}
-
-.saque-izq::before,
-.saque-der::before {
-  content: "";
-  position: absolute;
-  top: -50vh;
-  height: 100vh;
-  border-left: 2px solid rgba(255, 255, 255, 0.85);
-}
-
-.saque-izq::before {
-  left: -2px;
-}
-
-.saque-der::before {
-  right: -2px;
-}
-
+/* Secciones */
 .seccion {
-  padding-top: 56px;
+  padding-top: 72px;
 }
 
-.seccion-titulo {
-  font-size: 1.8rem;
+.seccion-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px 24px;
+  flex-wrap: wrap;
   margin-bottom: 20px;
 }
 
-.pasos {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.paso {
-  padding: 24px;
-}
-
-.paso h3 {
-  margin: 14px 0 6px;
-}
-
-.paso p {
+.inicio .seccion-titulo {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
   margin: 0;
+}
+
+.seccion-cabecera .texto-suave {
+  margin-top: 6px;
+}
+
+/* Cuando la sección abre la página (empresa: su día en lugar del hero) */
+.seccion-primera {
+  padding-top: 48px;
+}
+
+.inicio h1.seccion-titulo {
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  letter-spacing: -0.035em;
+}
+
+.acciones-vacio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Cierre para el cliente: volver al último complejo */
+.volver-a-jugar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 24px;
+  border-radius: var(--radio);
+  border: 1px solid var(--borde);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+  color: var(--texto);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.volver-a-jugar:hover {
+  background: var(--fondo-alt);
+}
+
+.volver-a-jugar strong {
+  display: block;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.volver-a-jugar .texto-suave {
+  display: block;
+  margin: 0;
+}
+
+.volver-a-jugar svg {
+  color: var(--primario);
+  transition: transform 0.25s var(--salida);
+}
+
+.volver-a-jugar:hover svg {
+  transform: translateX(4px);
+}
+
+.enlace-flecha {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  font-weight: 600;
+  color: var(--primario);
+  text-decoration: none;
+}
+
+.enlace-flecha svg {
+  transition: transform 0.25s var(--salida);
+}
+
+.enlace-flecha:hover svg {
+  transform: translateX(4px);
+}
+
+/* Tablero: lista de renglones dentro de una sola superficie */
+.tablero {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
+
+.tablero ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tablero > li + li,
+.tablero > ul > li + li {
+  border-top: 1px solid var(--borde);
+}
+
+.renglon {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 20px;
+  margin: 0;
+  padding: 16px 20px;
+}
+
+.renglon-enlace {
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.renglon-enlace:hover {
+  background: var(--fondo);
+}
+
+.renglon-enlace:focus-visible {
+  outline-offset: -3px;
+}
+
+.renglon-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.renglon-info strong {
+  font-size: 1.05rem;
+}
+
+.renglon-info .texto-suave {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+/* Miniatura de la cancha, el mismo dibujo del hero en chico */
+.mini-dibujo {
+  width: 56px;
+  aspect-ratio: 2 / 1;
+  border-radius: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 1px var(--borde);
+}
+
+.mini-futbol {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)) center / 2px 100% no-repeat,
+    repeating-linear-gradient(90deg, #1f9d4c 0 20%, #23ab53 20% 40%);
+}
+
+.mini-padel {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) center / 3px 100% no-repeat,
+    #2563eb;
+}
+
+.horarios-libres {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.horario-libre {
+  display: inline-grid;
+  place-items: center;
+  min-width: 64px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: var(--fondo);
+  color: var(--texto);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.renglon-futbol .horario-libre:hover {
+  background: var(--futbol-suave);
+  border-color: var(--futbol);
+  color: var(--futbol-texto);
+}
+
+.renglon-padel .horario-libre:hover {
+  background: var(--padel-suave);
+  border-color: var(--padel);
+  color: var(--padel);
+}
+
+.horario-mas {
+  color: var(--texto-suave);
+  font-weight: 600;
+}
+
+.renglon-sin-horarios {
+  color: var(--texto-suave);
+  font-size: 0.92rem;
+}
+
+.tablero-estado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 28px 20px;
+}
+
+.tablero-estado p {
+  margin: 0;
+}
+
+.nota-cuenta {
+  margin: 14px 0 0;
+  color: var(--texto-suave);
+  font-size: 0.95rem;
+}
+
+/* Esqueleto mientras carga */
+.renglon-cargando {
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+}
+
+.esqueleto {
+  display: block;
+  height: 14px;
+  border-radius: 6px;
+  background: var(--fondo-alt);
+  animation: latido 1.4s ease-in-out infinite;
+}
+
+.esqueleto-cancha {
+  width: 56px;
+  height: 28px;
+}
+
+.esqueleto-texto {
+  width: min(260px, 100%);
+}
+
+.esqueleto-horarios {
+  width: 200px;
+  height: 40px;
+}
+
+@keyframes latido {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Fechas en bloque: torneo (día grande) y turno (hora grande) */
+.fecha-torneo,
+.fecha-turno {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 56px;
+  line-height: 1.15;
+  color: var(--texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.fecha-torneo {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fecha-torneo strong {
+  font-size: 1.9rem;
+  letter-spacing: -0.03em;
+  color: var(--texto);
+}
+
+.fecha-turno {
+  font-size: 0.82rem;
+}
+
+.fecha-turno strong {
+  font-size: 1.35rem;
+  color: var(--texto);
+}
+
+.renglon-futbol .fecha-torneo strong {
+  color: var(--futbol-texto);
+}
+
+.renglon-padel .fecha-torneo strong {
+  color: var(--padel);
+}
+
+/* Cupo del torneo: un casillero por equipo */
+.cupo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.cupo-lugares {
+  display: flex;
+  gap: 3px;
+}
+
+.cupo-lugares span {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1px solid var(--borde);
+  background: var(--fondo-alt);
+}
+
+.renglon-futbol .cupo-lugares .ocupado {
+  background: var(--futbol);
+  border-color: transparent;
+}
+
+.renglon-padel .cupo-lugares .ocupado {
+  background: var(--padel);
+  border-color: transparent;
+}
+
+.cupo-texto {
+  color: var(--texto-suave);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Resumen del día del complejo */
+.resumen-dia {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  margin: 0;
+  padding: 18px 20px;
+  background: var(--fondo);
+  border-bottom: 1px solid var(--borde);
   color: var(--texto-suave);
 }
 
-.paso-numero {
+.resumen-dia strong {
+  margin-right: 6px;
+  font-size: 1.6rem;
+  color: var(--texto);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Banda para complejos */
+.banda-complejos {
+  margin-top: 96px;
+  background: var(--banda-fondo);
+  color: var(--banda-texto);
+  border-block: 1px solid var(--banda-borde);
+}
+
+.banda-interno {
   display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--acento);
-  color: #1b2a22;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+  padding-top: 88px;
+  padding-bottom: 88px;
+}
+
+.banda-texto h2 {
+  font-size: clamp(2rem, 4.2vw, 3.2rem);
   font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.banda-bajada {
+  max-width: 52ch;
+  margin: 18px 0 0;
+  font-size: 1.1rem;
+  color: var(--banda-suave);
+}
+
+.banda-lista {
+  display: grid;
+  gap: 14px;
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+}
+
+.banda-lista li {
+  position: relative;
+  padding-left: 26px;
+  color: var(--banda-suave);
+}
+
+.banda-lista li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.4em;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--acento);
+}
+
+.banda-lista strong {
+  color: var(--banda-texto);
+}
+
+.banda-acciones {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px 22px;
+  margin-top: 36px;
+}
+
+.banda-acciones p {
+  margin: 0;
+  color: var(--banda-suave);
+}
+
+.banda-acciones a:not(.boton) {
+  color: var(--banda-texto);
+  font-weight: 600;
+}
+
+.banda-complejos :focus-visible {
+  outline-color: var(--acento);
+}
+
+.boton-acento {
+  background: var(--acento);
+  color: #14210f;
+}
+
+.boton-acento:hover {
+  background: #c6f03a;
+}
+
+/* Ejemplo de agenda */
+.agenda-ejemplo {
+  margin: 0;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--banda-superficie);
+  box-shadow: 0 32px 64px -24px rgba(0, 0, 0, 0.5);
+  transform: rotate(1.5deg);
+}
+
+.agenda-ejemplo figcaption {
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--banda-suave);
+}
+
+.agenda-ejemplo ol {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.agenda-turno {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.agenda-hora {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.agenda-cuerpo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.agenda-cuerpo strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agenda-cuerpo strong::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+}
+
+.agenda-padel .agenda-cuerpo strong::before {
+  background: #60a5fa;
+}
+
+.agenda-cuerpo span {
+  font-size: 0.88rem;
+  color: var(--banda-suave);
+}
+
+.agenda-estado {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* El intento de reservar un horario ocupado, rechazado */
+.agenda-rechazado {
+  background: transparent;
+  border: 1.5px dashed rgba(248, 113, 113, 0.7);
+}
+
+.agenda-rechazado .agenda-hora,
+.agenda-rechazado strong {
+  text-decoration: line-through;
+  text-decoration-color: #f87171;
+}
+
+.agenda-rechazado .agenda-estado {
+  background: rgba(248, 113, 113, 0.18);
+  color: #fecaca;
+}
+
+@media (max-width: 800px) {
+  .hero-interno {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding-top: 40px;
+    padding-bottom: 48px;
+  }
+
+  .hero-canchas {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 16px;
+    padding: 0 12px;
+  }
+
+  .dibujo {
+    width: 100%;
+    border-width: 2px;
+    outline-width: 6px;
+  }
+
+  .dibujo-padel {
+    margin-top: 0;
+  }
+
+  .banda-interno {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding-top: 56px;
+    padding-bottom: 56px;
+  }
+
+  .agenda-ejemplo {
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .seccion {
+    padding-top: 56px;
+  }
+
+  /* Lo primero que ve el jugador en el celular tiene que ser un horario libre */
+  .hero-interno {
+    gap: 0;
+    padding-top: 28px;
+    padding-bottom: 36px;
+  }
+
+  .hero-canchas {
+    display: none;
+  }
+
+  .hero-bajada {
+    margin-top: 14px;
+    font-size: 1.05rem;
+  }
+
+  .hero-acciones {
+    margin-top: 22px;
+    flex-wrap: nowrap;
+  }
+
+  .hero-acciones .boton {
+    flex: 1 1 0;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .hero-oferta {
+    margin-top: 20px;
+    font-size: 0.95rem;
+  }
+
+  .hero + .seccion {
+    padding-top: 40px;
+  }
+
+  .seccion-primera {
+    padding-top: 28px;
+  }
+
+  /* Links sueltos dentro del texto: área táctil de 44px sin mover el renglón */
+  .nota-cuenta a,
+  .banda-acciones a:not(.boton) {
+    display: inline-block;
+    padding: 12px 0;
+    margin: -12px 0;
+  }
+
+  .volver-a-jugar {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .renglon {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 14px 16px;
+  }
+
+  /* En el celular alcanza con cuatro canchas; el resto está en Complejos */
+  .tablero > .renglon:nth-child(n + 5) {
+    display: none;
+  }
+
+  .horarios-libres,
+  .renglon-sin-horarios,
+  .cupo {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .renglon > .insignia {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .horarios-libres > li {
+    flex: 1 0 64px;
+  }
+
+  .horario-libre {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .banda-acciones .boton {
+    flex: 1 1 100%;
+  }
+
+  .agenda-ejemplo {
+    padding: 16px;
+  }
+
+  .agenda-turno {
+    grid-template-columns: 46px minmax(0, 1fr);
+  }
+
+  .agenda-estado {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dibujo,
+  .esqueleto {
+    animation: none;
+  }
 }
 
 /* ---------- Formularios ---------- */
 .pagina-auth {
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   padding-top: 48px;
+  padding-bottom: 48px;
+}
+
+.auth-marca {
+  display: flex;
+  gap: 6px;
+}
+
+.auth-marca .mini-dibujo {
+  width: 36px;
+}
+
+.formulario-auth .auth-volver,
+.formulario-registro .auth-volver {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 44px;
+  margin: -10px 0 -6px;
+}
+
+/* El turno o el torneo que la persona estaba por reservar */
+.auth-turno {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--fondo-alt);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Campo con un botón adentro (mostrar contraseña) */
+.campo-con-boton {
+  position: relative;
+  display: block;
+}
+
+.campo-con-boton input {
+  padding-right: 96px;
+}
+
+.campo-boton {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  min-height: 36px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--primario);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.campo-boton:hover {
+  background: var(--fondo-alt);
+}
+
+/* Área táctil de 44px sin agrandar el botón dentro del campo */
+.campo-boton::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+.olvido summary {
+  display: list-item;
+  padding: 11px 0;
+  color: var(--primario);
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.olvido p {
+  margin: 4px 0 0;
+  color: var(--texto-suave);
+  font-size: 0.92rem;
+}
+
+/* Aviso que deja una página a la siguiente (por ejemplo, después de ingresar) */
+.aviso-navegacion {
+  padding-top: 16px;
+}
+
+.aviso-navegacion .aviso {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.aviso-acciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aviso-acciones .boton {
+  min-height: 40px;
+  border-color: currentColor;
+  color: inherit;
+  font-weight: 700;
+}
+
+/* Cambio de contraseña (Mis reservas) */
+.form-cambio-password {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+}
+
+.form-cambio-password .grilla-campos {
+  margin: 0;
+}
+
+.form-cambio-acciones {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.aviso-cerrar {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.aviso-cerrar::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+.aviso-ok {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--futbol-suave);
+  color: var(--futbol-fuerte);
+  font-weight: 600;
+}
+
+/* Administrador: jugadores */
+.buscador-ancho {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  min-height: 44px;
+  margin: 20px 0;
+}
+
+.renglon-jugador {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.form-password {
+  display: grid;
+  gap: 10px;
+  min-width: 280px;
+}
+
+.form-password .acciones {
+  justify-content: flex-end;
+}
+
+/* Administrador: complejos */
+.barra-admin {
+  margin-top: 20px;
+}
+
+.barra-admin .buscador {
+  min-height: 44px;
+  max-width: 420px;
+}
+
+.segmentado-cuenta {
+  font-variant-numeric: tabular-nums;
+}
+
+.renglon-admin {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.renglon-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.renglon-titulo a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+.renglon-numeros {
+  margin-top: 4px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto-suave);
+}
+
+.renglon-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Acciones secundarias del renglón: texto, con menos peso que Editar */
+.accion-texto {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--texto);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--borde-campo);
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.accion-texto:hover {
+  background: var(--fondo-alt);
+}
+
+.accion-texto.peligro {
+  color: var(--peligro-texto);
+}
+
+.accion-texto.peligro:hover {
+  background: var(--peligro-suave);
+}
+
+.accion-texto[aria-busy="true"] {
+  cursor: progress;
+}
+
+.sin-corte {
+  white-space: nowrap;
+}
+
+.alinear-inicio {
+  align-self: flex-start;
+}
+
+.nota-chica {
+  font-size: 0.85rem;
+}
+
+/* Lo que se abre debajo de un renglón (contraseña, errores) ocupa todo el ancho */
+.renglon-ancho {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.renglon-ancho .form-password {
+  max-width: 460px;
+}
+
+/* De baja: el nombre pierde fuerza, las acciones no */
+.renglon-de-baja {
+  background: var(--fondo-alt);
+}
+
+.renglon-de-baja .renglon-titulo strong {
+  color: var(--texto-suave);
+}
+
+.pastilla-estado {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pastilla-estado.activo {
+  background: var(--futbol-suave);
+  color: var(--futbol-fuerte);
+}
+
+.pastilla-estado.de-baja {
+  background: var(--peligro-suave);
+  color: var(--peligro-texto);
+}
+
+.boton-texto-peligro {
+  color: var(--peligro-texto);
+}
+
+.boton-texto-peligro:hover {
+  background: var(--peligro-suave);
+}
+
+.boton-peligro,
+.boton-peligro:hover {
+  background: var(--peligro-texto);
+  color: var(--superficie);
+}
+
+.boton-peligro:hover {
+  filter: brightness(1.08);
+}
+
+/* Todavía falta escribir el nombre para confirmar */
+.boton-peligro[aria-disabled="true"]:not([aria-busy="true"]) {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.boton-enlace {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.confirmar-texto p {
+  margin: 0;
+}
+
+/* Formulario de complejo: el formulario y, al editar, la zona para eliminar */
+.formulario-columna {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  max-width: 720px;
+}
+
+.nota-password {
+  align-self: center;
+}
+
+.zona-peligro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px 24px;
+  padding: 22px 32px;
+  border-color: var(--peligro-suave);
+}
+
+.zona-peligro h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.zona-peligro .boton {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .renglon-admin {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .renglon-acciones {
+    justify-content: flex-start;
+  }
+
+  .renglon-acciones .boton {
+    min-height: 44px;
+  }
+
+  .renglon-acciones .accion-texto,
+  .renglon-titulo a {
+    min-height: 44px;
+  }
+
+  .barra-admin .segmentado {
+    width: 100%;
+  }
+
+  .barra-admin .segmentado button {
+    flex: 1;
+    min-height: 40px;
+  }
+
+  .zona-peligro {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 22px;
+  }
+}
+
+@media (max-width: 640px) {
+  .renglon-jugador {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .form-password {
+    min-width: 0;
+  }
+}
+
+.auth-registro {
+  display: grid;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--borde);
+  color: var(--texto-suave);
+  text-align: center;
+}
+
+.auth-registro p {
+  margin: 0;
+}
+
+/* Links de texto con área táctil de 44px sin mover el renglón */
+.auth-registro a {
+  display: inline-block;
+  padding: 12px 0;
+  margin: -12px 0;
+  font-weight: 600;
 }
 
 .formulario-auth,
@@ -503,8 +1760,87 @@
 }
 
 .campo small {
+  font-size: 0.82rem; /* unos 13px: ayudas y errores legibles */
   font-weight: 400;
   color: var(--texto-suave);
+}
+
+/* Error de un campo, debajo del campo (también fuera de .campo, como en los deportes) */
+.campo-error,
+.campo small.campo-error {
+  color: var(--peligro-texto);
+  font-weight: 600;
+}
+
+/* Advertencia que no es error (por ejemplo, una cancha sin precio) */
+.campo-aviso,
+.campo small.campo-aviso {
+  color: var(--aviso);
+  font-weight: 600;
+}
+
+.campos-obligatorios {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.tamano-futbol {
+  display: flex;
+}
+
+.tamano-futbol button {
+  flex: 1;
+  min-height: 40px;
+}
+
+/* El tamaño elegido se distingue en claro y en oscuro */
+.segmentado.tamano-futbol button.activo {
+  background: var(--primario);
+  color: var(--primario-texto);
+}
+
+/* Panel: primeros pasos de un complejo recién registrado */
+.primeros-pasos {
+  margin: 20px 0 24px;
+}
+
+.primeros-pasos-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.primeros-pasos-cabecera h2 {
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+
+.primeros-pasos-cabecera .texto-suave {
+  margin: 4px 0 0;
+}
+
+.primeros-pasos ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.primeros-pasos li + li {
+  border-top: 1px solid var(--borde);
+}
+
+.primeros-pasos .renglon {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+@media (max-width: 640px) {
+  .primeros-pasos .renglon {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .campo-titulo {
@@ -520,11 +1856,11 @@
 .horario-horas input {
   width: 100%;
   padding: 10px 12px;
+  font-size: 1rem;
   border-radius: 10px;
-  border: 1px solid var(--borde);
+  border: 1px solid var(--borde-campo);
   background: var(--fondo);
   font-weight: 400;
-  outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
@@ -537,7 +1873,21 @@
 .campo textarea:focus,
 .horario-horas input:focus {
   border-color: var(--primario);
-  box-shadow: 0 0 0 3px var(--futbol-suave);
+}
+
+/* Campo con error: borde y anillo de foco del color del error (el mensaje dice qué pasó) */
+.campo input[aria-invalid="true"] {
+  border-color: var(--peligro-texto);
+}
+
+.campo input[aria-invalid="true"]:focus-visible {
+  outline-color: var(--peligro-texto);
+}
+
+/* Mientras se envía, los campos quedan de solo lectura y se ven apagados */
+.campo input[readonly] {
+  background: var(--fondo-alt);
+  color: var(--texto-suave);
 }
 
 .campo-check {
@@ -558,7 +1908,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
-  align-items: end;
+  align-items: start;
 }
 
 /* Selección de deporte en el registro */
@@ -566,13 +1916,18 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  align-items: start;
 }
 
 .deporte {
   border: 2px solid var(--borde);
   border-radius: var(--radio);
-  overflow: hidden;
   transition: border-color 0.15s;
+}
+
+/* Ningún deporte elegido al enviar */
+.deportes.con-error .deporte {
+  border-color: var(--peligro-texto);
 }
 
 .deporte-futbol.elegido {
@@ -595,6 +1950,12 @@
   background: transparent;
   text-align: left;
   cursor: pointer;
+  border-radius: calc(var(--radio) - 2px);
+}
+
+/* El anillo de foco queda dentro de la tarjeta */
+.deporte-cabecera:focus-visible {
+  outline-offset: -4px;
 }
 
 .deporte-cabecera small {
@@ -656,7 +2017,7 @@
 
 .deporte-detalle {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   padding: 0 16px 16px;
 }
@@ -665,15 +2026,32 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid var(--borde);
+  border: 1px solid var(--borde-campo);
   border-radius: 10px;
   background: var(--fondo);
-  overflow: hidden;
+}
+
+.contador input {
+  width: 72px;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-weight: 700;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.contador input::-webkit-outer-spin-button,
+.contador input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .contador button {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
+  border-radius: 9px;
   border: none;
   background: transparent;
   font-size: 1.2rem;
@@ -850,12 +2228,12 @@
 
 .insignia-futbol {
   background: var(--futbol-suave);
-  color: var(--futbol);
+  color: var(--futbol-fuerte);
 }
 
 .insignia-padel {
   background: var(--padel-suave);
-  color: var(--padel);
+  color: var(--padel-fuerte);
 }
 
 .cancha-datos {
@@ -1061,10 +2439,10 @@
 .selector,
 .navegador-fecha input {
   padding: 9px 14px;
+  font-size: 1rem;
   border-radius: 999px;
   border: 1px solid var(--borde);
   background: var(--superficie);
-  outline: none;
 }
 
 .buscador {
@@ -1100,7 +2478,7 @@
 
 .insignia-torneo {
   background: rgba(181, 230, 29, 0.25);
-  color: #4d6b00;
+  color: #3f5800;
 }
 
 .titulo-con-estado {
@@ -1122,19 +2500,19 @@
 .estado-inscripcion,
 .turno-reservada {
   background: rgba(234, 179, 8, 0.16);
-  color: #a16207;
+  color: #854d0e;
 }
 
 .estado-en_curso,
 .turno-confirmada {
   background: var(--padel-suave);
-  color: var(--padel);
+  color: var(--padel-fuerte);
 }
 
 .estado-finalizado,
 .turno-jugada {
   background: var(--futbol-suave);
-  color: var(--futbol);
+  color: var(--futbol-fuerte);
 }
 
 .estado-cancelado,
@@ -1148,33 +2526,6 @@
 }
 
 /* ---------- Catálogo de complejos ---------- */
-.lista-complejos {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.complejo {
-  padding: 22px;
-}
-
-.complejo-cabecera {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.complejo-cabecera h2 {
-  font-size: 1.4rem;
-}
-
-.complejo-descripcion {
-  margin: 10px 0 0;
-  color: var(--texto-suave);
-}
-
 .chips-chicos {
   margin: 12px 0 0;
 }
@@ -1185,44 +2536,6 @@
   padding: 3px 10px;
 }
 
-.complejo-canchas {
-  list-style: none;
-  padding: 0;
-  margin: 16px 0 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 8px;
-}
-
-.mini-cancha {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--fondo);
-  border: 1px solid transparent;
-  color: var(--texto);
-  text-decoration: none;
-  font-size: 0.9rem;
-  flex-wrap: wrap;
-}
-
-.mini-cancha:hover {
-  border-color: var(--primario);
-}
-
-.mini-cancha .texto-suave {
-  margin: 0;
-  font-size: 0.8rem;
-}
-
-.mini-precio {
-  margin-left: auto;
-  font-weight: 700;
-}
-
-/* ---------- Ficha del complejo / torneo ---------- */
 .detalle-grilla {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
@@ -1272,6 +2585,11 @@
   max-width: 680px;
   max-height: calc(100vh - 32px);
   overflow-y: auto;
+}
+
+/* Con altura máxima, el flex encogía la fila de días hasta cortarla: cada bloque mantiene su alto */
+.modal-ancho > * {
+  flex-shrink: 0;
 }
 
 .dias {
@@ -1338,6 +2656,21 @@
 
 .reserva-pie > span:first-child {
   margin-right: auto;
+}
+
+.modal-ancho .reserva-pie {
+  position: sticky;
+  bottom: -28px;
+  z-index: 1;
+  margin: 6px -28px -28px;
+  padding: 14px 28px 20px;
+  border-top: 1px solid var(--borde);
+  background: var(--superficie);
+}
+
+/* El diálogo recibe el foco al abrir; el anillo se reserva para sus controles */
+.modal:focus-visible {
+  outline: none;
 }
 
 .exito-icono {
@@ -1424,10 +2757,6 @@
 
 .estadisticas-chicas strong {
   font-size: 1.4rem;
-}
-
-.estadisticas-seis {
-  grid-template-columns: repeat(6, 1fr);
 }
 
 .selector-estado {
@@ -1534,7 +2863,8 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.75rem;
-  color: var(--texto-suave);
+  font-weight: 700;
+  color: var(--texto); /* sobre el degradé, el gris suave no llegaba al contraste mínimo */
 }
 
 .campeon strong {
@@ -1617,7 +2947,6 @@
   text-align: center;
   font-size: 0.8rem;
   color: var(--texto-suave);
-  text-transform: capitalize;
 }
 
 .partido-libre {
@@ -1665,18 +2994,191 @@
 
 .form-equipo {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr 1.4fr auto;
-  gap: 8px;
-  padding: 12px;
+  grid-template-columns: 1.3fr 1fr 1fr 1.4fr auto;
+  align-items: end;
+  gap: 10px 12px;
+  padding: 16px;
   margin-bottom: 14px;
 }
 
-.form-equipo input {
-  padding: 9px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--borde);
-  background: var(--fondo);
+.form-equipo .campo {
   min-width: 0;
+}
+
+.form-equipo input {
+  min-width: 0;
+}
+
+.form-equipo-estado {
+  grid-column: 1 / -1;
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 0.9rem;
+}
+
+.form-equipo-estado:empty {
+  display: none;
+}
+
+/* Gestión de un torneo */
+.cabecera-torneo {
+  align-items: flex-start;
+}
+
+.acciones-torneo {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.acciones-torneo .boton {
+  white-space: nowrap;
+}
+
+.paso-torneo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 8px 0 20px;
+  padding: 16px 20px;
+  border-radius: var(--radio);
+  border: 1px solid var(--borde);
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+}
+
+.paso-torneo strong {
+  display: block;
+  font-size: 1.08rem;
+  margin-bottom: 2px;
+}
+
+.ayuda-fixture {
+  margin: 0 0 14px;
+  max-width: 70ch;
+}
+
+.cierre-inscripcion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 16px;
+}
+
+.lista-inscriptos {
+  margin: 0;
+}
+
+.renglon-equipo {
+  grid-template-columns: 2ch minmax(0, 1fr) auto auto;
+  gap: 10px 16px;
+}
+
+.renglon-numero {
+  color: var(--texto-suave);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pastilla-origen {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+/* Campeonato: la tabla al lado del fixture */
+.grilla-campeonato {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+}
+
+.lateral-columna {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lateral-columna .seccion-titulo {
+  margin-bottom: 0;
+}
+
+.lateral-tarjeta {
+  padding: 4px 20px 20px;
+}
+
+/* En la columna, goles a favor y en contra quedan en la diferencia */
+.lateral-columna .tabla-posiciones th:nth-child(8),
+.lateral-columna .tabla-posiciones td:nth-child(8),
+.lateral-columna .tabla-posiciones th:nth-child(9),
+.lateral-columna .tabla-posiciones td:nth-child(9) {
+  display: none;
+}
+
+.partido-estado {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.88rem;
+}
+
+.partido-estado:empty {
+  display: none;
+}
+
+/* Guardar sin cambios: neutro, en claro y en oscuro */
+.partido-editable .boton[aria-disabled="true"]:not([aria-busy="true"]) {
+  background: var(--fondo-alt);
+  color: var(--texto-suave);
+  border-color: var(--borde);
+  cursor: default;
+}
+
+@media (max-width: 640px) {
+  .renglon-equipo {
+    grid-template-columns: 2ch minmax(0, 1fr);
+  }
+
+  .renglon-equipo .pastilla-origen,
+  .renglon-equipo .accion-texto {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .renglon-equipo .accion-texto {
+    min-height: 44px;
+    margin-left: -10px;
+  }
+
+  .acciones-torneo {
+    justify-content: flex-start;
+  }
+
+  .acciones-torneo .boton,
+  .acciones-torneo .accion-texto,
+  .volver {
+    min-height: 44px;
+  }
+
+  .volver {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .partido-marcador input,
+  .partido-editable .partido-programa select,
+  .partido-editable .partido-programa input,
+  .partido-editable .partido-programa .boton {
+    min-height: 44px;
+  }
+
+  .panel .form-equipo {
+    grid-template-columns: 1fr;
+  }
 }
 
 .tabla-posiciones td:first-child,
@@ -1713,21 +3215,486 @@
   opacity: 0.6;
 }
 
-/* Activa / de baja en el panel del administrador */
-.interruptor {
-  padding: 4px 12px;
+/* ---------- Catálogo de complejos ---------- */
+.catalogo-resumen {
+  min-height: 1.5em;
+  text-wrap: balance;
+  font-variant-numeric: tabular-nums;
+}
+
+.catalogo-filtros {
+  display: grid;
+  gap: 14px;
+  margin: 24px 0 28px;
+}
+
+.catalogo .dia {
+  min-height: 44px;
+  padding: 8px 16px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.catalogo .dia.activo {
+  color: var(--primario-texto);
+}
+
+.catalogo-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.catalogo .buscador {
+  max-width: 420px;
+  min-height: 44px;
+}
+
+.catalogo-lista {
+  display: grid;
+  gap: 20px;
+  transition: opacity 0.2s;
+}
+
+/* Refiltrando: se ven los resultados anteriores, atenuados */
+.catalogo-lista.actualizando {
+  opacity: 0.55;
+}
+
+.bloque-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px 20px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.bloque-titulo h2 {
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.bloque-titulo h2 a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texto);
+  text-decoration: none;
+}
+
+.bloque-titulo h2 svg {
+  color: var(--primario);
+  transition: transform 0.25s var(--salida);
+}
+
+.bloque-titulo h2 a:hover svg {
+  transform: translateX(4px);
+}
+
+.bloque-cabecera .insignia {
+  font-size: 0.8rem;
+}
+
+.bloque-cerrado {
+  margin: 0;
+  color: var(--texto-suave);
+}
+
+.renglon-duracion {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.sugerencia {
+  margin-bottom: 20px;
+}
+
+.bloque-titulo h2 a:hover {
+  color: var(--primario);
+  text-decoration: underline;
+}
+
+.bloque-titulo .texto-suave {
+  margin: 4px 0 0;
+}
+
+.bloque-servicios {
+  margin: 6px 0 0;
+  font-size: 0.88rem;
+  color: var(--texto-suave);
+}
+
+@media (max-width: 640px) {
+  .catalogo .dias {
+    margin: 0 -16px;
+    padding: 0 16px 4px;
+  }
+
+  .catalogo-fila .segmentado {
+    flex: 1 1 100%;
+  }
+
+  .catalogo-fila .segmentado button {
+    flex: 1;
+    min-height: 40px;
+  }
+
+  .catalogo .buscador {
+    flex: 1 1 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .bloque-cabecera {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  /* La tira de días se desvanece a la derecha: se nota que sigue */
+  .catalogo .dias {
+    -webkit-mask-image: linear-gradient(to right, #000 82%, transparent);
+    mask-image: linear-gradient(to right, #000 82%, transparent);
+  }
+}
+
+/* ---------- Página de torneos ---------- */
+.pagina-torneos .catalogo-resumen {
+  margin-top: 6px;
+}
+
+.filtros-torneo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: 22px 0 8px;
+  padding: 0;
+  border: none;
+}
+
+/* En escritorio todo va en una sola tira que se acomoda sola */
+.filtros-fila,
+.filtros-extra {
+  display: contents;
+}
+
+.filtro-mas {
+  display: none;
+}
+
+.filtros-torneo:disabled {
+  opacity: 0.5;
+}
+
+.filtros-torneo .segmentado button {
+  white-space: nowrap;
+}
+
+.filtros-torneo .selector {
+  min-height: 44px;
+}
+
+.filtro-interruptor {
+  min-height: 44px;
+  padding: 9px 18px;
   border-radius: 999px;
   border: 1px solid var(--borde);
-  background: var(--peligro-suave);
-  color: var(--peligro);
+  background: var(--superficie);
+  color: var(--texto);
   font-weight: 600;
-  font-size: 0.8rem;
+  white-space: nowrap;
   cursor: pointer;
 }
 
-.interruptor.encendido {
+.filtro-interruptor:disabled {
+  cursor: default;
+}
+
+.filtro-interruptor .grupo-cantidad {
+  margin-left: 6px;
+}
+
+.filtro-interruptor.activo {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: var(--primario-texto);
+}
+
+.grupo-torneos {
+  margin-top: 32px;
+}
+
+.grupo-torneos .seccion-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.grupo-cantidad {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--fondo-alt);
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.renglon-premio {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+/* Nombres y premios largos: hasta dos líneas */
+.renglon-nombre,
+.renglon-premio {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.renglon-cuando {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--fondo-alt);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.cupo-texto.cupo-pocos {
+  color: var(--aviso);
+  font-weight: 800;
+}
+
+.renglon-cuando.pronto {
+  background: var(--aviso-suave);
+  color: var(--aviso);
+}
+
+.cupo-barra {
+  display: block;
+  width: 96px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--fondo-alt);
+  overflow: hidden;
+}
+
+.cupo-barra span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.renglon-futbol .cupo-barra span {
+  background: var(--futbol);
+}
+
+.renglon-padel .cupo-barra span {
+  background: var(--padel);
+}
+
+.filtros-activos {
+  display: none;
+}
+
+.chip-filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--primario);
   background: var(--futbol-suave);
-  color: var(--futbol);
+  color: var(--texto);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.solo-celular {
+  display: none;
+}
+
+.inscripcion-pie {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.inscripcion-resumen {
+  flex: 1 1 260px;
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.92rem;
+}
+
+.detalle-intro {
+  display: flex;
+  flex-direction: column;
+}
+
+.subgrupo-titulo {
+  margin: 20px 0 10px;
+  font-size: 1rem;
+  color: var(--texto-suave);
+}
+
+.info-donde a {
+  display: block;
+  font-weight: 600;
+}
+
+.inscripcion-anonimo {
+  display: grid;
+  gap: 12px;
+}
+
+.inscripcion-anonimo p {
+  margin: 0;
+}
+
+.cupo-texto.cupo-lleno {
+  color: var(--texto);
+  font-weight: 700;
+}
+
+.cupo-precio {
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.cupo-precio small {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--texto-suave);
+}
+
+/* Detalle del torneo */
+.torneo-organiza {
+  margin: 6px 0 0;
+  color: var(--texto-suave);
+}
+
+.torneo-organiza a {
+  font-weight: 600;
+}
+
+.lateral-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+}
+
+@media (max-width: 640px) {
+  /* Celular: deporte arriba; categoría, lugares y "Más filtros" abajo */
+  .filtros-torneo {
+    display: grid;
+    gap: 10px;
+  }
+
+  .filtros-fila {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .filtros-torneo .segmentado {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .filtros-torneo .segmentado button {
+    flex: 1 0 auto;
+    min-height: 44px;
+  }
+
+  .filtros-extra {
+    display: none;
+  }
+
+  .filtros-extra.abierto {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+  }
+
+  /* Los formatos tienen nombres largos: los botones bajan de línea en vez de cortarse */
+  .filtros-extra .segmentado {
+    flex-wrap: wrap;
+    border-radius: 24px;
+    overflow: visible;
+  }
+
+  .filtros-torneo .selector {
+    flex: 1 1 100%;
+  }
+
+  .filtros-fila .filtro-interruptor {
+    flex: 1 1 0;
+  }
+
+  .filtro-mas {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .renglon-direccion {
+    display: none;
+  }
+
+  .filtros-extra .solo-escritorio {
+    display: none;
+  }
+
+  .filtros-extra .solo-celular {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .filtros-activos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .chip-filtro {
+    min-height: 44px;
+  }
+
+  .detalle-intro .inscripcion {
+    order: -1;
+    margin-top: 16px;
+  }
+
+  /* Datos del torneo en dos columnas: la inscripción queda más arriba */
+  .info-torneo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .info-torneo li {
+    padding: 8px 12px;
+    font-size: 0.92rem;
+  }
 }
 
 /* ---------- Celular ---------- */
@@ -1742,18 +3709,20 @@
     padding-bottom: 40px;
   }
 
-  .pasos,
   .deportes {
     grid-template-columns: 1fr;
   }
 
-  .estadisticas,
-  .estadisticas-seis {
+  .estadisticas {
     grid-template-columns: 1fr 1fr;
   }
 
   .detalle-grilla {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detalle-grilla > * {
+    min-width: 0;
   }
 
   .lateral {
@@ -1764,14 +3733,17 @@
     grid-template-columns: 1fr 1fr;
   }
 
+  .form-equipo .boton {
+    grid-column: 1 / -1;
+  }
+
   .reserva {
     flex-wrap: wrap;
   }
 }
 
 @media (max-width: 520px) {
-  .grilla-campos,
-  .deporte-detalle {
+  .grilla-campos {
     grid-template-columns: 1fr;
   }
 
@@ -1780,7 +3752,33 @@
     padding: 22px;
   }
 
-  .navbar-empresa {
+}
+
+/* Colores fijos que en oscuro necesitan su propia versión */
+@media (prefers-color-scheme: dark) {
+  .estado-inscripcion,
+  .turno-reservada {
+    background: rgba(250, 204, 21, 0.14);
+    color: #facc15;
+  }
+
+  .insignia-torneo {
+    background: rgba(181, 230, 29, 0.16);
+    color: var(--acento);
+  }
+}
+
+@media (max-width: 520px) {
+  .tabla-posiciones th,
+  .tabla-posiciones td {
+    padding: 10px 8px;
+  }
+
+  /* Goles a favor y en contra quedan en la diferencia (DG) */
+  .tabla-posiciones th:nth-child(8),
+  .tabla-posiciones td:nth-child(8),
+  .tabla-posiciones th:nth-child(9),
+  .tabla-posiciones td:nth-child(9) {
     display: none;
   }
 }

@@ -3,6 +3,7 @@ import os from "node:os";
 import express from "express";
 import cors from "cors";
 import empresasRoutes from "./routes/empresas.routes.js";
+import clientesRoutes from "./routes/clientes.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import canchasRoutes from "./routes/canchas.routes.js";
 import perfilRoutes from "./routes/perfil.routes.js";
@@ -37,6 +38,7 @@ app.get("/api/instancia", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/publico", publicoRoutes);               // sin login
 app.use("/api/empresas", empresasRoutes);             // admin
+app.use("/api/clientes", clientesRoutes);             // admin
 app.use("/api/canchas", canchasRoutes);               // complejo
 app.use("/api/perfil", perfilRoutes);                 // complejo
 app.use("/api/turnos", turnosRoutes);                 // complejo

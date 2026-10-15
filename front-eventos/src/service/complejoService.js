@@ -4,6 +4,8 @@ import api from "./api";
 export const registrarEmpresa = (datos) => api.post("/auth/registro", datos);
 export const iniciarSesion = (email, password) => api.post("/auth/login", { email, password });
 export const obtenerSesion = () => api.get("/auth/sesion");
+// La persona logueada cambia su contraseña (cualquier rol)
+export const cambiarMiPassword = (actual, nueva) => api.put("/auth/password", { actual, nueva });
 
 // Canchas del complejo logueado
 export const obtenerCanchas = () => api.get("/canchas");

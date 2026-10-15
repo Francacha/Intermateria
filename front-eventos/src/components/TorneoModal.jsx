@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import useDialogo from "../service/useDialogo";
 import { hoyISO } from "../utils/formato";
 
 const TIPOS = [
@@ -22,6 +23,8 @@ export default function TorneoModal({ torneo, onGuardar, onCerrar }) {
   });
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
+  const ventana = useRef(null);
+  useDialogo(ventana, () => !guardando && onCerrar());
 
   // Con el fixture armado ya no se puede cambiar el formato ni el deporte
   const bloqueado = torneo && torneo.estado !== "inscripcion";
@@ -30,6 +33,7 @@ export default function TorneoModal({ torneo, onGuardar, onCerrar }) {
 
   const enviar = async (e) => {
     e.preventDefault();
+    if (guardando) return;
     setGuardando(true);
     setError("");
     try {
@@ -46,10 +50,19 @@ export default function TorneoModal({ torneo, onGuardar, onCerrar }) {
   };
 
   return (
-    <div className="modal-fondo" onClick={onCerrar}>
-      <form className="tarjeta modal modal-ancho" onSubmit={enviar} onClick={(e) => e.stopPropagation()}>
-        <h2>{torneo ? "Editar" : "Nuevo torneo o campeonato"}</h2>
-        {error && <p className="alerta">{error}</p>}
+    <div className="modal-fondo" onClick={() => !guardando && onCerrar()}>
+      <form
+        ref={ventana}
+        className="tarjeta modal modal-ancho"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="torneo-modal-titulo"
+        tabIndex={-1}
+        onSubmit={enviar}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 id="torneo-modal-titulo">{torneo ? `Editar ${torneo.tipo === "campeonato" ? "campeonato" : "torneo"}` : "Nuevo torneo o campeonato"}</h2>
+        {error && <p className="alerta" role="alert">{error}</p>}
 
         <div className="deportes">
           {TIPOS.map((tipo) => (
@@ -111,7 +124,7 @@ export default function TorneoModal({ torneo, onGuardar, onCerrar }) {
 
         <div className="modal-acciones">
           <button type="button" className="boton boton-fantasma" onClick={onCerrar}>Cancelar</button>
-          <button className="boton" disabled={guardando}>{guardando ? "Guardando..." : "Guardar"}</button>
+          <button className="boton" aria-disabled={guardando} aria-busy={guardando}>{guardando ? "Guardando…" : "Guardar"}</button>
         </div>
       </form>
     </div>

@@ -105,7 +105,9 @@ const insertarPartidos = async (db, idTorneo, partidos) => {
 export const generarFixture = async (db, torneo) => {
   if (torneo.estado !== "inscripcion") throw new ErrorHttp(400, "El fixture ya fue generado");
   const { rows } = await db.query("SELECT id_equipo FROM equipos WHERE id_torneo = $1", [torneo.id_torneo]);
-  if (rows.length < 2) throw new ErrorHttp(400, "Se necesitan al menos 2 equipos inscriptos");
+  if (rows.length < 2) {
+    throw new ErrorHttp(400, `Se necesitan al menos 2 ${torneo.deporte === "padel" ? "parejas inscriptas" : "equipos inscriptos"}`);
+  }
 
   const ids = mezclar(rows.map((r) => r.id_equipo));
   const partidos = torneo.tipo === "campeonato" ? fixtureLiga(ids) : primeraRonda(ids);
@@ -166,8 +168,9 @@ export const agregarEquipo = async (db, idTorneo, datos) => {
   );
   if (total >= torneo.cupo) throw new ErrorHttp(400, "No quedan cupos en este torneo");
 
+  const pareja = torneo.deporte === "padel";
   const nombre = String(datos.nombre ?? "").trim().slice(0, 80);
-  if (!nombre) throw new ErrorHttp(400, "El nombre del equipo es obligatorio");
+  if (!nombre) throw new ErrorHttp(400, `El nombre de${pareja ? " la pareja" : "l equipo"} es obligatorio`);
 
   try {
     const { rows } = await db.query(
@@ -184,7 +187,9 @@ export const agregarEquipo = async (db, idTorneo, datos) => {
     );
     return rows[0];
   } catch (error) {
-    if (error.code === "23505") throw new ErrorHttp(400, "Ya hay un equipo con ese nombre en el torneo");
+    if (error.code === "23505") {
+      throw new ErrorHttp(400, `Ya hay ${pareja ? "una pareja" : "un equipo"} con ese nombre en el torneo`);
+    }
     throw error;
   }
 };

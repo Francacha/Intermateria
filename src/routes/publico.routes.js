@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   disponibilidad,
+  disponibilidadDelDia,
   listarComplejos,
   listarTorneos,
   obtenerComplejo,
@@ -13,6 +14,7 @@ const router = Router();
 router.get("/complejos", listarComplejos);
 router.get("/complejos/:id", obtenerComplejo);
 router.get("/canchas/:id/disponibilidad", disponibilidad);
+router.get("/disponibilidad", disponibilidadDelDia);
 router.get("/torneos", listarTorneos);
 router.get("/torneos/:id", obtenerTorneoPublico);
 
