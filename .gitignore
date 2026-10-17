@@ -1,3 +1,5 @@
 node_modules
-.env
+# Archivos con contraseñas: nunca al repo (sí los .env.example)
+.env*
+!.env.example
 .claude/
