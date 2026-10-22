@@ -52,6 +52,20 @@ deducimos nosotros como analistas a partir de sus respuestas.
 27. Si tuvieran un sistema, ¿qué es lo primero que les gustaría resolver?
 28. ¿Hay algo que hoy funcione bien y no quieran cambiar?
 
+### Torneos y campeonatos
+29. ¿Organizan torneos o campeonatos? ¿De fútbol, de pádel o de los dos?
+30. ¿Qué diferencia hay entre un torneo y un campeonato para ustedes? ¿Cómo se juega cada uno?
+31. ¿Cómo se anotan los equipos o parejas? ¿Qué datos les piden? ¿Hay cupo y costo de inscripción?
+32. ¿Cómo arman el fixture o los cruces? ¿Lo sortean?
+33. ¿Cómo eligen en qué cancha y horario se juega cada partido? ¿Qué pasa con las reservas de esa cancha?
+34. ¿Quién anota los resultados y cómo se enteran los equipos? ¿Llevan una tabla de posiciones?
+35. ¿Qué pasa si un equipo no se presenta, o si hay empate en un partido que tiene que tener ganador?
+
+### Los jugadores y otros complejos
+36. ¿Cómo encuentran los jugadores su complejo hoy? ¿Comparan con otros complejos antes de reservar?
+37. ¿Les interesaría aparecer en una plataforma junto con otros complejos de la zona? ¿Qué les preocuparía?
+38. ¿Qué información sobre el complejo les gustaría que vean los jugadores antes de reservar (servicios, horarios, fotos, precios)?
+
 ## Consejos para la entrevista
 
 - **Anotar las palabras exactas que usa el cliente** (turno, seña, turno fijo,
