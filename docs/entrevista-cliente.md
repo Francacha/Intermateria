@@ -1,483 +1,559 @@
 # Entrevista al cliente — respuestas
 
-Respuestas del cliente (proyecto de ChatGPT de Sistemas de Información) a las
-preguntas de [relevamiento.md](relevamiento.md). Se guardan textuales como
-respaldo del relevamiento.
+Respuestas del cliente (dueño del complejo, simulado con el proyecto de ChatGPT
+de Sistemas de Información) a las preguntas de [relevamiento.md](relevamiento.md).
+Se guardan como respaldo del relevamiento.
 
-## La empresa
+## El negocio
 
 **1. ¿Nos cuenta cómo empezó el complejo y a qué se dedica hoy?**
 
-Bueno, les cuento. El complejo empezó como un emprendimiento deportivo, principalmente con canchas de fútbol, pensado para que la gente pudiera juntarse a jugar con amigos y pasar un buen rato. Con el tiempo fuimos viendo que también había interés en organizar encuentros un poco más armados, no solamente alquilar una cancha por un par de horas.
+Bueno, les cuento. El complejo empezó como un emprendimiento familiar. Arrancamos con unas pocas canchas de fútbol 5, porque veíamos que había mucha gente que quería juntarse con amigos a jugar después del trabajo. Con el tiempo fuimos creciendo, agregamos más canchas y después incorporamos pádel, que empezó a tener mucha demanda.
 
-Después incorporamos canchas de pádel y empezamos a ofrecer una organización más completa de encuentros deportivos recreativos. Así fuimos creciendo hasta sumar la organización de eventos por encargo.
+Hoy nos dedicamos principalmente al alquiler de canchas de fútbol y pádel, tanto para gente que reserva de vez en cuando como para grupos que tienen un horario fijo todas las semanas. También organizamos torneos propios.
 
-Hoy nos dedicamos a organizar encuentros deportivos recreativos en complejos con canchas de fútbol y pádel. Por ejemplo, una empresa puede contactarnos para organizar una jornada deportiva para su personal, o un grupo puede pedirnos que preparemos un encuentro para compartir con amigos.
+Tenemos cuatro canchas de fútbol 5 de césped sintético, una de ellas techada, una cancha de fútbol 7 y cuatro canchas de pádel: dos techadas con blindex y dos descubiertas de cemento.
 
-Nuestro trabajo no consiste solamente en conseguir las canchas. Hablamos con el cliente para entender qué necesita, acordamos qué servicios vamos a ofrecer y cuánto va a costar, y después coordinamos todo lo necesario para que el evento salga bien.
+Abrimos todos los días, de 9 de la mañana a 12 de la noche. Además, tenemos un buffet que maneja otra persona y ofrecemos alquiler de paletas y pelotas.
 
-Para eso, nos ocupamos de coordinar con los proveedores que hagan falta y de organizar las tareas de nuestro propio equipo. Tenemos que estar atentos a las fechas, los servicios acordados, las confirmaciones que faltan y cualquier cambio que pueda surgir.
+Yo me encargo de decidir los precios, los horarios y la organización de los torneos. Tengo dos encargados que se reparten los turnos: uno trabaja por la mañana y el otro por la tarde y noche. Ellos reciben las consultas, anotan las reservas, cobran las señas y el resto del turno, y se ocupan de abrir y cerrar las canchas.
 
-El principal desafío es que no se nos escape ningún compromiso con el cliente. Cuando tenemos varios eventos en preparación, necesitamos que todos los integrantes del equipo sepan qué se acordó, qué tiene que hacer cada uno y qué cuestiones siguen pendientes.
+El negocio funciona bien, pero a medida que fuimos creciendo se nos hizo más complicado organizar todo. Hoy recibimos reservas por WhatsApp, teléfono y en persona, y las vamos anotando en un cuaderno y en Excel. A veces no coinciden, y ya nos pasó de reservarle la misma cancha a dos grupos.
 
-Ese es, justamente, uno de los motivos por los que nos interesa contar con un software que nos ayude a organizar mejor el trabajo.
+También hacemos campeonatos de fútbol 5 y torneos de pádel por parejas. Eso lleva bastante trabajo porque tenemos que organizar los partidos, anotar los resultados y mantener las tablas al día.
 
-**2. ¿Cuántas canchas tienen y de qué tipo (pádel, fútbol 5, 7)? ¿Son techadas o al aire libre?**
+Lo que busco es que el complejo esté mejor organizado, que podamos saber qué canchas están libres sin tener que revisar varias cosas y que los clientes también puedan consultar y reservar por su cuenta.
 
-Tenemos canchas de pádel y de fútbol, pero todavía no les precisé la cantidad exacta ni cómo se distribuyen entre techadas y al aire libre. Lo que sí les puedo contar es que trabajamos con un complejo deportivo que nos permite organizar encuentros recreativos de ambos tipos.
+**2. ¿Qué canchas tienen? ¿De qué deporte, de qué superficie, techadas o descubiertas?**
 
-En cuanto a las características de las canchas, no quiero darles datos que todavía no establecimos. Para la organización de los eventos, lo importante es que coordinamos el uso de las canchas según lo que se acuerde con cada cliente y registramos los compromisos correspondientes.
+Tenemos 9 canchas en total: 5 de fútbol y 4 de pádel.
 
-**3. ¿Tienen una sola sede o varias?**
+- 4 canchas de fútbol 5: césped sintético, 3 descubiertas y 1 techada. Los turnos duran una hora.
+- 1 cancha de fútbol 7: césped sintético, para jugar con equipos más grandes. Los turnos duran una hora.
+- 2 canchas de pádel techadas, con paredes de blindex.
+- 2 canchas de pádel descubiertas, de cemento.
 
-Trabajamos con una sola sede por evento. Nos manejamos con un complejo deportivo donde coordinamos los encuentros de pádel y fútbol.
+En pádel, los turnos duran una hora y media.
 
-Podemos organizar varios eventos distintos, pero cada uno se realiza en una única sede durante una jornada. Por eso, cuando hablamos con un cliente, definimos dónde se hará el encuentro y dejamos acordado ese lugar para organizar los servicios y las tareas de preparación.
+Los precios varían según la cancha y el horario. Por ejemplo, cobramos más por jugar de noche y en las canchas techadas. El complejo abre todos los días de 9 a 24 horas.
 
-No trabajamos con una estructura de varias sedes que tengamos que coordinar simultáneamente para un mismo evento.
+**3. ¿Qué días y en qué horarios abren? ¿En qué momentos hay más movimiento?**
 
-**4. ¿Qué días y en qué horarios abren? ¿Cambia según la temporada?**
+Mirá, nosotros abrimos todos los días, de lunes a domingo, de 9 de la mañana a 12 de la noche. No cerramos ningún día de la semana.
 
-El complejo funciona de lunes a domingo, generalmente desde las 9 de la mañana hasta la medianoche. Los fines de semana solemos tener más movimiento, porque hay más grupos que quieren juntarse a jugar o hacer encuentros deportivos.
+Los horarios de más movimiento son estos:
 
-En cuanto a la temporada, el horario habitual se mantiene, aunque en épocas de mayor demanda podemos coordinar eventos en distintos horarios dentro de esa franja.
+- De lunes a viernes, de 19 a 24: es cuando más se llenan las canchas, porque la gente sale del trabajo o de estudiar y se junta a jugar.
+- Los fines de semana: tenemos bastante movimiento durante el día y la noche, tanto en fútbol como en pádel.
 
-Para los eventos que organizamos, no dependemos únicamente del horario general de apertura: también tenemos que acordar con el cliente la fecha y el horario de su jornada, y confirmar que podamos coordinar las canchas y los servicios necesarios para ese momento.
+A la mañana y durante la tarde más temprana suele haber menos demanda, así que generalmente es más fácil conseguir cancha.
 
-**5. Además de alquilar canchas, ¿ofrecen otra cosa? Por ejemplo buffet, escuelitas, torneos o alquiler de paletas y pelotas.**
+Esto nos afecta bastante con las reservas: en los horarios pico se nos llena el WhatsApp de consultas y a veces no llegamos a responder a todos. Mientras atendemos a alguien en el mostrador, pueden entrar varios mensajes preguntando si hay cancha libre.
 
-Sí, además del uso de las canchas, trabajamos con algunos servicios complementarios, principalmente cuando organizamos encuentros deportivos por encargo.
+Además, tenemos grupos que juegan siempre el mismo día y horario, así que esos turnos ya están ocupados de manera habitual.
 
-Por ejemplo, podemos coordinar:
+Por eso, para nosotros es importante tener claro qué canchas están libres y cuáles ya están reservadas, especialmente a la noche y los fines de semana.
 
-- Buffet o catering: para que los participantes tengan algo para comer y tomar durante la jornada.
-- Torneos recreativos: si el cliente quiere organizar partidos con una dinámica de competencia amistosa.
-- Equipamiento deportivo: podemos coordinar el acceso a paletas, pelotas u otros elementos necesarios, según lo que se acuerde para el evento.
+**4. Además de alquilar canchas, ¿qué otros servicios ofrecen?**
 
-Las escuelitas deportivas y las clases regulares son actividades que puede haber en complejos de este tipo, pero no forman parte de nuestro servicio de organización de eventos.
+Además del alquiler de las canchas de fútbol y pádel, ofrecemos algunas cosas más.
 
-Nuestro trabajo es identificar qué necesita cada cliente y acordar qué servicios vamos a incluir. Después coordinamos con los proveedores correspondientes y hacemos el seguimiento de las confirmaciones.
+- Alquiler de paletas y pelotas: para la gente que viene a jugar y no tiene sus propios elementos.
+- Buffet: tenemos uno dentro del complejo, pero lo maneja un tercero. Nosotros no nos encargamos de administrar sus ventas.
+- Organización de torneos propios: hacemos torneos de pádel por parejas, generalmente durante un fin de semana, y campeonatos de fútbol 5 que se juegan en varias fechas.
 
-No todos los eventos incluyen lo mismo: depende de lo que el cliente solicite y de lo que finalmente acordemos con él.
+En los torneos cobramos una inscripción y tenemos un cupo de participantes. En pádel, las parejas van avanzando por eliminación directa; en fútbol 5, los equipos juegan un campeonato todos contra todos y llevamos una tabla de posiciones.
 
-## Personas y tareas
+Por ahora, nuestro negocio se centra en eso: alquiler de canchas, alquiler de elementos para jugar y organización de competencias. No ofrecemos otros servicios especiales.
 
-**6. ¿Quiénes trabajan en el complejo y qué hace cada uno?**
+## Las personas
 
-En nuestro caso, somos un equipo chico y nos organizamos según los eventos que tenemos en preparación. Para que se entienda cómo trabajamos, tenemos estas responsabilidades principales:
+**5. ¿Quiénes trabajan en el complejo y qué hace cada uno?**
 
-- Coordinación de eventos: es quien habla con el cliente, entiende qué necesita, prepara la propuesta económica y acuerda los servicios que se van a ofrecer.
-- Organización y seguimiento: se ocupa de coordinar con los proveedores, confirmar su participación y verificar que las tareas de preparación se vayan cumpliendo.
-- Personal de apoyo: ayuda con las cuestiones prácticas de la jornada y con los preparativos que hagan falta para cada encuentro.
+Bueno, en el complejo estamos organizados de esta manera:
 
-En la práctica, una misma persona puede ocuparse de más de una función, según la cantidad de eventos que estemos organizando.
+- Yo, como dueño: me encargo de decidir los precios de las canchas, los horarios de atención y cómo organizamos los torneos. También consulto cómo viene la actividad del complejo y me fijo que todo esté funcionando bien.
+- El encargado de la mañana: atiende a los clientes que vienen al mostrador, responde consultas, toma reservas por teléfono o WhatsApp y registra los pagos de las señas y de los turnos. También se ocupa de abrir las canchas.
+- El encargado de la tarde y noche: hace prácticamente lo mismo, pero en el horario de mayor movimiento. Recibe a los grupos, controla las reservas, cobra lo que falta pagar y se ocupa de cerrar las canchas al final del día.
+- La persona que maneja el buffet: trabaja dentro del complejo, pero es independiente. Se encarga de atender el buffet y no forma parte de nuestro manejo de las reservas de las canchas.
 
-Lo importante es que, aunque nos comuniquemos con los clientes y proveedores por fuera de nuestro sistema, necesitamos dejar asentado internamente qué se acordó, quién quedó a cargo de cada tarea y qué cosas todavía están pendientes.
+Los dos encargados comparten las tareas de atención y reservas. El problema es que, como recibimos consultas por distintos medios y anotamos las cosas en un cuaderno y en Excel, a veces la información no coincide.
 
-No les diría que tenemos un empleado distinto para cada responsabilidad, porque no trabajamos con una estructura tan grande.
+Por ejemplo, puede pasar que uno de los encargados anote una reserva y el otro no se entere. Por eso necesito que podamos consultar la misma información y saber qué está reservado, cuánto dejó cada grupo de seña y cuánto queda por cobrar.
 
-**7. ¿Quién toma las reservas? ¿Quién cobra? ¿Quién abre y cierra?**
+**6. ¿Quién toma las reservas, quién cobra y quién abre y cierra las canchas?**
 
-Les cuento cómo nos organizamos en esas cuestiones:
+Mirá, esas tareas las hacen principalmente los dos encargados, que se dividen el trabajo según el horario.
 
-- Reservas y coordinación con el cliente: las maneja la persona encargada de coordinar los eventos. Recibe el pedido, consulta qué necesita el cliente y acuerda la fecha, la sede y los servicios. Después registra lo acordado y hace el seguimiento.
-- Cobros: cuando se trata del importe de un evento, la coordinación registra el presupuesto que le ofrecemos al cliente y las condiciones acordadas. Los cobros y la administración de los pagos no forman parte del sistema que necesitamos desarrollar.
-- Apertura y cierre del complejo: son tareas operativas del personal que está a cargo del funcionamiento diario del predio, no de quien organiza el evento necesariamente.
+- Tomar las reservas: los dos encargados. Reciben reservas por WhatsApp, teléfono y en el mostrador, tanto de gente que viene ocasionalmente como de los grupos que tienen turnos fijos.
+- Cobrar: también los dos encargados. Registran la seña que nos mandan por transferencia y cobran el resto cuando los jugadores llegan al complejo. La transferencia la tenemos que revisar nosotros manualmente; no hay una verificación automática.
+- Abrir las canchas: se ocupa el encargado de la mañana cuando empieza la actividad.
+- Cerrar las canchas: se ocupa el encargado de la tarde-noche al finalizar la jornada.
 
-Hay una distinción importante: nosotros organizamos eventos por encargo; no estamos buscando administrar toda la operación cotidiana del complejo. Lo que necesitamos controlar es que cada evento tenga sus servicios acordados, sus responsables y sus tareas de preparación bien organizadas.
+Yo, como dueño, decido los precios, los horarios y la organización de los torneos, y consulto cómo viene la actividad.
 
-**8. ¿Hay un encargado o dueño que toma las decisiones? ¿Qué información mira para decidir?**
+Lo que nos pasa hoy es que los dos encargados anotan las reservas en el cuaderno y en Excel, y no siempre tienen la misma información. Necesitaría que cualquiera de los dos pueda ver qué turnos están ocupados, cuáles quedan libres y si una reserva tiene la seña registrada o todavía está pendiente.
 
-Sí, tenemos un responsable general que supervisa el trabajo y toma las decisiones más importantes de la organización. También interviene cuando hay que resolver algún problema con un cliente o un proveedor, o cuando un cambio puede afectar lo que ya habíamos acordado.
+**7. ¿Quién decide los precios y los horarios? ¿Qué información mira para decidir?**
 
-Para decidir, se fija principalmente en:
+Los precios y los horarios los decido yo, como dueño del complejo. Los encargados pueden comentarme lo que ven en el día a día, pero las decisiones finales las tomo yo.
 
-- Los eventos en curso: cuáles están confirmados y qué fechas se acercan.
-- Los acuerdos con los clientes: qué servicios se comprometieron, qué condiciones se pactaron y si hubo cambios.
-- Los proveedores: cuáles ya confirmaron su participación y cuáles siguen pendientes.
-- La preparación: qué tareas faltan, quién es responsable de hacerlas y si hay tareas atrasadas.
-- Los problemas que necesitan atención: por ejemplo, un proveedor que todavía no confirmó o un cambio de fecha que obliga a revisar los compromisos.
+Para decidir los precios, tengo en cuenta principalmente:
 
-Hoy, buena parte de esa información la seguimos entre los integrantes del equipo, a partir de las comunicaciones que mantenemos y de lo que vamos registrando.
+- El horario: a la noche cobramos más que durante la mañana o la tarde temprana, porque hay mucha más demanda.
+- El tipo de cancha: las canchas techadas tienen una tarifa más alta.
+- El deporte y la cancha: diferenciamos los precios de fútbol 5, fútbol 7 y pádel.
 
-Lo que buscamos es que el responsable pueda tener una visión clara de qué eventos están encaminados, cuáles tienen cuestiones pendientes y dónde hace falta intervenir, sin tener que preguntarle a cada persona cómo viene todo.
+Para decidir los horarios, tengo en cuenta cuándo suele venir la gente y qué disponibilidad tenemos. Abrimos todos los días de 9 a 24, y el horario más solicitado es de lunes a viernes, de 19 a 24, además de los fines de semana.
 
-## Cómo se reserva hoy
+También me interesa saber cuántas canchas se ocupan, qué horarios quedan libres y cuántas reservas se concretan. Hoy esa información la saco revisando el cuaderno y el Excel, pero lleva tiempo y no siempre coinciden.
 
-**9. ¿Cómo hace un cliente para reservar? ¿Por teléfono, WhatsApp, en persona o por alguna app?**
+Lo que me gustaría es poder consultar fácilmente la actividad del complejo, ver qué horarios tienen más demanda y cuáles quedan vacíos, para decidir si necesito ajustar algún precio o cómo organizar mejor los turnos.
 
-Principalmente, los clientes se comunican con nosotros por WhatsApp o por teléfono. También puede pasar que alguien se acerque personalmente al complejo para consultar por la organización de un encuentro.
+## Las reservas
 
-Cuando recibimos una consulta, la persona encargada de coordinar los eventos conversa con el cliente para saber qué quiere organizar, para qué fecha, cuántas personas estima que van a participar y qué servicios necesita.
+**8. ¿Cómo hace hoy un jugador para reservar? ¿Nos cuenta cómo fue la última reserva que tomaron?**
 
-Con esa información, evaluamos el pedido y preparamos una propuesta con los servicios y sus importes. Después conversamos con el cliente hasta acordar las condiciones y registramos si acepta o rechaza la propuesta.
+Mirá, hoy los jugadores pueden reservar de tres maneras: por WhatsApp, por teléfono o viniendo directamente al mostrador. Todavía no tenemos una forma para que consulten y reserven solos por internet.
 
-No tenemos una aplicación propia para que los clientes hagan reservas. La comunicación es directa con nosotros y el seguimiento de cada pedido lo hacemos internamente.
+Les cuento un ejemplo ficticio, parecido a lo que nos pasa habitualmente. Ayer a la noche, un grupo nos escribió por WhatsApp para preguntar si teníamos una cancha de fútbol 5 disponible para las 21.
 
-Además, hay una diferencia importante: no es lo mismo una consulta inicial que un evento confirmado. Hasta que el cliente no acepta la propuesta y nosotros registramos esa confirmación, el evento no queda confirmado.
+1. Consultamos la disponibilidad: el encargado tuvo que revisar el cuaderno y el Excel para ver si había alguna cancha libre.
+2. Confirmamos el horario: como había disponibilidad, le ofrecimos una cancha y el grupo aceptó.
+3. Tomamos los datos: anotamos el nombre y el teléfono de la persona que hizo la reserva, junto con la cancha, la fecha y el horario.
+4. Pedimos la seña: les pedimos el 50 % del importe del turno por transferencia. El resto lo pagan cuando vienen a jugar.
+5. Registramos la reserva: el encargado la anotó en el cuaderno y en Excel, aunque a veces queda registrada en un solo lugar.
+6. Cuando llegan a jugar: el encargado controla la reserva, cobra el saldo pendiente y deja registrado el pago.
 
-**10. ¿Dónde anotan las reservas: cuaderno, planilla, alguna aplicación?**
+El problema es que no siempre queda claro si la persona ya transfirió la seña o si solamente dijo que la iba a mandar. Tenemos que revisar los comprobantes y anotarlo manualmente.
 
-Hoy nos manejamos principalmente con una combinación de planillas y anotaciones internas. Cuando entra una solicitud, registramos los datos básicos del cliente, la fecha prevista, la cantidad estimada de participantes y lo que necesita para el encuentro.
+Además, si justo entran muchas consultas juntas, podemos tardar en responder. Incluso ya nos pasó de ofrecer una cancha que otro encargado había reservado por otro medio.
 
-A medida que avanzamos con la organización, vamos anotando la propuesta económica, los servicios acordados y las cuestiones que tenemos que coordinar con los proveedores.
+Por eso, para mí sería importante que el jugador pudiera ver qué horarios están libres y reservar directamente, y que nosotros tengamos toda la información de las reservas en un mismo lugar.
 
-El problema es que la información queda repartida y, cuando tenemos varios eventos en preparación, cuesta saber rápidamente qué está confirmado, qué tareas faltan y quién tiene que resolver cada pendiente.
+Hay algo más que hacemos: si alguien cancela con menos de 24 horas de anticipación, pierde la seña. Si cancela antes, tenemos que revisar la situación y coordinar con el encargado; todavía no tenemos un procedimiento completamente uniforme para esos casos.
 
-Por eso queremos un sistema que centralice la información y nos permita hacer el seguimiento de cada evento desde que recibimos la solicitud hasta que se realiza o se cancela. No buscamos reemplazar la comunicación por WhatsApp o teléfono, sino tener un lugar interno donde registrar lo que se acuerda y lo que va pasando.
+**9. ¿Dónde anotan las reservas?**
 
-**11. ¿Cuánto dura un turno? ¿Los turnos son fijos o el cliente elige el horario?**
+Hoy anotamos las reservas en un cuaderno y en una planilla de Excel. Los dos encargados lo hacen, según quién esté trabajando cuando llega la consulta.
 
-Mirá, para los eventos que organizamos, no trabajamos con un turno único de duración fija. El horario y la duración de la jornada se acuerdan con cada cliente, según el tipo de encuentro, la cantidad estimada de participantes y los servicios que quiera incluir.
+Las reservas pueden entrar por WhatsApp, por teléfono o directamente en el mostrador. Después, el encargado anota el nombre del cliente, la cancha, la fecha y el horario.
 
-Por ejemplo, un cliente puede pedirnos una jornada de fútbol de unas horas y otro puede querer combinar partidos de pádel con un servicio de comida, lo que requiere organizar una franja horaria diferente.
+El problema es que el cuaderno y el Excel no siempre coinciden. A veces uno de los encargados registra una reserva y el otro no llega a enterarse, y ya nos pasó de asignar la misma cancha a dos grupos.
 
-Una vez que acordamos la fecha y el horario, coordinamos las canchas y los demás servicios necesarios. Si después el cliente pide cambiar el horario o la duración, revisamos los compromisos que puedan verse afectados y actualizamos lo acordado.
+Además, para saber si una cancha está libre, tenemos que revisar lo que anotamos. Cuando hay muchas consultas juntas, sobre todo de noche, se vuelve bastante complicado.
 
-Hay una diferencia con el alquiler habitual de una cancha por turno: nosotros gestionamos el evento completo, no solamente la duración de un partido.
+Lo que necesitamos es que los dos encargados y yo podamos consultar la misma agenda y ver las reservas actualizadas, sin depender de varias anotaciones.
 
-**12. ¿Con cuánta anticipación se puede reservar?**
+**10. ¿Cuánto dura un turno? ¿Es igual en fútbol y en pádel?**
 
-No tenemos una anticipación mínima o máxima estricta para recibir solicitudes. El cliente puede consultarnos con bastante tiempo o acercarse a la fecha que tiene en mente.
+No, la duración es distinta según el deporte.
 
-Lo que sí, cuanto antes nos contacte, mejor, porque necesitamos coordinar las canchas, consultar a los proveedores y organizar las tareas de preparación.
+- Fútbol 5 y fútbol 7: los turnos duran 1 hora.
+- Pádel: los turnos duran 1 hora y media.
 
-Si la solicitud llega con pocos días de anticipación, evaluamos si podemos organizar el encuentro con los servicios que pide. No confirmamos automáticamente: primero tenemos que revisar qué podemos comprometernos a ofrecer.
+Manejamos esos tiempos para todas las canchas de cada deporte, tanto las techadas como las descubiertas.
 
-Una vez que acordamos la propuesta con el cliente, registramos la confirmación y empezamos a hacer el seguimiento de las tareas y los servicios pendientes.
+Por ejemplo, si reservan fútbol de 20 a 21, la cancha queda ocupada durante esa hora. Si reservan pádel de 20 a 21:30, queda ocupada durante una hora y media.
 
-**13. ¿Hay clientes que tienen siempre el mismo día y horario (turnos fijos)? ¿Cómo los manejan?**
+Es importante respetar esas duraciones al tomar las reservas, porque tenemos que saber a qué hora termina un turno y desde cuándo podemos ofrecer la cancha al siguiente grupo.
 
-En nuestro caso, no trabajamos con turnos fijos recurrentes como modalidad habitual. Nos dedicamos principalmente a organizar eventos puntuales, de una sola jornada, por encargo de cada cliente.
+**11. ¿Con cuánta anticipación se puede reservar?**
 
-Puede pasar que un cliente que ya trabajó con nosotros vuelva a pedir otro encuentro, incluso para el mismo día de la semana o en un horario parecido. Pero lo tratamos como una nueva solicitud: volvemos a acordar la fecha, los servicios y las condiciones para esa ocasión.
+Mirá, hoy no tenemos un límite de anticipación establecido de manera estricta. La gente nos puede consultar y reservar con varios días de anticipación, y también hay quienes reservan el mismo día, si tenemos cancha disponible.
 
-No damos por hecho que una fecha u horario anterior se repita automáticamente. Cada evento necesita su propia coordinación y confirmación.
+Además, tenemos los turnos fijos, que son grupos que juegan siempre el mismo día y horario, semana tras semana.
 
-**14. ¿Qué pasa si dos personas quieren el mismo horario? ¿Les pasó que se reservara dos veces la misma cancha?**
+Lo que sí necesitamos es que, antes de confirmar una reserva, el encargado revise que la cancha esté libre para esa fecha y ese horario.
 
-Sí, puede pasar que dos clientes nos pidan organizar un evento para la misma fecha y horario. En ese caso, antes de confirmar, revisamos los compromisos que ya tenemos para esa jornada y consultamos la disponibilidad de las canchas con el complejo.
+Nos gustaría mantener esa flexibilidad, pero que los jugadores puedan consultar los horarios disponibles sin tener que escribirnos o llamarnos cada vez.
 
-No confirmamos un evento sin revisar que podamos cumplir con lo acordado. Si hay un conflicto, tenemos que resolverlo antes de comprometernos con el cliente; por ejemplo, podemos conversar con él para evaluar otro horario.
+**12. ¿Cómo manejan los turnos fijos? ¿Qué pasa si un grupo fijo falta una semana?**
 
-En cuanto a reservar dos veces la misma cancha, como hoy hacemos el seguimiento con planillas y anotaciones, existe el riesgo de que se nos pase por alto un compromiso si la información no está actualizada o no se consulta correctamente. No te diría que sea algo que nos haya ocurrido efectivamente, pero es una situación que queremos prevenir.
+Mirá, los turnos fijos son grupos que vienen a jugar siempre el mismo día y a la misma hora. Por ejemplo, un grupo que reserva la cancha de fútbol 5 todos los miércoles de 20 a 21.
 
-Justamente, nos serviría poder consultar los eventos por fecha y estado, y tener claros los horarios y servicios acordados para detectar posibles conflictos antes de confirmar. La disponibilidad real de las canchas la seguimos consultando por fuera del sistema.
+Nosotros tratamos de mantenerles ese horario semana tras semana, porque ya se organizan contando con esa cancha.
 
-## Cobros
+¿Qué pasa si faltan una semana? Si el grupo nos avisa que esa semana no va a venir, liberamos ese turno para que lo pueda reservar otra gente. El grupo conserva su horario habitual para las semanas siguientes.
 
-**15. ¿Cómo se fija el precio? ¿Cambia según la cancha, el horario o el día?**
+Si no avisan y simplemente no se presentan, el turno sigue siendo responsabilidad del grupo y se aplica la regla de la seña: si cancelan con menos de 24 horas de anticipación, la pierden. Si directamente no vienen, también perdemos la posibilidad de ofrecer esa cancha a otros jugadores.
 
-Mirá, nosotros no tenemos un precio único para todos los eventos, porque depende de lo que el cliente quiera organizar.
+Por eso, para nosotros es importante distinguir entre un turno fijo que sigue vigente, una ausencia puntual y un turno que se libera excepcionalmente.
 
-Para armar el presupuesto, tenemos en cuenta principalmente:
+Lo que todavía nos falta ordenar mejor es el seguimiento de estos casos, para que los encargados sepan qué grupos mantienen su horario, cuáles avisaron que faltarán y qué turnos se pueden ofrecer a otros jugadores.
 
-- El uso de las canchas: qué tipo de cancha necesita el cliente y durante cuánto tiempo.
-- La fecha y el horario: pueden influir en el costo de los servicios que necesitamos coordinar.
-- Los servicios adicionales: por ejemplo, si quiere incluir comida, bebidas o equipamiento deportivo.
-- Los proveedores involucrados: consultamos sus precios y consideramos esos importes al preparar nuestra propuesta.
+**13. ¿Les pasó que se reservara dos veces la misma cancha? ¿Cómo lo resolvieron?**
 
-Por ejemplo, no cuesta lo mismo organizar un encuentro de fútbol de unas horas que una jornada que combine fútbol, pádel y comida para los participantes.
+Sí, nos pasó, y es uno de los problemas que más nos preocupa.
 
-Nosotros preparamos una propuesta con los servicios incluidos, el importe de cada uno y el total que le ofrecemos al cliente. Si durante la negociación cambian los servicios o las condiciones, modificamos la propuesta y volvemos a acordarla con él.
+Por ejemplo, una vez un encargado anotó una reserva por WhatsApp y, al mismo tiempo, el otro tomó una reserva por teléfono para la misma cancha, el mismo día y horario. Como llevamos las anotaciones en un cuaderno y en Excel, no nos dimos cuenta de que ya estaba ocupada.
 
-No tenemos un sistema que calcule automáticamente los precios según el día o el horario. El presupuesto lo armamos nosotros para cada solicitud, y registramos cuál es la propuesta vigente y si el cliente la aceptó o la rechazó.
+¿Cómo lo resolvimos? Cuando llegaron los grupos, nos dimos cuenta del problema y tuvimos que hablar con ellos para explicarles lo que había pasado. Buscamos otra cancha que estuviera libre para acomodar a uno de los grupos. Si no hay otra disponible, tenemos que conversar con los jugadores y buscar una solución de común acuerdo.
 
-**16. ¿Piden seña? ¿Cuánto y cómo la cobran?**
+La verdad es que es una situación incómoda, porque la gente reserva con anticipación y espera poder jugar en el horario que eligió.
 
-En nuestro caso, no tenemos establecido un porcentaje fijo de seña para todos los eventos. Si para una jornada acordamos una seña con el cliente, dejamos asentado ese compromiso junto con las condiciones de la propuesta.
+Por eso, para nosotros es fundamental que una misma cancha no pueda quedar reservada por dos grupos en la misma fecha y horario, sin importar si la reserva se tomó por WhatsApp, por teléfono o en el mostrador. Y los turnos fijos y los partidos de los torneos también tienen que respetarse al organizar las reservas.
 
-El importe y la forma de pago se conversan con el cliente según el evento y lo que hayamos acordado. Los pagos se gestionan por fuera de la herramienta que queremos desarrollar.
+**14. ¿Cómo se entera un jugador de qué horarios están libres?**
 
-Para nosotros, lo importante en la organización es distinguir entre la aceptación de la propuesta y la confirmación del evento. La confirmación la registramos cuando acordamos las condiciones con el cliente; no queremos que el seguimiento de la preparación dependa de llevar una cuenta de cobros dentro del sistema.
+Hoy el jugador tiene que consultarnos directamente. Puede escribirnos por WhatsApp, llamarnos por teléfono o venir al mostrador y preguntarle al encargado si hay una cancha disponible para el día y horario que quiere.
+
+El encargado revisa el cuaderno y el Excel para ver qué está ocupado y qué queda libre. El problema es que lleva tiempo y, como a veces la información no coincide, podemos dar una respuesta equivocada.
+
+En los horarios de más movimiento, sobre todo de lunes a viernes de 19 a 24, se nos juntan muchos mensajes y no siempre podemos responder enseguida.
+
+Lo que me gustaría es que los jugadores pudieran consultar por su cuenta las canchas y los horarios libres y hacer una reserva sin tener que esperar nuestra respuesta. Y que esa disponibilidad esté actualizada, teniendo en cuenta también los turnos fijos y los partidos de los torneos, para no ofrecer una cancha que ya está ocupada.
+
+## Precios, seña y pagos
+
+**15. ¿Cómo se fija el precio de un turno? ¿Cambia según la cancha, el día o la hora?**
+
+Sí, el precio cambia según la cancha y el horario. Los precios los decido yo, como dueño del complejo, y tengo en cuenta principalmente cuánto se demanda cada horario y qué tipo de cancha eligen los jugadores.
+
+- Según el deporte y la cancha: tenemos tarifas distintas para fútbol 5, fútbol 7 y pádel.
+- Según el horario: a la noche cobramos más que durante la mañana o la tarde temprana, porque hay mucha más demanda.
+- Según si es techada o descubierta: las canchas techadas tienen una tarifa más alta.
+
+En cuanto al día, los fines de semana también tenemos bastante movimiento, aunque no tengo establecido que todas las canchas tengan automáticamente una tarifa diferente por ser sábado o domingo.
+
+Hay algo importante: una cosa es la tarifa por hora y otra es el importe total del turno. Por ejemplo, en fútbol se cobra una hora y en pádel una hora y media, así que el importe del turno se calcula según la tarifa que corresponda y la duración.
+
+Hoy los encargados consultan los precios que les indiqué para informarles a los clientes. Me gustaría que pudieran conocer el precio antes de reservar, para que sepan cuánto les va a costar jugar y no tengan que preguntarnos cada vez.
+
+**16. ¿Piden seña? ¿Cuánto, cómo la cobran y cómo controlan quién la pagó?**
+
+Sí, pedimos una seña para reservar una cancha. La idea es que la persona se comprometa con el turno y evitar que reserve y después no venga.
+
+- ¿Cuánto pedimos? El 50 % del importe total del turno. Por ejemplo, si un turno cuesta $20.000, pedimos $10.000 de seña y quedan $10.000 para pagar después.
+- ¿Cómo la cobran? El jugador nos transfiere la seña. Cuando llega al complejo, paga el saldo que le queda al encargado.
+- ¿Cómo controlamos quién pagó? Los encargados revisan manualmente las transferencias y anotan la seña en el cuaderno o en Excel. No tenemos una verificación automática, así que dependemos de revisar los comprobantes y registrar bien cada pago.
+- ¿Qué pasa si cancelan? Si cancelan con menos de 24 horas de anticipación, pierden la seña.
+
+El problema es que a veces no queda claro si una persona ya transfirió, si todavía está pendiente o si pagó solo una parte. También nos pasa que alguien reserva y después no aparece.
+
+Por eso necesito poder consultar por cada reserva cuánto debía pagar, cuánto dejó de seña, cuánto queda pendiente y si finalmente vino a jugar o faltó. Los encargados tienen que poder registrar esos datos manualmente, porque nosotros no queremos que el sistema cobre ni verifique las transferencias por su cuenta.
 
 **17. ¿Qué medios de pago aceptan?**
 
-Aceptamos principalmente transferencia bancaria y efectivo. La forma de pago se conversa con el cliente al acordar las condiciones del evento.
+Mirá, para las señas aceptamos transferencias bancarias. El jugador transfiere el 50 % del importe del turno para asegurar la reserva.
 
-De todos modos, como nuestra tarea principal es organizar los encuentros deportivos, los medios de pago y el seguimiento de los cobros se manejan por fuera del sistema que queremos desarrollar. Lo que sí necesitamos dejar registrado es el presupuesto ofrecido y las condiciones acordadas con el cliente.
+El resto lo paga cuando viene a jugar, directamente en el complejo. Para ese saldo, aceptamos efectivo o transferencia.
+
+Los encargados revisan las transferencias manualmente y anotan cuánto pagó cada persona y cuánto le queda pendiente. No tenemos un sistema que verifique los pagos automáticamente.
+
+Lo importante para nosotros es que quede registrado qué medio de pago usó el jugador, cuánto pagó y si todavía debe algo.
 
 **18. ¿Cómo controlan lo que se cobró en el día?**
 
-En realidad, el control de lo recaudado durante el día corresponde a la administración del complejo, no a la organización de los eventos que hacemos por encargo.
+Mirá, hoy lo controlamos de manera bastante manual. Los encargados van anotando en el cuaderno y en Excel los pagos que reciben durante su turno.
 
-Nosotros nos ocupamos de preparar el presupuesto para cada cliente, acordar los servicios y registrar la confirmación del evento. Los cobros y el control diario de la recaudación se manejan por fuera de nuestro trabajo de organización.
+Registramos las señas que entran por transferencia y lo que los jugadores pagan cuando vienen a jugar, ya sea en efectivo o por transferencia.
 
-Por eso, no necesitamos que el sistema que estamos buscando desarrolle una caja diaria ni un control de recaudación. Lo que sí necesitamos es consultar el importe presupuestado y los servicios que acordamos ofrecer para cada evento.
+Al final del día, yo reviso esas anotaciones para tener una idea de cuánto se cobró y qué pagos quedaron pendientes. El problema es que, como la información puede estar repartida entre el cuaderno y Excel, a veces tengo que revisar varias anotaciones para entender qué pasó con una reserva.
+
+Por ejemplo, puede haber un grupo que dejó la seña días atrás y hoy vino a jugar y pagó el saldo. Necesito distinguir ese cobro de las señas de las reservas nuevas.
+
+Lo que más me interesa es poder consultar:
+
+- Cuánto se cobró durante el día.
+- Qué señas se recibieron y cuáles están pendientes.
+- Qué reservas tienen saldo por cobrar.
+- Qué grupos vinieron a jugar y cuáles faltaron.
+
+No necesito que se cobre automáticamente ni que se controle la cuenta bancaria. Quiero que los encargados registren los pagos manualmente y que yo pueda consultar la información sin tener que reconstruirla a partir del cuaderno y el Excel.
 
 ## Cancelaciones y faltas
 
-**19. ¿Qué pasa si un cliente cancela? ¿Hasta cuándo puede hacerlo? ¿Se devuelve la seña?**
+**19. ¿Hasta cuándo se puede cancelar? ¿Qué pasa con la seña?**
 
-Cuando un cliente cancela, registramos la cancelación y el motivo, y avisamos internamente para que podamos revisar qué habíamos organizado para ese evento.
+Mirá, nosotros manejamos una regla bastante sencilla: si el jugador cancela con menos de 24 horas de anticipación, pierde la seña, que es el 50 % del importe del turno.
 
-No tenemos un plazo límite único para que el cliente cancele. Depende de lo que se haya conversado y acordado para esa ocasión.
+Si cancela con 24 horas de anticipación o más, no pierde la seña automáticamente. En ese caso, coordinamos con el encargado cómo resolverlo.
 
-Con respecto a la seña, tampoco tenemos una regla general de devolución que se aplique a todos los eventos. Se revisan las condiciones que se habían acordado con el cliente. Si ya habíamos coordinado proveedores o servicios, tenemos que tener en cuenta esos compromisos al resolver la situación.
+Por ejemplo, si alguien reservó para el viernes a las 21:
 
-Desde el lado de la organización, lo importante es que la cancelación no borre la información del evento. Necesitamos conservar lo que se había acordado, registrar el motivo de la cancelación y revisar las tareas y los servicios que ya estaban comprometidos.
+- Cancela el jueves a las 20: avisó con más de 24 horas, así que no pierde la seña automáticamente.
+- Cancela el jueves a las 22: faltan menos de 24 horas, por lo que pierde la seña.
 
-El sistema que buscamos no tiene que calcular devoluciones ni administrar consecuencias económicas; sí debe permitirnos registrar la cancelación y dejar constancia de lo ocurrido.
+Los encargados tienen que registrar la cancelación y dejar constancia de qué pasó con la seña, porque necesitamos saber si se perdió o si quedó pendiente de resolver.
 
-**20. ¿Qué hacen si un cliente reserva y no viene?**
+Hoy no siempre queda todo anotado de la misma manera, y eso nos puede traer confusiones. Me gustaría que al cancelar una reserva quede registrado cuándo se canceló y qué pasó con el importe que el jugador había entregado.
 
-Cuando un cliente confirma un evento y después no se presenta, primero intentamos comunicarnos con él para saber qué pasó.
+**20. ¿Qué hacen cuando alguien reserva y no viene?**
 
-Desde nuestra parte, registramos que el evento no se realizó y dejamos una observación con lo ocurrido. Si habíamos coordinado canchas o contratado servicios con proveedores, revisamos esos compromisos y nos comunicamos con ellos para informarles la situación y ver cómo proceder.
+Mirá, cuando alguien reserva y no viene, lo consideramos una inasistencia. Nos genera un problema porque esa cancha quedó apartada para ese grupo y podríamos haberla alquilado a otra persona.
 
-No tenemos una política única de penalización por inasistencia para todos los eventos. Si se había acordado alguna condición particular con el cliente, tomamos eso como referencia.
+En esos casos, hacemos lo siguiente:
 
-Para nosotros es importante distinguir entre una cancelación informada por el cliente y un evento en el que el cliente no se presenta sin avisar, porque son situaciones distintas y queremos conservar ese motivo en el registro.
+- Revisamos la reserva: vemos quién la hizo, para qué día y horario era y si había dejado la seña.
+- Controlamos el pago: si dejó la seña del 50 %, la registramos. Si no se presenta, no le devolvemos automáticamente ese importe; el encargado deja constancia de lo ocurrido.
+- Anotamos la inasistencia: necesitamos saber quién faltó y qué pasó con esa reserva, aunque hoy no siempre queda registrado de forma ordenada.
+- Para futuras reservas: tenemos en cuenta lo ocurrido, porque ya nos pasó que algunas personas reservan y después no aparecen.
 
-No necesitamos que el sistema gestione multas ni cobros por inasistencia; necesitamos poder dejar constancia de lo sucedido y cerrar operativamente el evento.
+La idea es poder distinguir claramente entre una reserva cancelada con anticipación, una cancelación de último momento y alguien que directamente no vino.
+
+También necesito que quede registrado si el turno se jugó, se canceló o terminó en inasistencia, y cuánto se cobró o quedó pendiente. Así puedo consultar esos datos y saber qué está pasando con las reservas del complejo.
 
 **21. ¿Qué pasa si llueve o hay que cerrar una cancha por mantenimiento?**
 
-En esos casos, lo primero que hacemos es revisar cómo afecta la situación al evento que tenemos organizado.
+Mirá, depende de la situación y de qué cancha se trate.
 
-Si llueve, depende de las condiciones de las canchas y de si se pueden utilizar con seguridad. Consultamos con el complejo qué posibilidades hay y, si no podemos realizar la actividad como estaba prevista, hablamos con el cliente para acordar cómo proceder.
+- Si llueve: las canchas descubiertas pueden quedar complicadas para jugar, especialmente las de pádel de cemento. En ese caso, el encargado revisa cómo está la cancha y me consulta si hace falta suspender los turnos. Las canchas techadas pueden seguir funcionando si están en condiciones.
+- Si hay que cerrar una cancha por mantenimiento: dejamos de ofrecerla mientras no se pueda usar. Si ya había reservas para ese horario, tenemos que comunicarnos con los jugadores y explicarles la situación.
 
-Si hay una cancha cerrada por mantenimiento, verificamos qué eventos y servicios se ven afectados. Si la cancha que teníamos prevista no se puede utilizar, evaluamos con el complejo si hay otra alternativa disponible o si necesitamos acordar un cambio con el cliente.
+En ambos casos, intentamos buscar otra cancha disponible o acordar con el grupo otro horario. No podemos simplemente mover una reserva sin consultarles, porque la gente ya organizó su partido.
 
-En ambos casos, si cambia la fecha, el horario o algún servicio acordado, dejamos registrado el cambio y revisamos las tareas y los compromisos con los proveedores que puedan verse afectados. No damos por hecho que todo lo demás siga igual.
+Con respecto a la seña, si tenemos que cancelar nosotros porque la cancha no se puede usar, no corresponde que el jugador pierda la seña por una situación que no provocó. Coordinamos con el grupo cómo resolverlo.
 
-No tenemos una reprogramación automática ni una regla única que resuelva todas estas situaciones. Las alternativas se conversan con el cliente y se coordinan con quienes corresponda.
+Hoy estos cambios los manejamos manualmente, avisando a los jugadores y modificando las anotaciones. Necesitamos que quede claro qué cancha se cerró, durante qué horario y qué pasó con las reservas afectadas, para no seguir ofreciendo una cancha que no está disponible.
 
-Lo importante para nosotros es que el equipo pueda identificar qué evento fue afectado, qué se había acordado originalmente y qué cuestiones quedan pendientes de resolver.
+## Los jugadores
 
-## Clientes
+**22. ¿Qué datos les piden a los jugadores?**
 
-**22. ¿Qué datos les piden a los clientes?**
+Mirá, cuando alguien hace una reserva, le pedimos los datos básicos para saber quién es el responsable del turno y cómo contactarlo.
 
-Cuando un cliente nos contacta para organizar un encuentro deportivo, le pedimos los datos necesarios para entender qué necesita y poder preparar una propuesta.
+- Nombre y apellido de la persona que hace la reserva.
+- Número de teléfono, para confirmar el horario o avisarle si surge algún problema.
+- Fecha y horario en que quiere jugar.
+- Tipo de deporte y cancha que quiere reservar, ya sea fútbol 5, fútbol 7 o pádel.
 
-Principalmente, recopilamos:
+Después, nosotros registramos los datos de la reserva y el tema del pago: cuánto cuesta el turno, cuánto dejó de seña y cuánto queda pendiente.
 
-- Datos del cliente: nombre o razón social, teléfono y, si corresponde, una persona de contacto.
-- Tipo de evento: por ejemplo, un encuentro recreativo de fútbol, de pádel o una jornada que combine ambos.
-- Fecha y horario: cuándo quiere realizarlo y cuánto tiempo estima que durará.
-- Lugar: el complejo donde se realizaría el encuentro.
-- Cantidad estimada de participantes: para dimensionar la organización, sin registrar individualmente a cada invitado.
-- Servicios solicitados: qué canchas necesita y si quiere agregar comida, bebidas, equipamiento u otros servicios que podamos coordinar.
-- Necesidades y preferencias: cualquier condición importante para organizar la jornada, como preferencias de horarios o requerimientos particulares.
+No necesitamos pedir los datos personales de todos los integrantes del grupo. Generalmente, tratamos con una sola persona que se hace responsable de la reserva.
 
-Con esa información preparamos el presupuesto. Durante la conversación podemos ajustar los servicios o las condiciones, y dejamos registrada la propuesta vigente.
+También es importante que podamos identificar a quien reservó para registrar si vino a jugar, si canceló o si no se presentó. Hoy toda esa información la anotamos entre el cuaderno y Excel, y a veces cuesta encontrarla.
 
-Después, si el cliente acepta, registramos la confirmación y los servicios y condiciones que acordamos.
+**23. ¿Tienen jugadores frecuentes? ¿Les dan algún beneficio?**
 
-También conservamos las observaciones y los cambios importantes que surjan durante la preparación, porque necesitamos que el equipo tenga claro qué pidió el cliente y qué terminamos comprometiéndonos a ofrecerle.
+Sí, tenemos bastantes jugadores frecuentes. Sobre todo, grupos de amigos que vienen a jugar al fútbol todas las semanas y parejas o grupos que juegan al pádel con regularidad.
 
-**23. ¿Tienen clientes frecuentes? ¿Les hacen algún descuento o beneficio?**
+Algunos tienen turnos fijos, es decir, reservan siempre el mismo día y horario. Por ejemplo, un grupo que juega todos los martes a las 21. También hay clientes que no tienen un turno fijo, pero nos llaman seguido para reservar cuando se organizan.
 
-Sí, tenemos clientes que vuelven a contactarnos porque ya organizaron un encuentro con nosotros y quedaron conformes con la experiencia. Nos pasa, por ejemplo, con empresas que vuelven a organizar una jornada deportiva para su personal o con grupos que quieren repetir un encuentro.
+En cuanto a los beneficios, hoy no tenemos un programa formal de descuentos ni puntos para clientes frecuentes. Lo que sí hacemos es tratar de mantenerles el horario a los grupos que ya tienen un turno fijo.
 
-En cuanto a los descuentos, no tenemos un programa fijo de beneficios para clientes frecuentes. Si un cliente vuelve a contratarnos, evaluamos la propuesta para ese evento y podemos conversar alguna condición especial, pero no es algo automático ni tenemos un porcentaje establecido.
+Para nosotros es importante reconocer quiénes tienen esos horarios habituales y llevar un buen seguimiento de sus reservas, porque necesitamos evitar que se superpongan con las reservas ocasionales.
 
-Para nosotros, lo importante es conservar los datos de contacto y el historial básico de los eventos anteriores, de modo que podamos reconocer al cliente y consultar qué habíamos organizado para él.
-
-De todas formas, cada nuevo encuentro se trata como una solicitud independiente: volvemos a acordar la fecha, los servicios, los importes y las condiciones correspondientes.
-
-**24. ¿Cómo se enteran los clientes de los horarios libres y de las promociones?**
-
-Mirá, en nuestro caso, los clientes no tienen una aplicación ni un calendario en línea para consultar los horarios libres.
-
-- Horarios disponibles: cuando un cliente nos consulta por WhatsApp o por teléfono, revisamos la fecha y el horario que necesita y consultamos la disponibilidad con el complejo antes de comprometernos.
-- Promociones: no tenemos un sistema fijo de promociones ni un calendario de ofertas. Si surge alguna condición especial para un evento, la conversamos directamente con el cliente.
-- Clientes frecuentes: si alguien ya organizó un encuentro con nosotros, puede volver a contactarnos por los mismos medios y conversamos sobre una nueva propuesta.
-
-La disponibilidad de las canchas la verificamos por fuera del sistema que queremos desarrollar. Para nosotros, lo importante es registrar internamente qué fecha y servicios acordamos con cada cliente, y hacer el seguimiento de los compromisos pendientes.
-
-## Problemas y necesidades
-
-**25. ¿Qué es lo que más trabajo o problemas les da hoy?**
-
-Y… hoy lo que más trabajo nos da es llevar el seguimiento de varios eventos al mismo tiempo sin que se nos pase nada.
-
-Te diría que tenemos tres dificultades principales:
-
-- La información está repartida. Los datos del cliente pueden estar en una planilla, mientras que los cambios que conversamos por WhatsApp o teléfono quedan en otro lado. Después tenemos que reconstruir qué fue lo último que acordamos.
-- Nos cuesta controlar los pendientes. Por ejemplo, podemos tener un evento confirmado, pero todavía falta que un proveedor confirme el catering o que alguien del equipo termine de coordinar un servicio. Necesitamos estar atentos para que eso no quede olvidado.
-- Los cambios nos obligan a revisar todo. Si el cliente cambia la fecha o pide otro servicio, tenemos que revisar qué habíamos coordinado, a quién debemos avisar y qué tareas hay que actualizar.
-
-Además, cuando se acerca la fecha de un evento, el responsable general necesita saber rápidamente si está todo encaminado o si hay algo que requiere su intervención. Hoy, para tener esa información, muchas veces tenemos que preguntarle a cada integrante del equipo.
-
-Por eso, si tuviera que elegir el problema más importante, sería este: no tenemos una visión centralizada y actualizada de cada evento, desde la solicitud inicial hasta su realización o cancelación.
-
-No buscamos que el sistema tome las decisiones por nosotros ni que se comunique automáticamente con clientes o proveedores. Queremos poder registrar lo acordado, asignar responsables y detectar a tiempo qué cosas todavía faltan resolver.
-
-**26. ¿Qué información les gustaría tener y hoy no tienen? Por ejemplo, horarios más pedidos, canchas más usadas o ingresos del mes.**
-
-Mirá, más que estadísticas generales del complejo, lo que hoy nos falta es información clara y actualizada para organizar mejor los eventos que nos encargan.
-
-Principalmente, nos gustaría tener:
-
-- Estado de cada evento: saber cuáles son las solicitudes recibidas, cuáles están confirmadas y cuáles ya se realizaron o se cancelaron.
-- Servicios pendientes de confirmar: identificar rápidamente qué proveedores todavía no confirmaron su participación.
-- Tareas de preparación: ver qué falta hacer, quién es responsable y cuáles son las tareas atrasadas.
-- Compromisos acordados con el cliente: consultar la fecha, el horario, la cantidad estimada de participantes, los servicios incluidos y el presupuesto vigente, sin tener que buscar en distintas planillas o conversaciones.
-- Cambios recientes: saber si se modificó la fecha o algún servicio, y qué compromisos tenemos que revisar a raíz de ese cambio.
-- Agenda de eventos: consultar qué eventos tenemos para una fecha determinada y en qué estado está cada uno.
-
-Sobre los ejemplos que mencionás, hay una diferencia importante. Los horarios más pedidos o las canchas más utilizadas podrían servir para analizar la actividad del complejo, pero no son nuestra prioridad actual. Los ingresos mensuales tampoco son un objetivo del sistema, porque la administración económica y los cobros quedan fuera de nuestro trabajo de organización.
-
-Lo que más necesitamos es información para anticiparnos a los problemas y cumplir con lo que acordamos con cada cliente. Si el responsable general puede detectar qué eventos tienen pendientes importantes sin tener que consultar a todo el equipo, ya sería una mejora grande para nosotros.
-
-**27. Si tuvieran un sistema, ¿qué es lo primero que les gustaría resolver?**
-
-Si tuviéramos un sistema, lo primero que nos gustaría resolver es centralizar toda la información de cada evento y poder controlar qué falta para que esté listo.
-
-Hoy la información está repartida entre planillas, anotaciones y conversaciones. Eso nos obliga a revisar varias fuentes o consultar a otros compañeros para saber cómo viene cada evento.
-
-Por ejemplo, imaginemos que tenemos una jornada deportiva confirmada para el sábado. Nos gustaría poder consultar en un solo lugar qué servicios acordamos con el cliente, qué proveedores ya confirmaron, qué tareas tiene asignadas cada integrante del equipo y qué cosas siguen pendientes.
-
-También queremos que, si el cliente cambia la fecha o modifica algún servicio, podamos registrar ese cambio y revisar qué compromisos necesitan actualizarse.
-
-Si tengo que elegir una prioridad concreta, sería esta: que ningún servicio acordado ni ninguna tarea de preparación quede olvidada por falta de seguimiento.
-
-Después, nos serviría consultar los eventos por fecha o estado y tener una visión general para que el responsable pueda detectar rápidamente cuáles necesitan atención. No necesitamos que el sistema decida por nosotros ni que gestione los pagos; necesitamos organizar mejor nuestro trabajo diario.
-
-**28. ¿Hay algo que hoy funcione bien y no quieran cambiar?**
-
-Sí, hay varias cosas que hoy nos funcionan bien y que no querríamos cambiar.
-
-- El trato directo con los clientes. Nos gusta conversar con ellos por WhatsApp o teléfono, entender qué necesitan y acordar personalmente los detalles del encuentro. No queremos reemplazar ese trato por un sistema automático.
-- La flexibilidad para organizar cada evento. No todos los clientes piden lo mismo. Preferimos evaluar cada solicitud y armar una propuesta a medida, en lugar de obligarlos a elegir entre opciones rígidas.
-- La comunicación directa con los proveedores. Nos resulta práctico contactarlos directamente para consultar disponibilidad, precios y confirmar los servicios. Lo que necesitamos mejorar es el seguimiento interno de esas conversaciones y sus resultados.
-- La posibilidad de resolver los cambios conversando. Si un cliente necesita modificar algo, buscamos una solución con él y revisamos los compromisos afectados. No queremos que un sistema decida automáticamente qué hacer.
-
-En resumen, queremos mejorar la organización interna sin cambiar nuestra manera de relacionarnos con clientes y proveedores. El sistema debería ayudarnos a registrar los acuerdos y controlar las tareas, mientras que las decisiones y la comunicación siguen a cargo de las personas.
+Por ahora, nuestra prioridad es ordenar las reservas y los pagos antes que empezar a ofrecer beneficios especiales.
 
 ## Torneos y campeonatos
 
-**29. ¿Organizan torneos o campeonatos? ¿De fútbol, de pádel o de los dos?**
+**24. ¿Organizan torneos o campeonatos? ¿De qué deporte?**
 
-Sí, podemos organizar torneos recreativos tanto de fútbol como de pádel, según lo que nos solicite el cliente. No nos dedicamos a organizar campeonatos oficiales como actividad principal, sino encuentros recreativos con una dinámica de competencia amistosa.
+Sí, organizamos competencias propias de los dos deportes: pádel y fútbol 5. Nos gusta hacerlo porque mueve bastante el complejo y reúne a jugadores que después también vienen a reservar por su cuenta.
 
-Por ejemplo, una empresa puede pedirnos una jornada de fútbol con varios equipos, o un grupo puede querer organizar un torneo de pádel entre amigos.
+En pádel, organizamos torneos por parejas que generalmente se juegan durante un fin de semana. Las parejas se inscriben pagando un costo, tenemos un cupo máximo y los partidos se juegan por eliminación directa: el que pierde queda eliminado y el que gana avanza a la siguiente ronda.
 
-En esos casos, coordinamos las canchas, los horarios, los servicios adicionales que se hayan acordado y las tareas necesarias para preparar la jornada.
+En fútbol 5, organizamos campeonatos con varios equipos que juegan todos contra todos. Se disputan en distintas fechas y llevamos una tabla de posiciones: el equipo que gana suma 3 puntos, si empatan cada uno suma 1 y el que pierde no suma puntos.
 
-Eso sí, cada torneo se trata como un evento puntual de una sola jornada. No administramos campeonatos que duren varias semanas ni llevamos un sistema de inscripciones de jugadores, tablas de posiciones o estadísticas deportivas. Nuestro trabajo es organizar el evento y asegurarnos de cumplir con lo acordado con el cliente.
+En ambos casos, cobramos una inscripción y tenemos que organizar los participantes y los partidos.
 
-**30. ¿Qué diferencia hay entre un torneo y un campeonato para ustedes? ¿Cómo se juega cada uno?**
+El problema es que hoy armamos los fixtures en Excel y comunicamos los horarios y resultados por WhatsApp. Llevar todo al día lleva bastante trabajo, especialmente en el campeonato de fútbol, porque hay que actualizar la tabla después de cada partido.
 
-Mirá, en el uso cotidiano, para nosotros un torneo y un campeonato pueden significar prácticamente lo mismo. La diferencia depende de cómo el cliente quiera organizar la competencia.
+Además, los partidos ocupan nuestras canchas, así que tenemos que coordinarlos con los alquileres habituales y los turnos fijos. No podemos asignar una cancha para un torneo si ya tenemos un compromiso con otro grupo.
 
-- Torneo: generalmente pensamos en una competencia concentrada en una jornada, con varios equipos o parejas que juegan partidos y se define un ganador ese mismo día. Puede ser de fútbol o de pádel.
-- Campeonato: suele asociarse más con una competencia que tiene varias fechas, donde los participantes acumulan resultados y se define una clasificación general. Por ejemplo, jugar una fecha cada fin de semana.
+**25. ¿Qué diferencia hay entre un torneo y un campeonato? ¿Cómo se juega cada uno?**
 
-En cuanto a cómo se juega, eso lo acordamos según el pedido. Un torneo puede organizarse por eliminación directa o por grupos, por ejemplo, pero no imponemos un formato único.
+Mirá, en nuestro complejo hacemos dos tipos de competencias, y la principal diferencia está en cómo se juegan y cuánto duran.
 
-Para nuestro trabajo, lo importante es que el evento que organizamos se desarrolle en una sola jornada y en una sola sede. Si alguien nos pide un campeonato de varias semanas, con fechas sucesivas y seguimiento de posiciones, eso excede el tipo de evento que organizamos habitualmente.
+*1. Torneo de pádel.* Lo organizamos por parejas y generalmente se juega durante un fin de semana.
 
-Nosotros coordinamos las canchas, los horarios y los servicios acordados; no administramos un campeonato completo con calendarios de múltiples fechas, tablas de posiciones o estadísticas de jugadores.
+- Las personas se inscriben en pareja y pagan un costo de inscripción.
+- Tenemos un cupo máximo de parejas.
+- Se juega por eliminación directa: las parejas se enfrentan y la que pierde queda eliminada.
+- La que gana avanza a la siguiente ronda, hasta llegar a la final.
 
-**31. ¿Cómo se anotan los equipos o parejas? ¿Qué datos les piden? ¿Hay cupo y costo de inscripción?**
+Por ejemplo, si se anotan ocho parejas, se van enfrentando en rondas hasta que queda una pareja ganadora.
 
-Cuando organizamos un torneo recreativo por encargo, la inscripción de los equipos o las parejas depende de cómo lo quiera manejar el cliente. Nosotros coordinamos la jornada, pero no tenemos un sistema propio de inscripción de participantes.
+*2. Campeonato de fútbol 5.* Este funciona de otra manera, porque se juega a lo largo de varias fechas.
 
-Por lo general, si el evento requiere organizar equipos o parejas, necesitamos conocer cuántos van a participar y cómo se van a distribuir para poder coordinar las canchas y los horarios.
+- Se inscriben los equipos, pagan la inscripción y hay un cupo máximo.
+- Todos los equipos juegan contra los demás.
+- Después de cada partido, actualizamos la tabla de posiciones.
+- Los puntos se reparten así: 3 por ganar, 1 por empatar y 0 por perder.
 
-- Inscripción: se puede organizar directamente entre el cliente y los participantes, por ejemplo, mediante WhatsApp.
-- Datos solicitados: para planificar el evento, nos alcanza con conocer la cantidad de equipos o parejas y la información general que el cliente necesita para organizarlos. No registramos individualmente a todos los invitados como parte de nuestra gestión.
-- Cupo: depende de las canchas disponibles, la duración de la jornada y la cantidad de partidos que se quieran realizar. Lo coordinamos antes de confirmar el evento.
-- Costo de inscripción: no tenemos una tarifa de inscripción general. Si el cliente quiere cobrarles a los participantes, esa gestión queda a su cargo. Nosotros acordamos con el cliente el presupuesto por los servicios de organización contratados.
+Al finalizar los partidos del campeonato, el equipo que queda mejor ubicado en la tabla es el ganador. Si hay un empate en puntos entre equipos, todavía tenemos que definir un criterio uniforme para resolver esos casos.
 
-En definitiva, nuestra responsabilidad es que la jornada esté preparada según lo acordado. No administramos una plataforma de inscripciones, listas individuales de jugadores ni cobros de inscripción.
+En resumen: el torneo de pádel es por eliminación directa y se resuelve en rondas; el campeonato de fútbol 5 tiene varias fechas, todos contra todos y una tabla de posiciones.
 
-**32. ¿Cómo arman el fixture o los cruces? ¿Lo sortean?**
+En ambos tenemos que controlar las inscripciones, los cupos, los equipos o parejas, los partidos y los resultados. Y, por supuesto, reservar las canchas para esos partidos sin pisar los turnos fijos ni las reservas que ya teníamos.
 
-Mirá, eso lo definimos según lo que quiera el cliente para el torneo recreativo. No tenemos un método único que usemos en todos los eventos.
+**26. ¿Cómo se anotan los equipos o parejas? ¿Hay cupo y costo de inscripción?**
 
-Por ejemplo, si organizamos un torneo de pádel, el cliente puede preferir cruces por eliminación directa o una primera ronda por grupos. En fútbol podemos hacer algo similar, según la cantidad de equipos y el tiempo disponible.
+Sí, tanto en los torneos de pádel como en los campeonatos de fútbol 5 tenemos un cupo máximo y cobramos una inscripción para participar.
 
-El sorteo es una posibilidad, pero no es obligatorio ni lo hacemos siempre. Podemos coordinar los cruces con el cliente, que puede traerlos ya definidos o acordar cómo organizarlos antes de la jornada.
+- En los torneos de pádel, se anotan las parejas. Registramos quiénes son los dos jugadores y los datos de contacto de la persona responsable de la inscripción.
+- En los campeonatos de fútbol 5, se inscriben los equipos. Registramos el nombre del equipo y quiénes lo integran, además de un contacto para comunicarnos con ellos.
 
-Nuestra responsabilidad es conocer el formato acordado y coordinar las canchas y los horarios para que la competencia pueda desarrollarse durante el evento.
+En ambos casos:
 
-No contamos con un sistema propio que genere automáticamente el fixture, realice sorteos o administre resultados y posiciones. Esa gestión deportiva no es el foco de nuestro servicio de organización.
+- Hay un cupo máximo: cuando se completa, dejamos de aceptar inscripciones.
+- La inscripción tiene un costo: lo decido yo según la competencia.
+- Llevamos el registro de participantes: necesitamos saber quiénes están anotados y cuáles son los equipos o parejas que finalmente participan.
 
-**33. ¿Cómo eligen en qué cancha y horario se juega cada partido? ¿Qué pasa con las reservas de esa cancha?**
+Hoy hacemos buena parte de esto en Excel y coordinamos por WhatsApp. El problema es que, cuando se acerca el torneo, cuesta mantener toda la información ordenada y saber rápidamente cuántos lugares quedan.
 
-Mirá, cuando organizamos un torneo recreativo, coordinamos las canchas y los horarios teniendo en cuenta el formato de la competencia, la cantidad de equipos o parejas y el tiempo que tenemos disponible para la jornada.
+Me gustaría poder consultar las inscripciones, ver cuántos cupos están ocupados y tener identificados los equipos o parejas que van a competir. Además, una vez organizados los partidos, tenemos que reservar las canchas correspondientes sin superponerlos con los turnos habituales.
 
-Primero acordamos con el cliente cómo quiere organizar los partidos. Después consultamos con el complejo qué canchas están disponibles y en qué horarios podemos utilizarlas. Con esa información armamos la distribución de los partidos y coordinamos lo necesario para que el evento se desarrolle como lo acordamos.
+Los cupos y los costos concretos los definimos para cada competencia; no son siempre los mismos.
 
-¿Y qué pasa si una cancha ya está reservada?
+**27. ¿Cómo arman el fixture o la llave? ¿Qué pasa si hay un número impar de equipos?**
 
-Antes de confirmar el evento, tenemos que revisar si las canchas necesarias están disponibles. Si alguna está comprometida con otra actividad, consultamos si hay otra cancha u horario posible. Si no encontramos una alternativa adecuada, lo conversamos con el cliente antes de comprometernos.
+Mirá, hoy lo hacemos principalmente con Excel. Yo defino cómo va a ser la competencia y después organizamos los partidos con los participantes que se anotaron.
 
-Si una reserva cambia después de haber coordinado el torneo, revisamos qué partidos y horarios se ven afectados y actualizamos los compromisos que correspondan.
+En los torneos de pádel, armamos una llave de eliminación directa. Las parejas se enfrentan, la ganadora pasa a la siguiente ronda y la perdedora queda eliminada, hasta llegar a la final.
 
-La disponibilidad real la consultamos por fuera del sistema. Lo que necesitamos registrar internamente es qué canchas y horarios acordamos para el evento y qué cuestiones quedan pendientes de confirmar.
+Si tenemos un número de parejas que no encaja bien en las rondas, alguna puede pasar directamente a la siguiente ronda sin jugar esa instancia. Lo importante es que quede claro quién avanza y con quién le toca jugar después.
 
-No asignamos automáticamente las canchas ni resolvemos los conflictos de reservas desde nuestro sistema; esa coordinación la hacemos nosotros con el complejo.
+En los campeonatos de fútbol 5, armamos un fixture con varias fechas para que todos los equipos jueguen contra los demás. Después de cada partido, anotamos el resultado y actualizamos la tabla: tres puntos por ganar, uno por empatar y ninguno por perder.
 
-**34. ¿Quién anota los resultados y cómo se enteran los equipos? ¿Llevan una tabla de posiciones?**
+Si tenemos un número impar de equipos, en cada fecha uno queda libre, es decir, no juega esa jornada. En las fechas siguientes se va alternando para que todos puedan completar sus partidos.
 
-En los torneos recreativos que organizamos, eso depende de cómo hayamos acordado manejar la competencia con el cliente.
+El problema es que hoy tenemos que controlar todo eso a mano en Excel. Si cambia un participante, se modifica un resultado o se posterga un partido, tenemos que revisar el fixture y actualizar lo que corresponda.
 
-- Resultados: normalmente, los anota la persona que el cliente haya definido para llevar el control de los partidos, o se los comunican al organizador durante la jornada.
-- Comunicación a los equipos: los resultados se informan durante el encuentro, directamente entre los participantes o mediante la persona que coordina el torneo.
-- Tabla de posiciones: si el formato del torneo necesita una tabla para definir quién clasifica, el cliente puede llevar ese seguimiento. Nosotros no tenemos una tabla de posiciones propia ni un sistema para registrar resultados deportivos.
+Además, cada partido necesita una cancha y un horario. Tenemos que coordinarlos con las reservas habituales y los turnos fijos, así que no podemos poner un partido en un horario que ya está comprometido.
 
-Nuestro trabajo es organizar la jornada y coordinar las canchas, los horarios y los servicios contratados. No administramos estadísticas de jugadores ni resultados deportivos como parte de nuestro servicio habitual.
+Lo que necesito es poder llevar el seguimiento de los partidos, saber quién avanza en pádel y mantener actualizada la tabla del campeonato de fútbol sin tener que hacer todas las cuentas manualmente.
 
-Si el cliente nos encarga un torneo, necesitamos saber cómo se va a manejar esa parte para que quede claro quién se ocupa de ella, pero no necesariamente tenemos que asumirla nosotros.
+**28. ¿Cómo eligen en qué cancha y horario se juega cada partido? ¿Qué pasa con las reservas de esa cancha?**
 
-**35. ¿Qué pasa si un equipo no se presenta, o si hay empate en un partido que tiene que tener ganador?**
+Mirá, hoy lo organizo yo con ayuda de los encargados. Cuando armamos un torneo o campeonato, tenemos en cuenta cuántos partidos hay que jugar, qué fechas tenemos disponibles y en qué horarios podemos usar las canchas.
 
-En esos casos, la resolución depende de las reglas del torneo que se hayan acordado con el cliente. Nosotros no tenemos un reglamento deportivo único para todos los encuentros.
+Tratamos de ubicar los partidos en horarios que nos permitan desarrollar la competencia sin complicar demasiado el alquiler habitual. Después, los encargados anotan los partidos en Excel y coordinan los horarios con los participantes.
 
-- Si un equipo no se presenta: el organizador del torneo debe decidir cómo proceder según las reglas acordadas. Por ejemplo, puede dar el partido por perdido al equipo ausente o intentar reorganizar el encuentro si hay tiempo y las canchas lo permiten. Si eso modifica los horarios, nosotros revisamos la coordinación de las canchas y los servicios afectados.
-- Si hay un empate y tiene que haber un ganador: depende del deporte y del formato acordado. En fútbol, por ejemplo, podrían definirse penales; en pádel, se debe establecer de antemano cómo resolver el empate si el formato lo requiere.
+¿Qué pasa si la cancha ya está reservada? Una reserva que ya tenemos comprometida no se puede desplazar sin resolverlo antes con el cliente. Lo mismo pasa con los turnos fijos: tenemos que respetar esos compromisos.
 
-Lo importante es que estas reglas queden claras antes de comenzar, para evitar discusiones durante la jornada.
+Si necesitamos una cancha para un partido del torneo, buscamos otro horario o una cancha que esté libre. Si no encontramos una alternativa, tenemos que reorganizar el partido antes de confirmarlo.
 
-Nosotros nos ocupamos de coordinar el evento, no de decidir automáticamente los resultados deportivos ni aplicar sanciones. Si una situación modifica la planificación, nos corresponde revisar los horarios y los compromisos que puedan verse afectados.
+El problema es que hoy llevamos las reservas por un lado y el fixture por otro, así que tenemos que comparar las anotaciones manualmente. Ahí es donde podemos equivocarnos o terminar con dos compromisos para la misma cancha.
 
-## Los jugadores y otros complejos
+Lo que necesito es que, cuando organicemos una competencia, podamos ver qué horarios están realmente libres, incluyendo los turnos fijos y las reservas ocasionales, para asignar los partidos sin superponerlos. Y si después cambia un horario o se cancela un partido, que quede claro qué cancha vuelve a estar disponible.
 
-**36. ¿Cómo encuentran los jugadores su complejo hoy? ¿Comparan con otros complejos antes de reservar?**
+**29. ¿Quién carga los resultados y cómo se enteran los equipos? ¿Llevan tabla de posiciones?**
 
-La mayoría de nuestros clientes llegan por recomendación de otras personas o porque ya conocen el complejo. También hay gente que nos encuentra por las redes sociales y nos contacta por WhatsApp para consultar por la organización de un encuentro.
+Sí, llevamos los resultados nosotros.
 
-Sí, es bastante posible que comparen con otros complejos antes de decidirse. Por ejemplo, pueden consultar precios, ubicación, tipo de canchas y servicios disponibles. Cuando nos contactan, tratamos de entender qué necesitan y les preparamos una propuesta acorde.
+- ¿Quién carga los resultados? Yo o alguno de los encargados anotamos el resultado cuando termina cada partido. Hoy lo hacemos en Excel, así que tenemos que asegurarnos de que el resultado quede bien registrado.
+- ¿Cómo se enteran los equipos? Les comunicamos los horarios de los partidos y los resultados por WhatsApp. Como la información está repartida, a veces tenemos que mandar mensajes adicionales para aclarar cómo quedó una llave o cómo viene el campeonato.
+- ¿Llevamos tabla de posiciones? Sí, pero en el campeonato de fútbol 5. Después de cada partido actualizamos la tabla con estos puntajes: victoria, 3 puntos; empate, 1 punto para cada equipo; derrota, 0 puntos. La tabla nos permite ver cuántos puntos tiene cada equipo y cómo va la competencia.
 
-No llevamos un registro formal de qué otros complejos consultó cada cliente ni de por qué nos eligió a nosotros. Tampoco tenemos estadísticas precisas sobre cómo nos conocieron.
+En los torneos de pádel no llevamos tabla de posiciones: registramos quién ganó cada partido y cómo avanza por la llave de eliminación directa hasta la final.
 
-Para nosotros, lo importante es responder la consulta, preparar una propuesta clara y hacer el seguimiento hasta saber si el cliente la acepta o la rechaza.
+Lo que más trabajo nos da es mantener todo actualizado. Si cargamos un resultado en Excel, tenemos que revisar los puntos del campeonato o actualizar la llave del pádel y después comunicarlo a los participantes. Me gustaría poder consultar los resultados y el avance de cada competencia sin tener que hacer todas esas tareas por separado.
 
-**37. ¿Les interesaría aparecer en una plataforma junto con otros complejos de la zona? ¿Qué les preocuparía?**
+**30. ¿Qué pasa si un equipo no se presenta o si hay empate en un partido que necesita ganador?**
 
-Sí, podría interesarnos aparecer en una plataforma junto con otros complejos de la zona, porque nos ayudaría a llegar a clientes nuevos que todavía no nos conocen.
+Mirá, son dos situaciones que todavía necesitamos manejar con una regla clara.
 
-Pero dependería de cómo funcione esa plataforma. Nos preocuparían principalmente estas cuestiones:
+Si un equipo no se presenta, registramos que no jugó y tenemos que resolver qué hacemos con ese partido. Para no decidir algo distinto en cada ocasión, como dueño establecería esta regla: si un equipo no se presenta sin avisar, pierde el partido por incomparecencia. El resultado se deja registrado para que quede constancia de lo ocurrido.
 
-- La competencia por precio: que los clientes elijan únicamente la opción más barata y no tengan en cuenta la calidad de la organización ni los servicios que ofrecemos.
-- La información publicada: que los horarios, los precios o los servicios aparezcan desactualizados y generen falsas expectativas.
-- La gestión de las consultas: que nos lleguen pedidos que no podamos atender o que los clientes crean que una consulta equivale a una reserva confirmada.
-- La relación con el cliente: queremos seguir conversando directamente con él para entender sus necesidades y preparar una propuesta a medida.
-- Los costos de participar: necesitaríamos saber si hay que pagar una comisión o una cuota por aparecer en la plataforma.
+Si hay empate, depende de la competencia:
 
-En principio, nos interesaría como medio para darnos a conocer y recibir consultas. Sin embargo, no querríamos que la plataforma confirme automáticamente eventos ni prometa disponibilidad sin que nosotros lo hayamos revisado.
+- Campeonato de fútbol 5: el empate es válido. Cada equipo suma un punto y no hace falta definir un ganador en ese partido.
+- Torneo de pádel por eliminación directa: necesitamos que haya una pareja ganadora para que avance a la siguiente ronda. Como regla, antes de comenzar el torneo estableceríamos que, si el partido termina empatado según el formato de juego acordado, se define con un desempate en cancha hasta determinar quién gana.
 
-Hoy nuestra prioridad sigue siendo organizar mejor los eventos que ya nos encargan. Una plataforma de difusión podría ser interesante a futuro, pero sería una iniciativa distinta del sistema interno que necesitamos para gestionar las solicitudes, los presupuestos y la preparación de cada evento.
+Hoy estas situaciones pueden generar discusiones porque llevamos los resultados y el fixture en Excel y comunicamos las decisiones por WhatsApp.
 
-**38. ¿Qué información sobre el complejo les gustaría que vean los jugadores antes de reservar (servicios, horarios, fotos, precios)?**
+Para mí, lo importante es que quede registrado si el partido se jugó, si hubo una incomparecencia, cuál fue el resultado y qué equipo o pareja continúa en la competencia. Así evitamos confusiones con la tabla de posiciones y con los siguientes partidos.
 
-Si participáramos en una plataforma para que los jugadores conozcan el complejo, nos gustaría que pudieran ver información clara para decidir si les interesa consultarnos.
+## Problemas y necesidades
 
-Principalmente, mostraríamos:
+**31. ¿Qué es lo que más trabajo o problemas les da hoy?**
 
-- Tipo de canchas: qué ofrecemos para jugar al fútbol y al pádel, con fotos de las instalaciones.
-- Servicios disponibles: por ejemplo, si se puede coordinar comida, bebidas o equipamiento deportivo para un encuentro.
-- Ubicación: dónde queda el complejo y cómo llegar.
-- Horarios habituales: nuestros horarios generales de funcionamiento, aclarando que la disponibilidad concreta hay que consultarla.
-- Precios orientativos: si corresponde publicar tarifas de referencia, dejando claro que el costo de un evento puede variar según la duración y los servicios solicitados.
-- Fotos del lugar: para que los posibles clientes puedan conocer las instalaciones antes de contactarnos.
-- Medios de contacto: especialmente WhatsApp y teléfono, que son los canales que usamos habitualmente.
+Mirá, si te soy sincero, lo que más trabajo nos da hoy es organizar las reservas y mantener toda la información al día, porque manejamos muchas cosas al mismo tiempo y con anotaciones en distintos lugares.
 
-Para nosotros hay una distinción importante: una cosa es mostrar información general del complejo y otra es confirmar que una cancha está libre para una fecha y un horario determinados.
+Te diría que los principales problemas son estos:
 
-Nos gustaría que la plataforma sirviera para informar y generar consultas, pero que la reserva se termine de acordar directamente con nosotros. Así podemos revisar la disponibilidad y preparar una propuesta que se ajuste a lo que el cliente necesita, sin publicar información que después no podamos cumplir.
+1. Las reservas y la disponibilidad. Recibimos consultas por WhatsApp, teléfono y mostrador. Tenemos que revisar el cuaderno y Excel para saber si una cancha está libre. Ya nos pasó de darle el mismo horario a dos grupos, y en las horas pico se nos acumulan mensajes que no llegamos a responder.
+2. Las señas y los cobros. Pedimos el 50 % por adelantado, pero tenemos que controlar manualmente quién transfirió, cuánto pagó y cuánto queda pendiente. A veces cuesta distinguir una seña de una reserva nueva del saldo de un turno que se juega ese día.
+3. Los turnos fijos. Hay grupos que juegan todas las semanas en el mismo horario. Tenemos que respetar esos compromisos y, al mismo tiempo, saber cuándo alguno avisa que no va a venir para poder ofrecer esa cancha a otra persona.
+4. Los torneos y campeonatos. Armamos las llaves y los fixtures en Excel, cargamos los resultados y actualizamos la tabla de fútbol a mano. Si cambia un partido, hay que revisar los horarios y avisarles a los participantes.
+5. Tener una visión general del negocio. Como dueño, quiero saber cuántas canchas se ocuparon, qué horarios quedaron libres, qué reservas tienen pagos pendientes y cómo avanzan las competencias. Hoy tengo que revisar distintas anotaciones para reunir esa información.
+
+En definitiva, no es que no podamos trabajar así, pero a medida que crece la cantidad de jugadores y reservas, se vuelve más fácil equivocarse y más difícil llevar el control.
+
+Si tuviera que elegir el problema más urgente, sería evitar las reservas superpuestas y poder conocer la disponibilidad real de todas las canchas desde un solo lugar. Eso nos ayudaría tanto a nosotros como a los jugadores.
+
+**32. ¿Qué información les gustaría tener y hoy no tienen?**
+
+Mirá, más que nada, me gustaría tener toda la información del complejo ordenada y poder consultarla sin tener que revisar el cuaderno, Excel y los mensajes de WhatsApp por separado.
+
+Hay varias cosas que hoy nos cuesta saber con claridad:
+
+- Disponibilidad de las canchas: quiero ver qué canchas están libres y cuáles ocupadas para una fecha y horario determinados, teniendo en cuenta las reservas ocasionales, los turnos fijos y los partidos de los torneos.
+- Estado de las reservas: saber quién reservó, para cuándo, qué cancha eligió y si la reserva sigue vigente, está confirmada, ya se jugó o se canceló.
+- Señas y saldos: consultar cuánto cuesta cada turno, cuánto dejó cada jugador de seña, cuánto falta cobrar y si hay pagos pendientes.
+- Inasistencias y cancelaciones: saber quién canceló, con cuánta anticipación y quién reservó pero no vino.
+- Turnos fijos: tener identificados los grupos que juegan todas las semanas y saber si mantienen su horario o avisaron que faltarán.
+- Torneos y campeonatos: consultar las parejas y equipos inscriptos, los cupos disponibles, los partidos programados, los resultados y el avance de cada competencia. En fútbol, también necesito ver la tabla de posiciones actualizada.
+- Actividad del complejo: como dueño, quiero saber qué canchas se ocupan más, qué horarios tienen mayor demanda y cuáles suelen quedar libres.
+
+También me gustaría que los jugadores pudieran consultar los precios y los horarios disponibles sin depender de que un encargado les responda.
+
+En resumen, necesito poder consultar la situación actual del complejo y el historial de lo que pasó con cada reserva, sin depender de anotaciones dispersas. Y, por supuesto, cada encargado debe poder registrar lo que sucede durante su turno para que yo tenga la información actualizada.
+
+**33. Si tuvieran un sistema, ¿qué es lo primero que les gustaría resolver?**
+
+Mirá, lo primero que resolvería es tener todas las reservas en una sola agenda y evitar que se reserve dos veces la misma cancha en el mismo horario.
+
+Hoy ese es el problema que más nos complica, porque recibimos reservas por WhatsApp, teléfono y mostrador, y las anotamos en un cuaderno y en Excel. Si los dos encargados no tienen la misma información, podemos cometer errores.
+
+Me gustaría poder:
+
+- Ver todas las canchas y sus horarios libres y ocupados.
+- Registrar en esa misma agenda las reservas ocasionales, los turnos fijos y los partidos de los torneos.
+- Permitir que los jugadores consulten la disponibilidad y reserven por su cuenta.
+- Registrar las señas, los saldos pendientes y los cobros de cada reserva.
+
+Después, como segunda prioridad, me gustaría ordenar la gestión de los torneos, para no tener que armar las llaves, actualizar los resultados y llevar la tabla del campeonato de fútbol todo a mano.
+
+Para mí, lo fundamental es que los encargados y yo trabajemos con la misma información y que los jugadores puedan reservar sin depender de que alguien les conteste un mensaje. Si solucionamos eso, ya sería un avance enorme para el complejo.
+
+**34. ¿Hay algo que hoy funcione bien y no quieran cambiar?**
+
+Sí, claro. No queremos cambiar todo porque hay cosas que funcionan bien y queremos mantenerlas.
+
+- La atención personal: nos gusta que los jugadores puedan hablar directamente con los encargados, hacer consultas y reservar en el mostrador. Aunque puedan reservar por su cuenta, queremos seguir atendiendo a quienes prefieren hacerlo personalmente.
+- Los turnos fijos: nos interesa mantener la relación con los grupos que vienen todas las semanas y respetarles el día y horario habitual.
+- La forma de cobrar: queremos seguir pidiendo el 50 % de seña por transferencia y cobrar el saldo cuando los jugadores llegan. Lo que necesitamos mejorar es el registro y el seguimiento de esos pagos, no cambiar cómo cobramos.
+- La organización de las competencias: queremos seguir haciendo torneos de pádel por eliminación directa y campeonatos de fútbol 5 todos contra todos. Son actividades que nos interesa conservar.
+- La independencia del buffet: lo maneja un tercero y queremos que siga siendo así. Nosotros nos ocupamos de las canchas y las competencias.
+
+Y hay algo importante: yo quiero seguir decidiendo los precios, los horarios y qué torneos organizamos. Los encargados tienen que poder seguir atendiendo, tomando reservas y cobrando como hacen hoy.
+
+En definitiva, queremos ordenar el trabajo sin perder la forma de atender a nuestros clientes ni cambiar las reglas principales del negocio.
+
+## Otros complejos
+
+**35. ¿Les interesaría aparecer en una plataforma junto con otros complejos de la zona? ¿Qué les preocuparía?**
+
+Sí, la verdad que sí. Me interesaría aparecer junto con otros complejos de la zona, porque nos podría ayudar a llegar a jugadores que todavía no nos conocen y a conseguir más reservas en los horarios en los que tenemos canchas libres.
+
+Me gustaría que la gente pudiera buscar canchas de fútbol o pádel, comparar horarios y precios, y elegir dónde jugar. Eso sí, hay algunas cosas que me preocuparían.
+
+- La privacidad de la información: no quiero que otros complejos puedan ver nuestras reservas, los datos de nuestros clientes ni cuánto cobramos o cuánto tenemos pendiente de cobrar.
+- La disponibilidad actualizada: si un jugador reserva una cancha con nosotros, no puede seguir apareciendo como libre en la plataforma.
+- La competencia por los clientes: me parece bien que los jugadores puedan comparar opciones, pero quiero que quede claro qué reserva corresponde a cada complejo y que no haya confusiones.
+- La autonomía del negocio: cada dueño tiene que poder decidir sus propios precios, horarios y torneos. No quiero que por estar en una plataforma tengamos que manejar todos el negocio de la misma manera.
+
+También me gustaría que los jugadores pudieran encontrarnos y reservar sin tener que escribirnos por WhatsApp para preguntar si hay lugar.
+
+En resumen, sí me interesa compartir la plataforma para conseguir más reservas, pero cada complejo tiene que mantener el control de su propia información y de sus decisiones.
+
+**36. ¿Qué información del complejo les gustaría que vean los jugadores antes de reservar?**
+
+Y… me gustaría que antes de reservar los jugadores tengan toda la información necesaria para elegir bien y no tengan que escribirnos para preguntar cada cosa.
+
+Principalmente, que puedan ver:
+
+- Tipo de cancha: si es fútbol 5, fútbol 7 o pádel, y sus características. Por ejemplo, si es techada, si tiene césped sintético o si la cancha de pádel es de blindex o de cemento.
+- Horarios disponibles: qué días y horarios están libres para la fecha que quieren jugar.
+- Precios: cuánto cuesta el turno según la cancha y la franja horaria, indicando el importe total del turno.
+- Duración del turno: una hora para fútbol y una hora y media para pádel.
+- Condiciones de reserva: que pedimos una seña del 50 % por transferencia, que el saldo se paga en el complejo y que, si cancelan con menos de 24 horas de anticipación, pierden la seña.
+- Ubicación y horarios de atención: dónde estamos y que abrimos todos los días de 9 a 24.
+- Servicios adicionales: que tenemos alquiler de paletas y pelotas, y que hay un buffet atendido por un tercero.
+
+También me gustaría que, si hay un torneo con inscripciones abiertas, puedan consultar de qué se trata, cuánto cuesta participar y si quedan lugares.
+
+Lo importante es que puedan elegir la cancha y el horario sabiendo cuánto van a pagar y cuáles son las condiciones, sin tener que consultarnos todo por mensaje.
