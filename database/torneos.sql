@@ -1,13 +1,15 @@
 -- Torneos y campeonatos que organiza cada complejo (fútbol o pádel).
 --   torneo:     eliminación directa (el que pierde queda afuera)
 --   campeonato: todos contra todos, con tabla de posiciones
+--   grupos:     fase de grupos (todos contra todos en cada grupo) y después
+--               eliminación directa con los mejores de cada grupo
 -- Requiere empresas.sql y canchas.sql.
 
 CREATE TABLE IF NOT EXISTS torneos (
     id_torneo SERIAL PRIMARY KEY,
     id_empresa INT NOT NULL REFERENCES empresas(id_empresa) ON DELETE CASCADE,
     nombre VARCHAR(120) NOT NULL,
-    tipo VARCHAR(12) NOT NULL CHECK (tipo IN ('torneo', 'campeonato')),
+    tipo VARCHAR(12) NOT NULL CHECK (tipo IN ('torneo', 'campeonato', 'grupos')),
     deporte VARCHAR(10) NOT NULL CHECK (deporte IN ('padel', 'futbol')),
     categoria VARCHAR(60),                 -- libre, +35, mixto, 4ta categoría...
     descripcion VARCHAR(500),
@@ -16,10 +18,14 @@ CREATE TABLE IF NOT EXISTS torneos (
     cupo SMALLINT NOT NULL CHECK (cupo BETWEEN 2 AND 64),
     precio_inscripcion NUMERIC(10, 2) NOT NULL DEFAULT 0 CHECK (precio_inscripcion >= 0),
     premio VARCHAR(150),
+    cantidad_grupos SMALLINT CHECK (cantidad_grupos BETWEEN 2 AND 8),      -- solo tipo grupos
+    clasifican_por_grupo SMALLINT CHECK (clasifican_por_grupo >= 1),       -- solo tipo grupos
+    ida_vuelta BOOLEAN NOT NULL DEFAULT FALSE,     -- todos contra todos a dos ruedas (campeonato o grupos)
     estado VARCHAR(12) NOT NULL DEFAULT 'inscripcion'
         CHECK (estado IN ('inscripcion', 'en_curso', 'finalizado', 'cancelado')),
     fecha_creacion TIMESTAMP DEFAULT NOW(),
-    CHECK (fecha_fin IS NULL OR fecha_fin >= fecha_inicio)
+    CHECK (fecha_fin IS NULL OR fecha_fin >= fecha_inicio),
+    CONSTRAINT torneos_grupos_check CHECK (tipo <> 'grupos' OR (cantidad_grupos IS NOT NULL AND clasifican_por_grupo IS NOT NULL))
 );
 
 CREATE INDEX IF NOT EXISTS idx_torneos_empresa ON torneos (id_empresa);
@@ -33,6 +39,7 @@ CREATE TABLE IF NOT EXISTS equipos (
     contacto_telefono VARCHAR(30),
     integrantes VARCHAR(500),
     id_cliente INT REFERENCES clientes(id_cliente) ON DELETE SET NULL,  -- si lo inscribió un cliente
+    grupo CHAR(1) CHECK (grupo BETWEEN 'A' AND 'H'),                    -- solo tipo grupos; NULL = sin asignar
     fecha_inscripcion TIMESTAMP DEFAULT NOW(),
     UNIQUE (id_torneo, nombre),
     UNIQUE (id_equipo, id_torneo)
@@ -41,7 +48,8 @@ CREATE TABLE IF NOT EXISTS equipos (
 CREATE TABLE IF NOT EXISTS partidos (
     id_partido SERIAL PRIMARY KEY,
     id_torneo INT NOT NULL REFERENCES torneos(id_torneo) ON DELETE CASCADE,
-    ronda SMALLINT NOT NULL CHECK (ronda >= 1),        -- fecha (campeonato) o ronda (torneo)
+    ronda SMALLINT NOT NULL CHECK (ronda >= 1),        -- fecha (campeonato y grupos) o ronda (llave)
+    grupo CHAR(1),                                     -- partido de la fase de grupos; NULL = llave o campeonato
     id_local INT NOT NULL,
     id_visitante INT,                                  -- NULL = queda libre y pasa de ronda
     resultado_local SMALLINT CHECK (resultado_local >= 0),       -- goles o sets

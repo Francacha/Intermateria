@@ -1,10 +1,14 @@
 import { ErrorHttp, aHora, aMinutos } from "../utils/comun.js";
 
-// Lógica de torneos (eliminación directa) y campeonatos (todos contra todos).
+// Lógica de torneos (eliminación directa), campeonatos (todos contra todos) y
+// torneos con fase de grupos (todos contra todos en cada grupo y después llave).
 // Todas las funciones reciben "db": el pool o un cliente dentro de una transacción.
 
 // Cuánto ocupa la cancha un partido programado
 export const DURACION_PARTIDO = { futbol: 60, padel: 90 };
+
+// Nombres de los grupos (hasta 8)
+export const LETRAS = "ABCDEFGH";
 
 const mezclar = (lista) => {
   const copia = [...lista];
@@ -50,9 +54,25 @@ export const calcularTabla = (equipos, partidos) => {
     .sort((a, b) => b.pts - a.pts || b.dg - a.dg || b.gf - a.gf || a.nombre.localeCompare(b.nombre));
 };
 
-// Campeonato: método del círculo. Con n equipos salen n-1 fechas (n par) y en
+// Ordena dos filas de tabla de grupos distintos: primero el de más puntos
+const mejorFila = (a, b) => b.pts - a.pts || b.dg - a.dg || b.gf - a.gf;
+
+// Tabla de cada grupo (solo los grupos que tienen equipos)
+export const tablasDeGrupos = (torneo, equipos, partidos) =>
+  [...LETRAS.slice(0, torneo.cantidad_grupos)]
+    .map((grupo) => ({
+      grupo,
+      tabla: calcularTabla(
+        equipos.filter((e) => e.grupo === grupo),
+        partidos.filter((p) => p.grupo === grupo)
+      )
+    }))
+    .filter((g) => g.tabla.length > 0);
+
+// Campeonato o grupo: método del círculo. Con n equipos salen n-1 fechas (n par) y en
 // cada una juegan todos. Si n es impar, en cada fecha un equipo queda libre.
-const fixtureLiga = (ids) => {
+// Ida y vuelta: se repiten las fechas con la localía invertida.
+const fixtureLiga = (ids, { idaVuelta = false, grupo = null } = {}) => {
   const lista = ids.length % 2 ? [...ids, null] : [...ids];
   const n = lista.length;
   const partidos = [];
@@ -62,12 +82,14 @@ const fixtureLiga = (ids) => {
       const b = lista[n - 1 - i];
       if (a === null || b === null) continue; // fecha libre
       // Se alterna quién es local para que no sea siempre el mismo
-      partidos.push(ronda % 2 ? { ronda, local: a, visitante: b } : { ronda, local: b, visitante: a });
+      partidos.push(ronda % 2 ? { ronda, grupo, local: a, visitante: b } : { ronda, grupo, local: b, visitante: a });
     }
     // Rota todos menos el primero
     lista.splice(1, 0, lista.pop());
   }
-  return partidos;
+  if (!idaVuelta) return partidos;
+  const vuelta = partidos.map((p) => ({ ronda: p.ronda + n - 1, grupo, local: p.visitante, visitante: p.local }));
+  return [...partidos, ...vuelta];
 };
 
 // Torneo: primera ronda de la llave. Si los equipos no son potencia de 2,
@@ -90,35 +112,164 @@ const primeraRonda = (ids) => {
   return partidos;
 };
 
+// Llave armada con los clasificados de los grupos, ya ordenados del mejor al peor.
+// Cruce clásico: el 1° contra el último, el 2° contra el anteúltimo... y en el orden
+// de la llave el 1° y el 2° quedan en mitades distintas (solo se cruzan en la final).
+// Si no son potencia de 2, los mejores pasan libres a la ronda siguiente.
+const llaveDeClasificados = (clasificados) => {
+  let orden = [1];
+  while (orden.length < clasificados.length) orden = orden.flatMap((s) => [s, orden.length * 2 + 1 - s]);
+  const partidos = [];
+  for (let i = 0; i < orden.length; i += 2) {
+    partidos.push({ ronda: 1, local: clasificados[orden[i] - 1], visitante: clasificados[orden[i + 1] - 1] ?? null });
+  }
+  // Dos del mismo grupo no se cruzan en la primera ronda: se intercambian rivales
+  const grupo = (c) => c?.grupo;
+  for (const p of partidos) {
+    if (!p.visitante || grupo(p.local) !== grupo(p.visitante)) continue;
+    const otro = partidos.find(
+      (q) => q !== p && q.visitante && grupo(q.local) !== grupo(p.visitante) && grupo(p.local) !== grupo(q.visitante)
+    );
+    if (otro) [p.visitante, otro.visitante] = [otro.visitante, p.visitante];
+  }
+  return partidos.map((p) => ({ ...p, local: p.local.id_equipo, visitante: p.visitante?.id_equipo ?? null }));
+};
+
 const insertarPartidos = async (db, idTorneo, partidos) => {
   for (const p of partidos) {
     const libre = p.visitante === null;
     await db.query(
-      `INSERT INTO partidos (id_torneo, ronda, id_local, id_visitante, estado)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [idTorneo, p.ronda, p.local, p.visitante, libre ? "jugado" : "pendiente"]
+      `INSERT INTO partidos (id_torneo, ronda, grupo, id_local, id_visitante, estado)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [idTorneo, p.ronda, p.grupo ?? null, p.local, p.visitante, libre ? "jugado" : "pendiente"]
     );
   }
+};
+
+const palabraEquipos = (torneo) => (torneo.deporte === "padel" ? "parejas" : "equipos");
+
+// Sortea todos los inscriptos en los grupos, parejos (los grupos quedan de igual
+// tamaño o con uno de diferencia). Pisa lo que se haya asignado a mano.
+export const sortearGrupos = async (db, torneo) => {
+  if (torneo.tipo !== "grupos") throw new ErrorHttp(400, "Este torneo no tiene fase de grupos");
+  if (torneo.estado !== "inscripcion") throw new ErrorHttp(400, "Los grupos ya están armados");
+  const { rows } = await db.query("SELECT id_equipo FROM equipos WHERE id_torneo = $1", [torneo.id_torneo]);
+  const ids = mezclar(rows.map((r) => r.id_equipo));
+  for (const [i, id] of ids.entries()) {
+    await db.query("UPDATE equipos SET grupo = $1 WHERE id_equipo = $2", [LETRAS[i % torneo.cantidad_grupos], id]);
+  }
+};
+
+// Pone a mano un equipo en un grupo (null = sin grupo, se sortea al armar el fixture)
+export const asignarGrupo = async (db, torneo, idEquipo, grupo) => {
+  if (torneo.tipo !== "grupos") throw new ErrorHttp(400, "Este torneo no tiene fase de grupos");
+  if (torneo.estado !== "inscripcion") throw new ErrorHttp(400, "Con el fixture armado ya no se pueden cambiar los grupos");
+  if (grupo !== null && !LETRAS.slice(0, torneo.cantidad_grupos).includes(grupo)) {
+    throw new ErrorHttp(400, "Ese grupo no existe en este torneo");
+  }
+  const resultado = await db.query("UPDATE equipos SET grupo = $1 WHERE id_equipo = $2 AND id_torneo = $3", [
+    grupo,
+    idEquipo,
+    torneo.id_torneo
+  ]);
+  if (resultado.rowCount === 0) throw new ErrorHttp(404, "Equipo no encontrado");
+};
+
+// Fase de grupos: completa los grupos con los que quedaron sin asignar (cada uno
+// va al grupo con menos equipos), controla que alcancen y arma un fixture por grupo
+const fixtureGrupos = async (db, torneo, equipos) => {
+  const letras = [...LETRAS.slice(0, torneo.cantidad_grupos)];
+  const grupos = new Map(letras.map((l) => [l, []]));
+  const sinGrupo = [];
+  for (const e of equipos) {
+    if (grupos.has(e.grupo)) grupos.get(e.grupo).push(e.id_equipo);
+    else sinGrupo.push(e.id_equipo);
+  }
+  for (const id of mezclar(sinGrupo)) {
+    const menor = letras.reduce((a, b) => (grupos.get(b).length < grupos.get(a).length ? b : a));
+    grupos.get(menor).push(id);
+    await db.query("UPDATE equipos SET grupo = $1 WHERE id_equipo = $2", [menor, id]);
+  }
+
+  const pasan = torneo.clasifican_por_grupo;
+  for (const [letra, ids] of grupos) {
+    if (ids.length <= pasan) {
+      throw new ErrorHttp(
+        400,
+        `El grupo ${letra} tiene ${ids.length} ${ids.length === 1 ? palabraEquipos(torneo).slice(0, -1) : palabraEquipos(torneo)}: ` +
+          `si pasan ${pasan} por grupo, cada grupo necesita al menos ${pasan + 1}. Mové ${palabraEquipos(torneo)} de grupo o editá el formato.`
+      );
+    }
+  }
+  return letras.flatMap((letra) => fixtureLiga(mezclar(grupos.get(letra)), { idaVuelta: torneo.ida_vuelta, grupo: letra }));
 };
 
 // Cierra la inscripción y arma el fixture (sorteado)
 export const generarFixture = async (db, torneo) => {
   if (torneo.estado !== "inscripcion") throw new ErrorHttp(400, "El fixture ya fue generado");
-  const { rows } = await db.query("SELECT id_equipo FROM equipos WHERE id_torneo = $1", [torneo.id_torneo]);
+  const { rows } = await db.query("SELECT id_equipo, grupo FROM equipos WHERE id_torneo = $1", [torneo.id_torneo]);
   if (rows.length < 2) {
     throw new ErrorHttp(400, `Se necesitan al menos 2 ${torneo.deporte === "padel" ? "parejas inscriptas" : "equipos inscriptos"}`);
   }
 
   const ids = mezclar(rows.map((r) => r.id_equipo));
-  const partidos = torneo.tipo === "campeonato" ? fixtureLiga(ids) : primeraRonda(ids);
+  let partidos;
+  if (torneo.tipo === "grupos") partidos = await fixtureGrupos(db, torneo, rows);
+  else if (torneo.tipo === "campeonato") partidos = fixtureLiga(ids, { idaVuelta: torneo.ida_vuelta });
+  else partidos = primeraRonda(ids);
   await insertarPartidos(db, torneo.id_torneo, partidos);
   await db.query("UPDATE torneos SET estado = 'en_curso' WHERE id_torneo = $1", [torneo.id_torneo]);
   await actualizarAvance(db, torneo.id_torneo);
 };
 
+// Fase de grupos terminada: pasan los mejores de cada grupo a la llave. Lo pide el
+// complejo (no se arma solo con el último resultado) para que pueda revisar y
+// corregir los resultados de los grupos antes de cerrarlos.
+export const armarLlave = async (db, torneo) => {
+  if (torneo.tipo !== "grupos") throw new ErrorHttp(400, "Este torneo no tiene fase de grupos");
+  if (torneo.estado !== "en_curso") throw new ErrorHttp(400, "El torneo no está en curso");
+
+  const { rows: partidos } = await db.query("SELECT * FROM partidos WHERE id_torneo = $1", [torneo.id_torneo]);
+  if (partidos.some((p) => p.grupo === null)) throw new ErrorHttp(400, "La llave ya está armada");
+  const faltan = partidos.filter((p) => p.estado !== "jugado").length;
+  if (faltan > 0) {
+    throw new ErrorHttp(400, `Faltan ${faltan} ${faltan === 1 ? "partido" : "partidos"} de la fase de grupos`);
+  }
+
+  const { rows: equipos } = await db.query("SELECT id_equipo, nombre, grupo FROM equipos WHERE id_torneo = $1", [
+    torneo.id_torneo
+  ]);
+  const grupos = tablasDeGrupos(torneo, equipos, partidos);
+  // Primero todos los 1°, después los 2°...; entre los del mismo puesto, el de mejor campaña
+  const clasificados = [];
+  for (let puesto = 0; puesto < torneo.clasifican_por_grupo; puesto++) {
+    const delPuesto = grupos.map((g) => g.tabla[puesto] && { ...g.tabla[puesto], grupo: g.grupo }).filter(Boolean);
+    clasificados.push(...delPuesto.sort(mejorFila));
+  }
+  await insertarPartidos(db, torneo.id_torneo, llaveDeClasificados(clasificados));
+  await actualizarAvance(db, torneo.id_torneo);
+};
+
+// Llave: si se jugó toda la ronda, arma la siguiente con los ganadores.
+// Devuelve true si la ronda jugada era la final.
+const avanzarLlave = async (db, idTorneo, partidos) => {
+  const ultima = Math.max(...partidos.map((p) => p.ronda));
+  const ronda = partidos.filter((p) => p.ronda === ultima);
+  const ganadores = ronda.map(ganador);
+  if (ganadores.some((g) => g === null)) return false;
+  if (ganadores.length === 1) return true;
+  const siguiente = [];
+  for (let i = 0; i < ganadores.length; i += 2) {
+    siguiente.push({ ronda: ultima + 1, local: ganadores[i], visitante: ganadores[i + 1] });
+  }
+  await insertarPartidos(db, idTorneo, siguiente);
+  return false;
+};
+
 // Después de cargar un resultado:
 //   campeonato → si se jugaron todos los partidos, termina
 //   torneo     → si se jugó toda la ronda, arma la siguiente con los ganadores (o termina si fue la final)
+//   grupos     → durante los grupos no avanza solo (ver armarLlave); con la llave armada, igual que torneo
 export const actualizarAvance = async (db, idTorneo) => {
   const { rows: [torneo] } = await db.query("SELECT * FROM torneos WHERE id_torneo = $1", [idTorneo]);
   if (!torneo || torneo.estado === "cancelado" || torneo.estado === "inscripcion") return;
@@ -127,26 +278,15 @@ export const actualizarAvance = async (db, idTorneo) => {
     "SELECT * FROM partidos WHERE id_torneo = $1 ORDER BY ronda, id_partido",
     [idTorneo]
   );
+  const llave = partidos.filter((p) => p.grupo === null);
 
   let terminado;
   if (torneo.tipo === "campeonato") {
     terminado = partidos.every((p) => p.estado === "jugado");
+  } else if (llave.length === 0) {
+    terminado = false;
   } else {
-    const ultima = Math.max(...partidos.map((p) => p.ronda));
-    const ronda = partidos.filter((p) => p.ronda === ultima);
-    const ganadores = ronda.map(ganador);
-    if (ganadores.some((g) => g === null)) {
-      terminado = false;
-    } else if (ganadores.length === 1) {
-      terminado = true;
-    } else {
-      const siguiente = [];
-      for (let i = 0; i < ganadores.length; i += 2) {
-        siguiente.push({ ronda: ultima + 1, local: ganadores[i], visitante: ganadores[i + 1] });
-      }
-      await insertarPartidos(db, idTorneo, siguiente);
-      terminado = false;
-    }
+    terminado = await avanzarLlave(db, idTorneo, llave);
   }
 
   await db.query("UPDATE torneos SET estado = $1 WHERE id_torneo = $2", [
@@ -260,7 +400,7 @@ export const detalleTorneo = async (db, idTorneo, { privado = false } = {}) => {
   if (!torneo) return null;
 
   const { rows: equipos } = await db.query(
-    `SELECT ${privado ? "*" : "id_equipo, nombre, integrantes, id_cliente"}
+    `SELECT ${privado ? "*" : "id_equipo, nombre, integrantes, id_cliente, grupo"}
        FROM equipos WHERE id_torneo = $1 ORDER BY fecha_inscripcion, id_equipo`,
     [idTorneo]
   );
@@ -271,23 +411,26 @@ export const detalleTorneo = async (db, idTorneo, { privado = false } = {}) => {
        LEFT JOIN equipos v ON v.id_equipo = p.id_visitante
        LEFT JOIN canchas c ON c.id_cancha = p.id_cancha
       WHERE p.id_torneo = $1
-      ORDER BY p.ronda, p.id_partido`,
+      ORDER BY p.grupo IS NULL, p.ronda, p.grupo, p.id_partido`,
     [idTorneo]
   );
+  // Partidos de eliminación directa (en un torneo con grupos, los que vienen después)
+  const llave = partidos.filter((p) => p.grupo === null);
 
   const tabla = torneo.tipo === "campeonato" ? calcularTabla(equipos, partidos) : null;
+  const grupos = torneo.tipo === "grupos" ? tablasDeGrupos(torneo, equipos, partidos) : null;
 
   let campeon = null;
   if (torneo.estado === "finalizado") {
     if (tabla) {
       campeon = tabla[0] ? { id_equipo: tabla[0].id_equipo, nombre: tabla[0].nombre } : null;
-    } else if (partidos.length) {
-      const final = partidos[partidos.length - 1];
+    } else if (llave.length) {
+      const final = llave[llave.length - 1];
       const id = ganador(final);
       campeon = equipos.find((e) => e.id_equipo === id) ?? null;
       if (campeon) campeon = { id_equipo: campeon.id_equipo, nombre: campeon.nombre };
     }
   }
 
-  return { ...torneo, inscriptos: equipos.length, equipos, partidos, tabla, campeon };
+  return { ...torneo, inscriptos: equipos.length, equipos, partidos, tabla, grupos, campeon };
 };

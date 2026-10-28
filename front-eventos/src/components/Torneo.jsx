@@ -4,6 +4,7 @@ import {
   ESTADO_TORNEO,
   FORMATO,
   capitalizar,
+  detalleFormato,
   cuandoEmpieza,
   diasHasta,
   fechaCorta,
@@ -11,7 +12,7 @@ import {
   hora,
   nombreRonda,
   pesos,
-  rondasDeLlave
+  rondasDelTorneo
 } from "../utils/formato";
 
 // Piezas para mostrar torneos y campeonatos (las usan las páginas públicas y el panel)
@@ -161,7 +162,8 @@ export function Campeon({ campeon }) {
   );
 }
 
-export function TablaPosiciones({ tabla }) {
+// clasifican: en un grupo, cuántos de arriba pasan a la llave (se marcan)
+export function TablaPosiciones({ tabla, clasifican = 0 }) {
   if (!tabla?.length) return null;
   return (
     <div className="tarjeta tabla-contenedor">
@@ -182,8 +184,8 @@ export function TablaPosiciones({ tabla }) {
         </thead>
         <tbody>
           {tabla.map((fila, i) => (
-            <tr key={fila.id_equipo}>
-              <td>{i + 1}</td>
+            <tr key={fila.id_equipo} className={i < clasifican ? "clasifica" : undefined}>
+              <td>{i + 1}{i < clasifican && <span className="solo-lectores"> (pasa a la llave)</span>}</td>
               <td><strong>{fila.nombre}</strong></td>
               <td><strong>{fila.pts}</strong></td>
               <td>{fila.pj}</td>
@@ -231,36 +233,40 @@ export function Partido({ partido }) {
   );
 }
 
-// Los equipos que no juegan en una fecha de campeonato (con cantidad impar, uno por fecha)
-const libresDeLaFecha = (torneo, partidos) =>
-  torneo.tipo === "campeonato"
-    ? torneo.equipos.filter((e) => !partidos.some((p) => p.id_local === e.id_equipo || p.id_visitante === e.id_equipo))
-    : [];
+// Los equipos que no juegan en una fecha de todos contra todos (con cantidad impar, uno por fecha)
+const libresDeLaFecha = (equipos, partidos) =>
+  equipos ? equipos.filter((e) => !partidos.some((p) => p.id_local === e.id_equipo || p.id_visitante === e.id_equipo)) : [];
 
-// Partidos agrupados por fecha (campeonato) o ronda (torneo)
-export function Fixture({ torneo, renderPartido = (p) => <Partido partido={p} /> }) {
-  if (!torneo.partidos.length) {
-    return (
-      <p className="tablero tablero-estado">
-        {torneo.tipo === "torneo"
-          ? "La llave se sortea cuando se cierra la inscripción."
-          : "El fixture se arma cuando se cierra la inscripción."}
-      </p>
-    );
-  }
-  const rondas = [...new Set(torneo.partidos.map((p) => p.ronda))];
-  const total = rondasDeLlave(torneo.equipos.length);
+const SIN_FIXTURE = {
+  torneo: "La llave se sortea cuando se cierra la inscripción.",
+  campeonato: "El fixture se arma cuando se cierra la inscripción.",
+  grupos: "Los grupos y sus partidos se arman cuando se cierra la inscripción."
+};
+
+// Partidos agrupados por fecha (todos contra todos) o ronda (llave).
+// liga: los partidos son de todos contra todos (un campeonato o un grupo) y
+// equipos son los que juegan, para mostrar quién queda libre en cada fecha.
+export function Fixture({
+  torneo,
+  partidos = torneo.partidos,
+  liga = torneo.tipo === "campeonato",
+  equipos = torneo.equipos,
+  renderPartido = (p) => <Partido partido={p} />
+}) {
+  if (!partidos.length) return <p className="tablero tablero-estado">{SIN_FIXTURE[torneo.tipo]}</p>;
+  const rondas = [...new Set(partidos.map((p) => p.ronda))];
+  const total = rondasDelTorneo(torneo);
   return (
     <div className="fixture">
       {rondas.map((ronda) => (
         <section key={ronda} className="tarjeta ronda">
-          <h3>{nombreRonda(ronda, total, torneo.tipo)}</h3>
-          {torneo.partidos
+          <h3>{nombreRonda(ronda, total, liga ? "campeonato" : "torneo")}</h3>
+          {partidos
             .filter((p) => p.ronda === ronda)
             .map((p) => (
               <div key={p.id_partido}>{renderPartido(p)}</div>
             ))}
-          {libresDeLaFecha(torneo, torneo.partidos.filter((p) => p.ronda === ronda)).map((e) => (
+          {libresDeLaFecha(liga && equipos, partidos.filter((p) => p.ronda === ronda)).map((e) => (
             <div key={e.id_equipo} className="partido partido-libre">
               <span className="partido-equipo">{e.nombre}</span>
               <span className="texto-suave">libre esta fecha</span>
@@ -272,11 +278,32 @@ export function Fixture({ torneo, renderPartido = (p) => <Partido partido={p} />
   );
 }
 
+// Fase de grupos: por cada grupo, su tabla (marcando los que pasan) y sus partidos
+export function FaseDeGrupos({ torneo, renderPartido }) {
+  return (
+    <div className="fase-grupos">
+      {torneo.grupos.map(({ grupo, tabla }) => (
+        <section key={grupo} className="grupo" aria-labelledby={`grupo-${grupo}`}>
+          <h3 className="grupo-titulo" id={`grupo-${grupo}`}>Grupo {grupo}</h3>
+          <TablaPosiciones tabla={tabla} clasifican={torneo.clasifican_por_grupo} />
+          <Fixture
+            torneo={torneo}
+            partidos={torneo.partidos.filter((p) => p.grupo === grupo)}
+            liga
+            equipos={torneo.equipos.filter((e) => e.grupo === grupo)}
+            renderPartido={renderPartido}
+          />
+        </section>
+      ))}
+    </div>
+  );
+}
+
 // Datos generales del torneo
 export function InfoTorneo({ torneo }) {
   return (
     <ul className="info-torneo">
-      <li><small>Formato</small>{FORMATO[torneo.tipo]}</li>
+      <li><small>Formato</small>{detalleFormato(torneo)}</li>
       {(torneo.direccion || torneo.telefono) && (
         <li className="info-donde">
           <small>Dónde</small>

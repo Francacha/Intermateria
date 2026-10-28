@@ -62,6 +62,11 @@ cliente y el front lleva a cada uno a su panel.
 | `canchas.sql` | `canchas`, `clientes`, `reservas` (turnos) |
 | `torneos.sql` | `torneos`, `equipos`, `partidos` |
 
+Los scripts de `database/` corren solo cuando se crea el volumen por primera
+vez. Los cambios posteriores están en [database/migraciones/](database/migraciones/)
+y se aplican a mano sobre una base que ya existe, por ejemplo:
+`docker exec -i canchas-db psql -U postgres -d canchas < database/migraciones/01-fase-de-grupos.sql`
+
 Las contraseñas se guardan cifradas con bcrypt. Dos turnos superpuestos en la
 misma cancha los rechaza la propia base (restricción `EXCLUDE` sobre un rango
 de tiempo), así que vale aunque dos droplets intenten reservar a la vez; lo
@@ -194,7 +199,10 @@ Las rutas marcadas con rol requieren `Authorization: Bearer <token>` de ese tipo
 | GET, POST | `/api/torneos` | empresa | torneos del complejo / crear |
 | GET, PUT, DELETE | `/api/torneos/:id` | empresa | ver, editar o cancelar (`estado: "cancelado"`), eliminar |
 | POST, DELETE | `/api/torneos/:id/equipos[/:idEquipo]` | empresa | agregar / quitar equipo |
-| POST | `/api/torneos/:id/fixture` | empresa | cerrar inscripción y armar fixture o llave |
+| POST | `/api/torneos/:id/grupos/sorteo` | empresa | sortear los grupos al azar (formato grupos) |
+| PUT | `/api/torneos/:id/equipos/:idEquipo/grupo` | empresa | mover un equipo de grupo (`{ grupo: "B" }` o `null`) |
+| POST | `/api/torneos/:id/fixture` | empresa | cerrar inscripción y armar fixture, llave o fase de grupos |
+| POST | `/api/torneos/:id/llave` | empresa | cerrar la fase de grupos y armar la llave con los clasificados |
 | PUT | `/api/torneos/:id/partidos/:idPartido` | empresa | resultado y/o cancha, día y hora |
 | GET | `/api/empresas`, `/api/empresas/resumen` | admin | empresas con su actividad / totales |
 | GET, POST | `/api/empresas`, `/api/empresas/:id` | admin | ver / crear (con contraseña opcional) |

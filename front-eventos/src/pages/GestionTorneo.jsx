@@ -3,28 +3,34 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import Confirmar from "../components/Confirmar";
 import { Cargando, ConError } from "../components/Estados";
 import TorneoModal from "../components/TorneoModal";
-import { Campeon, EstadoTorneo, Fixture, Partido, TablaPosiciones } from "../components/Torneo";
+import { Campeon, EstadoTorneo, FaseDeGrupos, Fixture, Partido, TablaPosiciones } from "../components/Torneo";
 import { mensajeDeError } from "../service/api";
 import {
   actualizarPartido,
   actualizarTorneo,
   agregarEquipo,
+  armarLlave,
+  cambiarGrupo,
   eliminarTorneo,
   generarFixture,
   obtenerCanchas,
   obtenerTorneo,
-  quitarEquipo
+  quitarEquipo,
+  sortearGrupos
 } from "../service/complejoService";
 import useCarga from "../service/useCarga";
 import {
   DEPORTE,
-  FORMATO,
   capitalizar,
+  describirGrupos,
+  detalleFormato,
   fechaCorta,
   hora,
+  letrasDeGrupos,
   nombreRonda,
   pesos,
-  rondasDeLlave
+  rondasDeLlave,
+  rondasDelTorneo
 } from "../utils/formato";
 
 // Palabras según el deporte: en pádel se anotan parejas, en fútbol equipos
@@ -40,6 +46,16 @@ const conArticulo = (ronda) => `${/^(Cuartos|Octavos)/.test(ronda) ? "los" : "la
 
 // Partidos que se juegan de verdad (los que pasan libre no cuentan)
 const reales = (partidos) => partidos.filter((p) => p.id_visitante !== null);
+
+// Fase de grupos: cuántos quedan en cada grupo al cerrar la inscripción. Los que
+// no tienen grupo van al que tiene menos (igual que hace el servidor).
+const tamanosAlCerrar = (torneo) => {
+  const letras = letrasDeGrupos(torneo.cantidad_grupos);
+  const tamanos = letras.map((l) => torneo.equipos.filter((e) => e.grupo === l).length);
+  const sinGrupo = torneo.equipos.filter((e) => !letras.includes(e.grupo)).length;
+  for (let i = 0; i < sinGrupo; i++) tamanos[tamanos.indexOf(Math.min(...tamanos))]++;
+  return tamanos;
+};
 
 // "Sáb 18/10 11:30 · Pádel 2"
 const cuandoYDonde = (p) => `${capitalizar(fechaCorta(p.fecha))} ${hora(p.hora)}${p.cancha ? ` · ${p.cancha}` : ""}`;
@@ -93,12 +109,21 @@ function Gestion({ inicial, canchas }) {
 
   const p = palabras(torneo);
   const esLlave = torneo.tipo === "torneo";
+  const conGrupos = torneo.tipo === "grupos";
   const abierto = torneo.estado === "inscripcion";
   const lugares = torneo.cupo - torneo.inscriptos;
-  const ultimaRonda = Math.max(0, ...torneo.partidos.map((x) => x.ronda));
-  const totalRondas = rondasDeLlave(torneo.equipos.length);
+  // Partidos de eliminación directa (en un torneo con grupos, los que vienen después de los grupos)
+  const llave = torneo.tipo === "campeonato" ? [] : torneo.partidos.filter((x) => x.grupo === null);
+  const ultimaRonda = Math.max(0, ...llave.map((x) => x.ronda));
+  const totalRondas = rondasDelTorneo(torneo);
   const canchasDelDeporte = canchas.filter((c) => c.deporte === torneo.deporte);
-  const armar = esLlave ? "la llave" : "el fixture";
+  const armar = esLlave ? "la llave" : conGrupos ? "el fixture de grupos" : "el fixture";
+  const queArmar = esLlave ? "llave" : conGrupos ? "grupos" : "fixture";
+  // Con fase de grupos, cada grupo necesita al menos uno más de los que pasan
+  const minimo = conGrupos ? torneo.cantidad_grupos * (torneo.clasifican_por_grupo + 1) : 2;
+  const puedeCerrar = torneo.inscriptos >= minimo;
+  const gruposTerminados =
+    conGrupos && torneo.estado === "en_curso" && llave.length === 0 && reales(torneo.partidos).every((x) => x.estado === "jugado");
 
   useEffect(() => {
     document.title = `${torneo.nombre} · Mis torneos`;
@@ -122,6 +147,25 @@ function Gestion({ inicial, canchas }) {
     const n = torneo.inscriptos;
     const despues = ` Después ya no se pueden sumar ni quitar ${p.varios}.`;
     const vacios = lugares > 0 ? ` Quedan ${cuenta(lugares, "lugar", "lugares")} sin ocupar.` : "";
+    if (conGrupos) {
+      const letras = letrasDeGrupos(torneo.cantidad_grupos);
+      const sinGrupo = torneo.equipos.filter((e) => !letras.includes(e.grupo)).length;
+      const reparto =
+        sinGrupo === n
+          ? " Como no armaste los grupos, se sortean ahora."
+          : sinGrupo > 0
+            ? ` ${sinGrupo === 1 ? `1 ${p.uno} sin grupo va` : `${sinGrupo} ${p.varios} sin grupo van`} a los grupos con menos ${p.varios}.`
+            : "";
+      const grupos = describirGrupos({
+        equipos: n,
+        grupos: torneo.cantidad_grupos,
+        pasan: torneo.clasifican_por_grupo,
+        idaVuelta: torneo.ida_vuelta,
+        varios: p.varios,
+        tamanos: tamanosAlCerrar(torneo)
+      });
+      return `${grupos}${reparto}${vacios}${despues}`;
+    }
     if (esLlave) {
       let tamano = 1;
       while (tamano < n) tamano *= 2;
@@ -141,8 +185,8 @@ function Gestion({ inicial, canchas }) {
 
   // Antes de guardar un resultado: ¿cierra la ronda (o termina el torneo)?
   const avisoDeCierre = (partido, envio) => {
-    if (!esLlave || envio.resultado_local == null) return null;
-    const ronda = torneo.partidos.filter((x) => x.ronda === partido.ronda);
+    if (torneo.tipo === "campeonato" || partido.grupo !== null || envio.resultado_local == null) return null;
+    const ronda = llave.filter((x) => x.ronda === partido.ronda);
     const otros = reales(ronda).filter((x) => x.id_partido !== partido.id_partido);
     if (!otros.every((x) => x.estado === "jugado")) return null;
     const actual = nombreRonda(partido.ronda, totalRondas, "torneo");
@@ -178,7 +222,7 @@ function Gestion({ inicial, canchas }) {
 
   const resumen = [
     DEPORTE[torneo.deporte],
-    FORMATO[torneo.tipo],
+    detalleFormato(torneo),
     torneo.categoria,
     `${capitalizar(fechaCorta(torneo.fecha_inicio.slice(0, 10)))}${torneo.fecha_fin ? ` al ${fechaCorta(torneo.fecha_fin.slice(0, 10))}` : ""}`,
     Number(torneo.precio_inscripcion) > 0 ? `${pesos(torneo.precio_inscripcion)} por ${p.uno}` : "Inscripción gratis",
@@ -192,9 +236,44 @@ function Gestion({ inicial, canchas }) {
       className={`boton ${principal ? "" : "boton-fantasma"}`}
       onClick={() => setConfirmar({ tipo: "fixture" })}
     >
-      Cerrar inscripción y armar {esLlave ? "llave" : "fixture"}
+      Cerrar inscripción y armar {queArmar}
     </button>
   );
+
+  // Partido con resultado y programación; los de grupos se corrigen hasta que se arma la
+  // llave, y en la llave solo los de la última ronda
+  const renderPartido = (x) => {
+    if (x.id_visitante === null || torneo.estado === "cancelado") return <Partido partido={x} />;
+    const deGrupos = x.grupo !== null;
+    return (
+      <PartidoEditable
+        partido={x}
+        canchas={canchasDelDeporte}
+        palabras={p}
+        resultadoEditable={torneo.tipo === "campeonato" || (deGrupos ? llave.length === 0 : x.ronda === ultimaRonda)}
+        permiteEmpate={torneo.deporte === "futbol" && (torneo.tipo === "campeonato" || deGrupos)}
+        guardado={guardado === x.id_partido}
+        onGuardar={(envio) => guardarPartido(x, envio)}
+      />
+    );
+  };
+
+  const ayudaFixture = (texto) =>
+    torneo.estado !== "cancelado" && (
+      <p className="texto-suave ayuda-fixture">
+        Cargá el resultado de cada partido y programalo en una cancha: el horario queda bloqueado en tu agenda de turnos. {texto}
+      </p>
+    );
+
+  const guardarGrupo = async (equipo, grupo) => {
+    try {
+      const { data } = await cambiarGrupo(torneo.id_torneo, equipo.id_equipo, grupo);
+      setTorneo(data);
+      return null;
+    } catch (err) {
+      return mensajeDeError(err, "No se pudo cambiar el grupo.");
+    }
+  };
 
   return (
     <main className="contenedor panel">
@@ -219,8 +298,11 @@ function Gestion({ inicial, canchas }) {
         </div>
       </div>
 
-      <ProximoPaso torneo={torneo} lugares={lugares} armar={armar} palabras={p} totalRondas={totalRondas}>
-        {abierto && lugares <= 0 && torneo.inscriptos >= 2 && botonArmar(true)}
+      <ProximoPaso torneo={torneo} llave={llave} minimo={minimo} lugares={lugares} armar={armar} palabras={p} totalRondas={totalRondas}>
+        {abierto && lugares <= 0 && puedeCerrar && botonArmar(true)}
+        {gruposTerminados && (
+          <button className="boton" onClick={() => setConfirmar({ tipo: "llave" })}>Cerrar grupos y armar la llave</button>
+        )}
       </ProximoPaso>
 
       {listo && <p className="aviso-ok" role="status" tabIndex={-1} ref={mensajeListo}>{listo}</p>}
@@ -244,8 +326,20 @@ function Gestion({ inicial, canchas }) {
               }}
             />
           )}
-          <ListaEquipos torneo={torneo} palabras={p} onQuitar={(equipo) => setConfirmar({ tipo: "quitar", equipo })} />
-          {torneo.inscriptos >= 2 && lugares > 0 && (
+          <ListaEquipos
+            torneo={torneo}
+            palabras={p}
+            onQuitar={(equipo) => setConfirmar({ tipo: "quitar", equipo })}
+            onCambiarGrupo={conGrupos ? guardarGrupo : undefined}
+          />
+          {conGrupos && (
+            <ArmadoGrupos
+              torneo={torneo}
+              palabras={p}
+              onSortear={() => setConfirmar({ tipo: "sortear" })}
+            />
+          )}
+          {puedeCerrar && lugares > 0 && (
             <div className="cierre-inscripcion">
               <p className="texto-suave sin-margen">
                 ¿No esperás más {p.varios}? Podés cerrar la inscripción con {cuenta(torneo.inscriptos, p.uno, p.varios)}.
@@ -254,34 +348,37 @@ function Gestion({ inicial, canchas }) {
             </div>
           )}
         </section>
+      ) : conGrupos ? (
+        <div className="detalle-grilla">
+          <section>
+            {llave.length > 0 && (
+              <>
+                <h2 className="seccion-titulo con-margen">Llave</h2>
+                {ayudaFixture("Cuando se juega toda la ronda, se arma la siguiente con los ganadores.")}
+                <Fixture torneo={torneo} partidos={llave} renderPartido={renderPartido} />
+              </>
+            )}
+            <h2 className="seccion-titulo con-margen">Fase de grupos</h2>
+            {llave.length === 0
+              ? ayudaFixture(
+                  `Podés corregir resultados hasta que armes la llave. ${
+                    torneo.clasifican_por_grupo === 1 ? "El primero de cada grupo pasa" : `Los ${torneo.clasifican_por_grupo} primeros de cada grupo pasan`
+                  } a la llave (marcados en la tabla).`
+                )
+              : <p className="texto-suave ayuda-fixture">La fase de grupos está cerrada: sus resultados ya no se pueden cambiar.</p>}
+            <FaseDeGrupos torneo={torneo} renderPartido={renderPartido} />
+          </section>
+          <aside className="tarjeta lateral">
+            <ListaEquipos torneo={torneo} palabras={p} compacta />
+          </aside>
+        </div>
       ) : (
         <div className={`detalle-grilla ${torneo.tabla ? "grilla-campeonato" : ""}`}>
           <section>
             <h2 className="seccion-titulo con-margen">{esLlave ? "Llave" : "Fixture"}</h2>
-            {torneo.partidos.length > 0 && torneo.estado !== "cancelado" && (
-              <p className="texto-suave ayuda-fixture">
-                Cargá el resultado de cada partido y programalo en una cancha: el horario queda bloqueado en tu agenda de turnos.
-                {esLlave && " Cuando se juega toda la ronda, se arma la siguiente con los ganadores."}
-              </p>
-            )}
-            <Fixture
-              torneo={torneo}
-              renderPartido={(x) =>
-                x.id_visitante === null || torneo.estado === "cancelado" ? (
-                  <Partido partido={x} />
-                ) : (
-                  <PartidoEditable
-                    partido={x}
-                    canchas={canchasDelDeporte}
-                    palabras={p}
-                    resultadoEditable={!esLlave || x.ronda === ultimaRonda}
-                    permiteEmpate={!esLlave && torneo.deporte === "futbol"}
-                    guardado={guardado === x.id_partido}
-                    onGuardar={(envio) => guardarPartido(x, envio)}
-                  />
-                )
-              }
-            />
+            {torneo.partidos.length > 0 &&
+              ayudaFixture(esLlave ? "Cuando se juega toda la ronda, se arma la siguiente con los ganadores." : "")}
+            <Fixture torneo={torneo} renderPartido={renderPartido} />
           </section>
           {torneo.tabla ? (
             <aside className="lateral-columna">
@@ -319,7 +416,7 @@ function Gestion({ inicial, canchas }) {
       {confirmar?.tipo === "fixture" && (
         <Confirmar
           titulo={`¿Cerrar la inscripción y armar ${armar}?`}
-          textoBoton={`Armar ${esLlave ? "llave" : "fixture"}`}
+          textoBoton={`Armar ${queArmar}`}
           onCerrar={() => setConfirmar(null)}
           onConfirmar={async () => {
             const { data } = await generarFixture(torneo.id_torneo);
@@ -329,6 +426,53 @@ function Gestion({ inicial, canchas }) {
           }}
         >
           <p>{vistaPrevia()}</p>
+        </Confirmar>
+      )}
+
+      {confirmar?.tipo === "sortear" && (
+        <Confirmar
+          titulo="¿Sortear los grupos?"
+          textoBoton="Sortear"
+          onCerrar={() => setConfirmar(null)}
+          onConfirmar={async () => {
+            const { data } = await sortearGrupos(torneo.id_torneo);
+            setTorneo(data);
+            setConfirmar(null);
+            avisar("Listo: se sortearon los grupos. Si querés, mové a mano los que necesites.");
+          }}
+        >
+          <p>
+            {cuenta(torneo.inscriptos, `${p.uno} ${p.inscripta}`, `${p.varios} ${p.inscripta}s`)} se reparten al azar en{" "}
+            {torneo.cantidad_grupos} grupos parejos.
+            {torneo.equipos.some((e) => e.grupo) && " Se pierde lo que hayas armado a mano."} Después podés mover a cualquiera de grupo.
+          </p>
+        </Confirmar>
+      )}
+
+      {confirmar?.tipo === "llave" && (
+        <Confirmar
+          titulo="¿Cerrar la fase de grupos y armar la llave?"
+          textoBoton="Armar la llave"
+          onCerrar={() => setConfirmar(null)}
+          onConfirmar={async () => {
+            const { data } = await armarLlave(torneo.id_torneo);
+            setTorneo(data);
+            setConfirmar(null);
+            avisar("Listo: se armó la llave. Programá sus partidos.");
+          }}
+        >
+          <p>Pasan a la llave:</p>
+          <ul className="clasificados">
+            {torneo.grupos.map((g) => (
+              <li key={g.grupo}>
+                <strong>Grupo {g.grupo}:</strong> {g.tabla.slice(0, torneo.clasifican_por_grupo).map((f) => f.nombre).join(", ")}
+              </li>
+            ))}
+          </ul>
+          <p>
+            Los mejor ubicados se cruzan con los peores y dos del mismo grupo no se enfrentan en la primera ronda. Después ya no
+            vas a poder cambiar los resultados de la fase de grupos.
+          </p>
         </Confirmar>
       )}
 
@@ -422,7 +566,7 @@ function Gestion({ inicial, canchas }) {
 }
 
 // Franja con lo que conviene hacer según el estado del torneo
-function ProximoPaso({ torneo, lugares, armar, palabras: p, totalRondas, children }) {
+function ProximoPaso({ torneo, llave, minimo, lugares, armar, palabras: p, totalRondas, children }) {
   let titulo;
   let detalle;
   if (torneo.estado === "finalizado") return <Campeon campeon={torneo.campeon} />;
@@ -431,9 +575,9 @@ function ProximoPaso({ torneo, lugares, armar, palabras: p, totalRondas, childre
     detalle = "Los partidos sin jugar salieron de tu agenda. Queda para consultar lo que se jugó.";
   } else if (torneo.estado === "inscripcion") {
     const n = torneo.inscriptos;
-    if (n < 2) {
+    if (n < minimo) {
       titulo = `Inscripción abierta: ${n} de ${torneo.cupo} ${p.varios}`;
-      detalle = `Necesitás al menos 2 para armar ${armar}. Se anotan desde la página pública o los cargás vos acá abajo.`;
+      detalle = `Necesitás al menos ${minimo} para armar ${armar}. Se anotan desde la página pública o los cargás vos acá abajo.`;
     } else if (lugares > 0) {
       titulo = `Faltan ${cuenta(lugares, p.uno, p.varios)} para llenar el cupo (${n} de ${torneo.cupo})`;
       detalle = `Cuando quieras, cerrá la inscripción y armá ${armar} con ${p.varios === "parejas" ? "las" : "los"} que haya.`;
@@ -444,13 +588,13 @@ function ProximoPaso({ torneo, lugares, armar, palabras: p, totalRondas, childre
   } else {
     const partidos = reales(torneo.partidos);
     const pendientes = partidos.filter((x) => x.estado !== "jugado");
-    if (torneo.tipo === "torneo") {
-      const ronda = Math.max(...torneo.partidos.map((x) => x.ronda));
-      const deLaRonda = partidos.filter((x) => x.ronda === ronda);
+    if (llave.length > 0) {
+      const ronda = Math.max(...llave.map((x) => x.ronda));
+      const deLaRonda = reales(llave).filter((x) => x.ronda === ronda);
       titulo = `${nombreRonda(ronda, totalRondas, "torneo")}: ${deLaRonda.filter((x) => x.estado === "jugado").length} de ${cuenta(deLaRonda.length, "partido jugado", "partidos jugados")}`;
     } else {
       const fecha = Math.min(...pendientes.map((x) => x.ronda));
-      titulo = `${partidos.length - pendientes.length} de ${cuenta(partidos.length, "partido jugado", "partidos jugados")}${Number.isFinite(fecha) ? ` · vamos por la fecha ${fecha}` : ""}`;
+      titulo = `${torneo.tipo === "grupos" ? "Fase de grupos: " : ""}${partidos.length - pendientes.length} de ${cuenta(partidos.length, "partido jugado", "partidos jugados")}${Number.isFinite(fecha) ? ` · vamos por la fecha ${fecha}` : ""}`;
     }
     const programados = pendientes
       .filter((x) => x.fecha && x.hora)
@@ -465,6 +609,10 @@ function ProximoPaso({ torneo, lugares, armar, palabras: p, totalRondas, childre
     ]
       .filter(Boolean)
       .join(" · ");
+    if (torneo.tipo === "grupos" && llave.length === 0 && pendientes.length === 0) {
+      titulo = "Fase de grupos terminada";
+      detalle = "Revisá los resultados y las tablas: cuando armes la llave ya no se van a poder cambiar.";
+    }
   }
   return (
     <div className="paso-torneo">
@@ -561,7 +709,7 @@ function FormEquipo({ palabras: p, onAgregar }) {
   );
 }
 
-function ListaEquipos({ torneo, palabras: p, onQuitar, compacta = false }) {
+function ListaEquipos({ torneo, palabras: p, onQuitar, onCambiarGrupo, compacta = false }) {
   if (torneo.equipos.length === 0) {
     return compacta ? null : (
       <p className="tablero tablero-estado">
@@ -577,7 +725,9 @@ function ListaEquipos({ torneo, palabras: p, onQuitar, compacta = false }) {
           {torneo.equipos.map((e) => (
             <li key={e.id_equipo}>
               <strong>{e.nombre}</strong>
-              <small className="texto-suave">{[e.contacto_nombre, e.contacto_telefono].filter(Boolean).join(" · ")}</small>
+              <small className="texto-suave">
+                {[e.grupo && `Grupo ${e.grupo}`, e.contacto_nombre, e.contacto_telefono].filter(Boolean).join(" · ")}
+              </small>
             </li>
           ))}
         </ol>
@@ -587,7 +737,7 @@ function ListaEquipos({ torneo, palabras: p, onQuitar, compacta = false }) {
   return (
     <ol className="tablero lista-inscriptos">
       {torneo.equipos.map((e, i) => (
-        <li key={e.id_equipo} className="renglon renglon-equipo">
+        <li key={e.id_equipo} className={`renglon renglon-equipo ${onCambiarGrupo ? "con-grupo" : ""}`}>
           <span className="renglon-numero">{i + 1}</span>
           <div className="renglon-info">
             <strong>{e.nombre}</strong>
@@ -597,12 +747,74 @@ function ListaEquipos({ torneo, palabras: p, onQuitar, compacta = false }) {
             {e.integrantes && <span className="texto-suave">{e.integrantes}</span>}
           </div>
           <span className="pastilla-origen">{e.id_cliente ? "Se anotó online" : p.cargada}</span>
+          {onCambiarGrupo && <SelectorGrupo equipo={e} cantidad={torneo.cantidad_grupos} onCambiar={onCambiarGrupo} />}
           <button className="accion-texto peligro" onClick={() => onQuitar(e)}>
             Quitar<span className="solo-lectores"> a {e.nombre}</span>
           </button>
         </li>
       ))}
     </ol>
+  );
+}
+
+// Grupo de un inscripto, para armar los grupos a mano
+function SelectorGrupo({ equipo, cantidad, onCambiar }) {
+  const [error, setError] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const cambiar = async (e) => {
+    setEnviando(true);
+    setError((await onCambiar(equipo, e.target.value || null)) ?? "");
+    setEnviando(false);
+  };
+  return (
+    <span className="selector-grupo">
+      <select value={equipo.grupo ?? ""} onChange={cambiar} disabled={enviando} aria-label={`Grupo de ${equipo.nombre}`}>
+        <option value="">Sin grupo</option>
+        {letrasDeGrupos(cantidad).map((l) => <option key={l} value={l}>Grupo {l}</option>)}
+      </select>
+      {error && <small className="campo-error" role="alert">{error}</small>}
+    </span>
+  );
+}
+
+// Cómo quedan los grupos mientras está abierta la inscripción
+function ArmadoGrupos({ torneo, palabras: p, onSortear }) {
+  const letras = letrasDeGrupos(torneo.cantidad_grupos);
+  const sinGrupo = torneo.equipos.filter((e) => !letras.includes(e.grupo));
+  const hayArmados = sinGrupo.length < torneo.equipos.length;
+  return (
+    <section className="armado-grupos" aria-labelledby="titulo-grupos">
+      <div className="barra-grupos">
+        <div>
+          <h2 className="seccion-titulo sin-margen" id="titulo-grupos">Grupos</h2>
+          <p className="texto-suave sin-margen">
+            Sortealos al azar o elegí el grupo de cada {p.uno} en la lista de arriba.
+            {sinGrupo.length > 0 && ` ${hayArmados ? `Los que queden sin grupo` : `Si no los armás, todos`} se sortean al cerrar la inscripción.`}
+          </p>
+        </div>
+        {torneo.equipos.length > 0 && (
+          <button className="boton boton-fantasma" onClick={onSortear}>{hayArmados ? "Volver a sortear" : "Sortear grupos"}</button>
+        )}
+      </div>
+      <div className="grilla-grupos">
+        {letras.map((l) => {
+          const delGrupo = torneo.equipos.filter((e) => e.grupo === l);
+          return (
+            <div key={l} className="tarjeta grupo-armado">
+              <h3>Grupo {l} <span className="grupo-cantidad">{delGrupo.length}</span></h3>
+              {delGrupo.length > 0 ? (
+                <ul>{delGrupo.map((e) => <li key={e.id_equipo}>{e.nombre}</li>)}</ul>
+              ) : (
+                <p className="texto-suave sin-margen">Vacío</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {sinGrupo.length > 0 && hayArmados && (
+        <p className="texto-suave sin-margen">Sin grupo: {sinGrupo.map((e) => e.nombre).join(", ")}</p>
+      )}
+    </section>
   );
 }
 

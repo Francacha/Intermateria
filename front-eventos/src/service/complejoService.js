@@ -31,4 +31,7 @@ export const eliminarTorneo = (id) => api.delete(`/torneos/${id}`);
 export const agregarEquipo = (id, equipo) => api.post(`/torneos/${id}/equipos`, equipo);
 export const quitarEquipo = (id, idEquipo) => api.delete(`/torneos/${id}/equipos/${idEquipo}`);
 export const generarFixture = (id) => api.post(`/torneos/${id}/fixture`);
+export const sortearGrupos = (id) => api.post(`/torneos/${id}/grupos/sorteo`);
+export const cambiarGrupo = (id, idEquipo, grupo) => api.put(`/torneos/${id}/equipos/${idEquipo}/grupo`, { grupo });
+export const armarLlave = (id) => api.post(`/torneos/${id}/llave`);
 export const actualizarPartido = (id, idPartido, datos) => api.put(`/torneos/${id}/partidos/${idPartido}`, datos);

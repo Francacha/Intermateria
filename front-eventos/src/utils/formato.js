@@ -18,7 +18,18 @@ export const detalleDeCancha = (cancha) =>
 
 export const TIPO_TORNEO = { torneo: "Torneo", campeonato: "Campeonato" };
 // Un solo nombre para cada formato, en filtros, listas y detalle
-export const FORMATO = { torneo: "Eliminación directa", campeonato: "Todos contra todos" };
+export const FORMATO = { torneo: "Eliminación directa", campeonato: "Todos contra todos", grupos: "Grupos + eliminación" };
+
+// "Grupos + eliminación · 4 grupos, pasan los 2 primeros · ida y vuelta"
+export const detalleFormato = (torneo) =>
+  [
+    FORMATO[torneo.tipo],
+    torneo.tipo === "grupos" &&
+      `${torneo.cantidad_grupos} grupos, ${torneo.clasifican_por_grupo === 1 ? "pasa el primero" : `pasan los ${torneo.clasifican_por_grupo} primeros`}`,
+    torneo.ida_vuelta && "ida y vuelta"
+  ]
+    .filter(Boolean)
+    .join(" · ");
 export const ESTADO_TORNEO = {
   inscripcion: "Inscripción abierta",
   en_curso: "En curso",
@@ -152,6 +163,54 @@ export const nombreRonda = (ronda, totalRondas, tipo) => {
 
 // Cantidad de rondas de una llave para n equipos
 export const rondasDeLlave = (equipos) => Math.max(1, Math.ceil(Math.log2(Math.max(2, equipos))));
+
+// Rondas de la llave de un torneo: con fase de grupos, la juegan solo los clasificados
+export const rondasDelTorneo = (torneo) =>
+  rondasDeLlave(torneo.tipo === "grupos" ? torneo.cantidad_grupos * torneo.clasifican_por_grupo : torneo.equipos.length);
+
+// Letras de los grupos de un torneo: ["A", "B", "C"]
+export const letrasDeGrupos = (cantidad) => [..."ABCDEFGH".slice(0, cantidad)];
+
+// Cuántos equipos quedan en cada grupo si se reparten parejos: 10 en 3 → [4, 3, 3]
+export const tamanosDeGrupos = (equipos, grupos) =>
+  Array.from({ length: grupos }, (_, i) => Math.floor(equipos / grupos) + (i < equipos % grupos ? 1 : 0));
+
+// Opciones válidas de la fase de grupos para un cupo: cada grupo con al menos 2
+// equipos y que pase al menos uno menos de los que juegan
+export const maximoDeGrupos = (cupo) => Math.min(8, Math.floor(cupo / 2));
+export const maximoQuePasan = (cupo, grupos) => Math.max(1, Math.floor(cupo / grupos) - 1);
+
+// Cómo queda un torneo con fase de grupos, en palabras:
+// "16 equipos en 4 grupos de 4, todos contra todos a una rueda (3 fechas). Pasan los 2 primeros..."
+// tamanos: cuántos hay en cada grupo, si ya están armados (si no, se reparten parejos)
+export const describirGrupos = ({ equipos, grupos, pasan, idaVuelta, varios, tamanos = tamanosDeGrupos(equipos, grupos) }) => {
+  const chico = Math.min(...tamanos);
+  const grande = Math.max(...tamanos);
+  const fechas = (grande % 2 ? grande : grande - 1) * (idaVuelta ? 2 : 1);
+  const clasificados = grupos * pasan;
+  let tamano = 1;
+  while (tamano < clasificados) tamano *= 2;
+  const libres = tamano - clasificados;
+  const rondas = rondasDeLlave(clasificados);
+  const ronda = (n) => nombreRonda(n, rondas, "torneo").toLowerCase();
+  const articulo = (nombre) => `${/^(cuartos|octavos)/.test(nombre) ? "los" : "la"} ${nombre}`;
+
+  const quienes = pasan === 1 ? "el primero" : `los ${pasan} primeros`;
+  let llave;
+  if (rondas === 1) llave = "juegan la final";
+  else if (libres === 0) llave = `la llave arranca en ${ronda(1)} con ${clasificados} ${varios}`;
+  else {
+    const mejores = libres <= grupos ? "mejores primeros" : "mejor ubicados";
+    llave =
+      `${libres === 1 ? "el mejor primero pasa" : `los ${libres} ${mejores} pasan`} directo a ${articulo(ronda(2))} ` +
+      `y ${clasificados - libres === 2 ? "los otros dos juegan" : "el resto juega"} ${articulo(ronda(1))}`;
+  }
+  return (
+    `${equipos} ${varios} en ${grupos} grupos de ${chico === grande ? chico : `${chico} o ${grande}`}, ` +
+    `todos contra todos ${idaVuelta ? "ida y vuelta" : "a una rueda"} (${fechas} ${fechas === 1 ? "fecha" : "fechas"}). ` +
+    `Pasa${pasan === 1 ? "" : "n"} ${quienes} de cada grupo (${clasificados} en total): ${llave}.`
+  );
+};
 
 // CUIT: va poniendo los guiones mientras se escribe ("30123" → "30-123", hasta "30-12345678-1")
 export const formatearCuit = (texto) => {
