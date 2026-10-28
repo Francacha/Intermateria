@@ -8,7 +8,7 @@
 # Todos los datos (empresas, canchas, turnos, torneos, clientes) están en PostgreSQL.
 #
 # Solo Nginx publica un puerto hacia afuera; la API queda en la red interna
-# "red_canchas". PostgreSQL además escucha en 127.0.0.1:5432 (solo esta PC) para
+# "red_canchas". PostgreSQL además escucha en 127.0.0.1:5435 (solo esta PC) para
 # poder correr la API con "npm run dev" usando el .env.
 
 # Configuración común a todas las réplicas de la API
@@ -41,7 +41,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: canchas
     ports:
-      - "127.0.0.1:5432:5432"                                 # solo accesible desde esta PC
+      - "127.0.0.1:5435:5432"                                 # solo accesible desde esta PC
     volumes:
       - datos_postgres:/var/lib/postgresql/data              # persistencia
       - ./database/empresas.sql:/docker-entrypoint-initdb.d/01-empresas.sql:ro
