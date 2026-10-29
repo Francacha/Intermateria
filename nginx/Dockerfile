@@ -1,9 +1,9 @@
 # Etapa 1: compilar el front (React + Vite)
 FROM node:22-alpine AS build
 WORKDIR /front
-COPY front-eventos/package*.json ./
+COPY frontend/package*.json ./
 RUN npm ci
-COPY front-eventos/ ./
+COPY frontend/ ./
 # El front llama a /api en el mismo origen; Nginx lo deriva a los droplets
 ENV VITE_API_URL=/api
 RUN npm run build

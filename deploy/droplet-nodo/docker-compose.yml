@@ -6,7 +6,7 @@
 
 services:
   api:
-    build: ../..
+    build: ../../backend
     container_name: canchas-api
     restart: unless-stopped
     environment:

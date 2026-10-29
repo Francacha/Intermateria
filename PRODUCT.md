@@ -35,7 +35,7 @@ One place that covers both sides of the court. Players see every complex's open 
 
 ## Capabilities and Constraints
 
-- Stack: React 19 + Vite + react-router (front-eventos/), Node/Express API, PostgreSQL, Docker. Plain CSS (App.css, index.css). No UI library.
+- Stack: React 19 + Vite + react-router (frontend/), Node/Express API, PostgreSQL, Docker. Plain CSS (App.css, index.css). No UI library.
 - Domain vocabulary must match how complexes talk: turno, seña, cancha, complejo, torneo, campeonato, fixture, llave, tabla de posiciones, encargado, turno fijo.
 - The database rejects overlapping bookings on the same court (an EXCLUDE constraint), so double-booking cannot happen even across droplets.
 - A deactivated complex can't log in and doesn't appear on the public site.

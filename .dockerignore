@@ -1,5 +1,11 @@
+# Contexto de la imagen de Nginx (compila frontend/): no mandar dependencias ni secretos
 **/node_modules
 **/dist
-.env
 **/.env
+**/.env.*
 .git
+backend
+database
+deploy
+docs
+.impeccable

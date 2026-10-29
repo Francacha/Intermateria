@@ -62,6 +62,26 @@ DigitalOcean con **Nginx** como balanceador.
 Hay un único login: según el email, la API reconoce si es admin, dueño o
 encargado de un complejo, o cliente, y el front lleva a cada uno a su panel.
 
+## Estructura del repositorio
+
+```
+backend/      API (Node.js + Express) y su Dockerfile
+frontend/     Front (React + Vite)
+database/     Scripts SQL y el Dockerfile de la base (PostgreSQL)
+nginx/        Balanceador: compila frontend/ y lo sirve; reparte /api entre las APIs
+deploy/       Un docker-compose por droplet
+docs/         Relevamiento y entrevista al cliente
+docker-compose.yml   Los 3 droplets simulados en una sola PC
+```
+
+Cada parte tiene su propia imagen de Docker:
+
+| Imagen | Se construye desde | Contenido |
+| --- | --- | --- |
+| Base de datos | [database/Dockerfile](database/Dockerfile) | PostgreSQL 16 con las tablas y los datos de demo |
+| API | [backend/Dockerfile](backend/Dockerfile) | Node.js con la API (la misma imagen en los 3 droplets) |
+| Nginx + front | [nginx/Dockerfile](nginx/Dockerfile) | Compila `frontend/` y lo sirve con Nginx, que también balancea |
+
 ## Arquitectura
 
 ```
@@ -82,13 +102,16 @@ encargado de un complejo, o cliente, y el front lleva a cada uno a su panel.
 | **API** | Droplets 1, 2 y 3 (Docker) | Misma imagen en los tres. Cada respuesta lleva la cabecera `X-Droplet`. |
 | **PostgreSQL** | Droplet 1 (Docker) | Base única con todos los datos. Solo escucha en la IP privada. |
 
-**Tablas** ([database/](database/), se cargan en orden al crear el contenedor):
+**Tablas** ([database/](database/)): el [Dockerfile](database/Dockerfile) de la
+base copia los scripts a la imagen y PostgreSQL los ejecuta en orden la primera
+vez que arranca (con el volumen vacío):
 
 | Script | Tablas |
 | --- | --- |
 | `empresas.sql` | `administradores`, `empresas`, `perfiles` (horarios en JSONB, servicios en TEXT[]) |
 | `canchas.sql` | `canchas`, `clientes`, `reservas` (turnos) |
 | `torneos.sql` | `torneos`, `equipos`, `partidos` |
+| `gestion.sql` | `encargados`, `turnos_fijos`, `pagos`, `cierres` y las columnas nuevas de la entrevista |
 
 Las contraseñas se guardan cifradas con bcrypt. Dos turnos superpuestos en la
 misma cancha los rechaza la propia base (restricción `EXCLUDE` sobre un rango
@@ -143,7 +166,7 @@ Abrir http://localhost:8080.
 
 Si ya tenés PostgreSQL instalado en la PC usando el puerto 5432, cambiá el
 puerto que publica el contenedor: `DB_PUERTO_LOCAL=5433 docker compose up -d --build`
-(o poné `DB_PUERTO_LOCAL=5433` en el `.env` de la raíz).
+(o poné `DB_PUERTO_LOCAL=5433` en un archivo `.env` junto al `docker-compose.yml`).
 
 Los scripts SQL solo se ejecutan cuando el volumen de PostgreSQL está vacío.
 Para volver a los datos de demo: `docker compose down -v && docker compose up -d --build`.
@@ -169,7 +192,7 @@ docker logs canchas-api            # "API en droplet-N corriendo en el puerto 30
 - [docker-compose.yml](docker-compose.yml) — versión local: `x-api` define una
   vez la configuración de la API y `api1`, `api2`, `api3` la reutilizan
   (`<<: *api`), cambiando solo `DROPLET`. Red `red_canchas`, volumen
-  `datos_postgres`, `healthcheck` para que las APIs esperen a PostgreSQL.
+  `datos_postgres`, `healthcheck` (definido en [database/Dockerfile](database/Dockerfile)) para que las APIs esperen a PostgreSQL.
 - [deploy/droplet-1/docker-compose.yml](deploy/droplet-1/docker-compose.yml) —
   Nginx + API + PostgreSQL. PostgreSQL publica el 5432 solo en la IP privada.
 - [deploy/droplet-nodo/docker-compose.yml](deploy/droplet-nodo/docker-compose.yml) —
@@ -197,11 +220,12 @@ for i in 1 2 3 4 5 6; do curl -s http://<IP droplet 1>/api/instancia; echo; done
 **Tolerancia a fallos**: `docker stop canchas-api` en el droplet 2 → el sistema
 sigue respondiendo con los droplets 1 y 3. `docker start canchas-api` para volver.
 
-## Desarrollo local (sin Docker)
+## Desarrollo local (API y front sin Docker)
 
 ```bash
-cp .env.example .env && npm install && npm run dev       # API en :3001
-cd front-eventos && cp .env.example .env && npm install && npm run dev
+docker compose up -d db                                   # solo la base, en Docker
+cd backend && cp .env.example .env && npm install && npm run dev    # API en :3001
+cd frontend && cp .env.example .env && npm install && npm run dev   # front en :5173
 ```
 
 ## Endpoints

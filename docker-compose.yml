@@ -9,11 +9,11 @@
 #
 # Solo Nginx publica un puerto hacia afuera; la API queda en la red interna
 # "red_canchas". PostgreSQL además escucha en 127.0.0.1:5432 (solo esta PC) para
-# poder correr la API con "npm run dev" usando el .env.
+# poder correr la API con "npm run dev" desde backend/ usando backend/.env.
 
 # Configuración común a todas las réplicas de la API
 x-api: &api
-  build: .
+  build: ./backend
   restart: unless-stopped
   environment: &api-env
     PORT: 3000
@@ -33,27 +33,16 @@ x-api: &api
 services:
   # Base SQL única, compartida por todas las réplicas
   db:
-    image: postgres:16-alpine
+    build: ./database            # PostgreSQL con el esquema y los datos de demo
     container_name: canchas-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: canchas
     ports:
       # Solo accesible desde esta PC. Si ya usás el 5432 (PostgreSQL instalado), DB_PUERTO_LOCAL=5433
       - "127.0.0.1:${DB_PUERTO_LOCAL:-5432}:5432"
     volumes:
       - datos_postgres:/var/lib/postgresql/data              # persistencia
-      - ./database/empresas.sql:/docker-entrypoint-initdb.d/01-empresas.sql:ro
-      - ./database/canchas.sql:/docker-entrypoint-initdb.d/02-canchas.sql:ro
-      - ./database/torneos.sql:/docker-entrypoint-initdb.d/03-torneos.sql:ro
-      - ./database/gestion.sql:/docker-entrypoint-initdb.d/04-gestion.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
     networks:
       - red_canchas
 
