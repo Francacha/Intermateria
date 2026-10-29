@@ -169,9 +169,10 @@ docker compose up -d --build     # usa docker-compose.yml de la raíz
 
 Abrir http://localhost:8080.
 
-Si ya tenés PostgreSQL instalado en la PC usando el puerto 5432, cambiá el
-puerto que publica el contenedor: `DB_PUERTO_LOCAL=5433 docker compose up -d --build`
-(o poné `DB_PUERTO_LOCAL=5433` en un archivo `.env` junto al `docker-compose.yml`).
+PostgreSQL del contenedor se publica en `127.0.0.1:5435` (el 5432 suele estar
+ocupado por un PostgreSQL instalado en la PC). Si el 5435 también está ocupado:
+`DB_PUERTO_LOCAL=5436 docker compose up -d --build` (o poné `DB_PUERTO_LOCAL` en
+un archivo `.env` junto al `docker-compose.yml`).
 
 Los scripts SQL solo se ejecutan cuando el volumen de PostgreSQL está vacío.
 Para volver a los datos de demo: `docker compose down -v && docker compose up -d --build`.
