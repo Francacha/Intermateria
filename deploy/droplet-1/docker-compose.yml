@@ -49,9 +49,8 @@ services:
     container_name: canchas-nginx
     restart: unless-stopped
     environment:
-      NODO1: api:3000                    # API de este mismo droplet
-      NODO2: ${IP_DROPLET2}:3000         # API del droplet 2 (IP privada)
-      NODO3: ${IP_DROPLET3}:3000         # API del droplet 3 (IP privada)
+      # API de este mismo droplet + las de los otros droplets (IP privada:3000)
+      NODOS: "api:3000 ${NODOS_REMOTOS}"
     ports:
       - "80:80"
     depends_on:

@@ -76,9 +76,7 @@ services:
     container_name: canchas-nginx
     restart: unless-stopped
     environment:
-      NODO1: api1:3000
-      NODO2: api2:3000
-      NODO3: api3:3000
+      NODOS: "api1:3000 api2:3000 api3:3000"
     ports:
       - "8080:80"
     depends_on:

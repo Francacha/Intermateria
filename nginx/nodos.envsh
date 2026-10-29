@@ -1,0 +1,16 @@
+#!/bin/sh
+# Lo ejecuta la imagen oficial de Nginx al arrancar (los .envsh se cargan con
+# "source", así la variable queda disponible para el envsubst de la plantilla).
+# NODOS="api1:3000 api2:3000" -> una línea "server" por nodo del upstream.
+
+if [ -z "$NODOS" ]; then
+  echo "Falta la variable NODOS (lista de APIs, por ejemplo: api1:3000 api2:3000)" >&2
+  exit 1
+fi
+
+SERVIDORES_API=""
+for nodo in $NODOS; do
+  SERVIDORES_API="${SERVIDORES_API}server ${nodo} max_fails=3 fail_timeout=10s;
+        "
+done
+export SERVIDORES_API

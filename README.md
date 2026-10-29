@@ -133,7 +133,17 @@ usuario: por eso `JWT_SECRET` tiene que ser **el mismo en los 3 droplets**.
 
 ## Despliegue en los droplets
 
-Requisitos: los 3 droplets en la **misma VPC** (red privada) y con Docker
+**Desplegado ahora en 2 droplets:** http://162.243.173.208.nip.io
+
+| Droplet | IP pública | IP privada (VPC) | Corre |
+| --- | --- | --- | --- |
+| droplet-1 | 162.243.173.208 | 10.116.0.5 | Nginx (balanceador + front), API, PostgreSQL |
+| droplet-2 | 198.199.91.249 | 10.116.0.6 | API |
+
+Para sumar un tercer droplet: levantar `deploy/droplet-nodo` con `DROPLET=droplet-3`
+y agregar su `IP:3000` a `NODOS_REMOTOS` en el `.env` del droplet 1.
+
+Requisitos: los droplets en la **misma VPC** (red privada) y con Docker
 instalado (`curl -fsSL https://get.docker.com | sh`). En cada uno:
 
 ```bash
@@ -144,7 +154,7 @@ git clone https://github.com/Francacha/Intermateria.git && cd Intermateria
 
 ```bash
 cd deploy/droplet-1
-cp .env.example .env     # completar IPs privadas, contraseña y JWT_SECRET
+cp .env.example .env     # IP privada, NODOS_REMOTOS, contraseña y JWT_SECRET
 docker compose up -d --build
 ```
 
@@ -211,8 +221,10 @@ docker logs canchas-api            # "API en droplet-N corriendo en el puerto 30
 - `location /api/` → `proxy_pass` al upstream; `proxy_next_upstream` reintenta
   en otro droplet si uno falla.
 - `location /` sirve el front compilado (`try_files` para las rutas de React).
-- `${NODO1..3}` se completan al arrancar con las variables del compose (la
-  imagen oficial de Nginx hace `envsubst` sobre `/etc/nginx/templates`).
+- La lista de nodos sale de la variable `NODOS` del compose (por ejemplo
+  `"api:3000 10.116.0.6:3000"`): al arrancar, [nginx/nodos.envsh](nginx/nodos.envsh)
+  arma una línea `server` por nodo y la imagen oficial de Nginx hace `envsubst`
+  sobre `/etc/nginx/templates`. Sirve igual con 2 o con 3 droplets.
 
 **Ver el balanceo en vivo**
 
