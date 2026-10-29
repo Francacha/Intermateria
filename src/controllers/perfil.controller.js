@@ -1,4 +1,4 @@
-import { buscarPerfil, DIAS, guardarPerfil } from "../data/perfiles.js";
+import { buscarPerfil, DIAS, guardarPerfil, reglasPorDefecto } from "../data/perfiles.js";
 
 const HORA = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -23,7 +23,24 @@ const limpiarPerfil = (body) => {
     redes: {
       instagram: texto(body.redes?.instagram, 60),
       whatsapp: texto(body.redes?.whatsapp, 30)
-    }
+    },
+    reglas: limpiarReglas(body.reglas ?? {})
+  };
+};
+
+const entero = (valor, min, max, porDefecto) => {
+  const n = Number(valor);
+  return Number.isInteger(n) && n >= min && n <= max ? n : porDefecto;
+};
+
+// Reglas de reserva: lo que no es válido vuelve al valor por defecto
+const limpiarReglas = (reglas) => {
+  const base = reglasPorDefecto();
+  return {
+    porcentaje_sena: entero(reglas.porcentaje_sena, 0, 100, base.porcentaje_sena),
+    horas_cancelacion: entero(reglas.horas_cancelacion, 0, 168, base.horas_cancelacion),
+    hora_noche: HORA.test(reglas.hora_noche) ? reglas.hora_noche : base.hora_noche,
+    datos_transferencia: texto(reglas.datos_transferencia, 120)
   };
 };
 

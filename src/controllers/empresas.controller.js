@@ -8,11 +8,12 @@ import { normalizarCuit } from "../utils/comun.js";
 // Un id que no es un número entero no puede existir en la tabla
 const idValido = (id) => /^\d+$/.test(id);
 
-// El email de una empresa no puede ser el de un admin o un cliente (es el usuario del login)
+// El email de una empresa no puede ser el de un admin, un encargado o un cliente (es el usuario del login)
 const emailDeOtroUsuario = async (email) => {
   if (!email) return false;
   const { rows } = await pool.query(
     `SELECT 1 FROM administradores WHERE email = LOWER($1)
+     UNION ALL SELECT 1 FROM encargados WHERE email = LOWER($1)
      UNION ALL SELECT 1 FROM clientes WHERE email = LOWER($1)`,
     [email]
   );

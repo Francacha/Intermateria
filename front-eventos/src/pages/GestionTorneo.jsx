@@ -5,6 +5,7 @@ import { Cargando, ConError } from "../components/Estados";
 import TorneoModal from "../components/TorneoModal";
 import { Campeon, EstadoTorneo, FaseDeGrupos, Fixture, Partido, TablaPosiciones } from "../components/Torneo";
 import { mensajeDeError } from "../service/api";
+import { esDueno, useAuth } from "../context/auth";
 import {
   actualizarPartido,
   actualizarTorneo,
@@ -100,6 +101,9 @@ export default function GestionTorneo() {
 
 function Gestion({ inicial, canchas }) {
   const navigate = useNavigate();
+  // Crear, editar, cancelar y armar el fixture lo hace el dueño; los encargados inscriben y cargan resultados
+  const { empresa } = useAuth();
+  const dueno = esDueno(empresa);
   const [torneo, setTorneo] = useState(inicial);
   const [editando, setEditando] = useState(false);
   const [confirmar, setConfirmar] = useState(null); // { tipo, ...datos } del diálogo abierto
@@ -231,7 +235,7 @@ function Gestion({ inicial, canchas }) {
     .filter(Boolean)
     .join(" · ");
 
-  const botonArmar = (principal) => (
+  const botonArmar = (principal) => dueno && (
     <button
       className={`boton ${principal ? "" : "boton-fantasma"}`}
       onClick={() => setConfirmar({ tipo: "fixture" })}
@@ -288,19 +292,21 @@ function Gestion({ inicial, canchas }) {
         </div>
         <div className="acciones acciones-torneo">
           <Link className="boton boton-fantasma" to={`/torneos/${torneo.id_torneo}`}>Ver página pública</Link>
-          {torneo.estado !== "cancelado" && (
+          {dueno && torneo.estado !== "cancelado" && (
             <button className="boton boton-fantasma" onClick={() => setEditando(true)}>Editar</button>
           )}
-          {["inscripcion", "en_curso"].includes(torneo.estado) && (
+          {dueno && ["inscripcion", "en_curso"].includes(torneo.estado) && (
             <button className="accion-texto peligro" onClick={() => setConfirmar({ tipo: "cancelar" })}>Cancelar torneo</button>
           )}
-          <button className="accion-texto peligro" onClick={() => setConfirmar({ tipo: "eliminar" })}>Eliminar torneo</button>
+          {dueno && (
+            <button className="accion-texto peligro" onClick={() => setConfirmar({ tipo: "eliminar" })}>Eliminar torneo</button>
+          )}
         </div>
       </div>
 
       <ProximoPaso torneo={torneo} llave={llave} minimo={minimo} lugares={lugares} armar={armar} palabras={p} totalRondas={totalRondas}>
         {abierto && lugares <= 0 && puedeCerrar && botonArmar(true)}
-        {gruposTerminados && (
+        {dueno && gruposTerminados && (
           <button className="boton" onClick={() => setConfirmar({ tipo: "llave" })}>Cerrar grupos y armar la llave</button>
         )}
       </ProximoPaso>
@@ -330,13 +336,13 @@ function Gestion({ inicial, canchas }) {
             torneo={torneo}
             palabras={p}
             onQuitar={(equipo) => setConfirmar({ tipo: "quitar", equipo })}
-            onCambiarGrupo={conGrupos ? guardarGrupo : undefined}
+            onCambiarGrupo={conGrupos && dueno ? guardarGrupo : undefined}
           />
           {conGrupos && (
             <ArmadoGrupos
               torneo={torneo}
               palabras={p}
-              onSortear={() => setConfirmar({ tipo: "sortear" })}
+              onSortear={dueno ? () => setConfirmar({ tipo: "sortear" }) : undefined}
             />
           )}
           {puedeCerrar && lugares > 0 && (
@@ -777,7 +783,8 @@ function SelectorGrupo({ equipo, cantidad, onCambiar }) {
   );
 }
 
-// Cómo quedan los grupos mientras está abierta la inscripción
+// Cómo quedan los grupos mientras está abierta la inscripción. Sin onSortear (encargados)
+// solo se muestran: los grupos los arma el dueño.
 function ArmadoGrupos({ torneo, palabras: p, onSortear }) {
   const letras = letrasDeGrupos(torneo.cantidad_grupos);
   const sinGrupo = torneo.equipos.filter((e) => !letras.includes(e.grupo));
@@ -788,11 +795,14 @@ function ArmadoGrupos({ torneo, palabras: p, onSortear }) {
         <div>
           <h2 className="seccion-titulo sin-margen" id="titulo-grupos">Grupos</h2>
           <p className="texto-suave sin-margen">
-            Sortealos al azar o elegí el grupo de cada {p.uno} en la lista de arriba.
-            {sinGrupo.length > 0 && ` ${hayArmados ? `Los que queden sin grupo` : `Si no los armás, todos`} se sortean al cerrar la inscripción.`}
+            {onSortear
+              ? `Sortealos al azar o elegí el grupo de cada ${p.uno} en la lista de arriba.${
+                  sinGrupo.length > 0 ? ` ${hayArmados ? "Los que queden sin grupo" : "Si no los armás, todos"} se sortean al cerrar la inscripción.` : ""
+                }`
+              : `Los grupos los arma el dueño del complejo.${sinGrupo.length > 0 ? " Los que queden sin grupo se sortean al cerrar la inscripción." : ""}`}
           </p>
         </div>
-        {torneo.equipos.length > 0 && (
+        {onSortear && torneo.equipos.length > 0 && (
           <button className="boton boton-fantasma" onClick={onSortear}>{hayArmados ? "Volver a sortear" : "Sortear grupos"}</button>
         )}
       </div>
@@ -820,6 +830,9 @@ function ArmadoGrupos({ torneo, palabras: p, onSortear }) {
 
 // Valores del partido que vienen del servidor; si cambian, la fila se actualiza
 const valoresDe = (partido) => ({
+  // "local" o "visitante" si ese equipo no se presentó (pierde el partido)
+  incomparecencia:
+    partido.incomparecencia == null ? "" : partido.incomparecencia === partido.id_local ? "local" : "visitante",
   resultado_local: partido.resultado_local ?? "",
   resultado_visitante: partido.resultado_visitante ?? "",
   id_cancha: partido.id_cancha ?? "",
@@ -851,8 +864,10 @@ function PartidoEditable({ partido, canchas, palabras: p, resultadoEditable, per
   };
 
   const cambioResultado =
+    datos.incomparecencia !== inicial.incomparecencia ||
     String(datos.resultado_local) !== String(inicial.resultado_local) ||
     String(datos.resultado_visitante) !== String(inicial.resultado_visitante);
+  const noVino = datos.incomparecencia !== "";
   const cambioPrograma =
     String(datos.id_cancha) !== String(inicial.id_cancha) || datos.fecha !== inicial.fecha || datos.hora !== inicial.hora;
   const hayCambios = cambioResultado || cambioPrograma;
@@ -862,7 +877,7 @@ function PartidoEditable({ partido, canchas, palabras: p, resultadoEditable, per
     if (enviando || !hayCambios) return;
     const local = String(datos.resultado_local);
     const visitante = String(datos.resultado_visitante);
-    if (cambioResultado) {
+    if (cambioResultado && !noVino) {
       if ((local === "") !== (visitante === "")) {
         setError(`Cargá el resultado de ${p.lasDos}.`);
         (local === "" ? campoLocal : campoVisitante).current?.focus();
@@ -875,7 +890,9 @@ function PartidoEditable({ partido, canchas, palabras: p, resultadoEditable, per
       }
     }
     const envio = {};
-    if (cambioResultado) {
+    if (cambioResultado && noVino) {
+      envio.incomparecencia = datos.incomparecencia;
+    } else if (cambioResultado) {
       envio.resultado_local = local === "" ? null : Number(local);
       envio.resultado_visitante = visitante === "" ? null : Number(visitante);
     }
@@ -891,11 +908,14 @@ function PartidoEditable({ partido, canchas, palabras: p, resultadoEditable, per
   };
 
   const jugado = partido.estado === "jugado";
+  const ausente = valoresDe(partido).incomparecencia;
   const gana = (lado) =>
     jugado &&
-    (lado === "local"
-      ? partido.resultado_local > partido.resultado_visitante
-      : partido.resultado_visitante > partido.resultado_local);
+    (ausente
+      ? ausente !== lado
+      : lado === "local"
+        ? partido.resultado_local > partido.resultado_visitante
+        : partido.resultado_visitante > partido.resultado_local);
   const quien = `${partido.local} contra ${partido.visitante}`;
 
   return (
@@ -909,9 +929,9 @@ function PartidoEditable({ partido, canchas, palabras: p, resultadoEditable, per
           min="0"
           max="99"
           aria-label={`Resultado de ${partido.local}`}
-          disabled={!resultadoEditable}
+          disabled={!resultadoEditable || noVino}
           readOnly={enviando}
-          value={datos.resultado_local}
+          value={noVino ? "" : datos.resultado_local}
           onChange={(e) => cambiar("resultado_local", e.target.value)}
           aria-invalid={Boolean(error) || undefined}
         />
@@ -923,15 +943,26 @@ function PartidoEditable({ partido, canchas, palabras: p, resultadoEditable, per
           min="0"
           max="99"
           aria-label={`Resultado de ${partido.visitante}`}
-          disabled={!resultadoEditable}
+          disabled={!resultadoEditable || noVino}
           readOnly={enviando}
-          value={datos.resultado_visitante}
+          value={noVino ? "" : datos.resultado_visitante}
           onChange={(e) => cambiar("resultado_visitante", e.target.value)}
           aria-invalid={Boolean(error) || undefined}
         />
       </span>
       <span className={`partido-equipo derecha ${gana("visitante") ? "ganador" : ""}`}>{partido.visitante}</span>
       <span className="partido-programa">
+        {/* Regla del complejo: el que no se presenta sin avisar pierde el partido */}
+        <select
+          value={datos.incomparecencia}
+          onChange={(e) => cambiar("incomparecencia", e.target.value)}
+          aria-label="¿Alguno no se presentó?"
+          disabled={enviando || !resultadoEditable}
+        >
+          <option value="">Se presentaron los dos</option>
+          <option value="local">No se presentó {partido.local}</option>
+          <option value="visitante">No se presentó {partido.visitante}</option>
+        </select>
         <select value={datos.id_cancha} onChange={(e) => cambiar("id_cancha", e.target.value)} aria-label="Cancha" disabled={enviando}>
           <option value="">Sin cancha</option>
           {canchas.map((c) => <option key={c.id_cancha} value={c.id_cancha}>{c.nombre}</option>)}

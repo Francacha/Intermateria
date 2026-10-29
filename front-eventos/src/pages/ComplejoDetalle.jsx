@@ -4,7 +4,7 @@ import ReservaModal from "../components/ReservaModal";
 import { TarjetaTorneo } from "../components/Torneo";
 import { obtenerComplejo } from "../service/publicoService";
 import { mensajeDeError } from "../service/api";
-import { DEPORTE, capitalizar, pesos } from "../utils/formato";
+import { DEPORTE, DURACION_TURNO, capitalizar, duracionTexto, pesos } from "../utils/formato";
 
 const DIAS = [
   ["lunes", "Lunes"], ["martes", "Martes"], ["miercoles", "Miércoles"], ["jueves", "Jueves"],
@@ -87,7 +87,15 @@ export default function ComplejoDetalle() {
                     <li>{cancha.techada ? "Techada" : "Al aire libre"}</li>
                   </ul>
                   <div className="cancha-pie">
-                    <span className="precio">{pesos(cancha.precio_hora)}<small>/hora</small></span>
+                    <span className="precios-cancha">
+                      <span className="precio">{pesos(cancha.precio_hora)}<small>/hora</small></span>
+                      {cancha.precio_hora_noche != null && Number(cancha.precio_hora_noche) !== Number(cancha.precio_hora) && (
+                        <small className="texto-suave">
+                          {pesos(cancha.precio_hora_noche)}/hora desde las {perfil.reglas?.hora_noche ?? "19:00"}
+                        </small>
+                      )}
+                      <small className="texto-suave">Turnos de {duracionTexto(DURACION_TURNO[cancha.deporte])}</small>
+                    </span>
                     <button className="boton" onClick={() => abrirReserva(cancha)}>Reservar</button>
                   </div>
                 </div>
@@ -129,6 +137,19 @@ export default function ComplejoDetalle() {
               );
             })}
           </ul>
+          {perfil.reglas && (
+            <>
+              <span className="campo-titulo">Condiciones de reserva</span>
+              <ul className="lista-condiciones">
+                {perfil.reglas.porcentaje_sena > 0 && (
+                  <li>Seña del {perfil.reglas.porcentaje_sena} % por transferencia para confirmar el turno.</li>
+                )}
+                <li>El resto se paga en el complejo, en efectivo o por transferencia.</li>
+                <li>Si cancelás con menos de {perfil.reglas.horas_cancelacion} horas de anticipación, perdés la seña.</li>
+                <li>Fútbol: turnos de 1 hora. Pádel: turnos de 1 h 30.</li>
+              </ul>
+            </>
+          )}
           {(perfil.redes.instagram || perfil.redes.whatsapp) && (
             <>
               <span className="campo-titulo">Contacto</span>

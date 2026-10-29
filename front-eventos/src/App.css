@@ -3938,3 +3938,353 @@
     display: none;
   }
 }
+
+/* ---------- Gestión del complejo: pagos, turnos fijos, cierres, caja y reportes ---------- */
+.turno-ausente {
+  background: var(--aviso-suave);
+  color: var(--aviso);
+}
+
+.fila-ausente td {
+  background: var(--aviso-suave);
+}
+
+.texto-ok {
+  color: var(--ok);
+}
+
+.texto-aviso {
+  color: var(--aviso);
+}
+
+.aviso-faltas {
+  color: var(--peligro-texto);
+  font-weight: 600;
+}
+
+.insignia-fijo {
+  background: var(--padel-suave);
+  color: var(--padel-fuerte);
+  margin-right: 4px;
+}
+
+.insignia-sena {
+  background: var(--padel-suave);
+  color: var(--padel-fuerte);
+}
+
+.insignia-saldo {
+  background: var(--futbol-suave);
+  color: var(--futbol-fuerte);
+}
+
+.celda-cliente,
+.celda-pago,
+.celda-estado,
+.resolver-sena {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tabla-agenda td {
+  vertical-align: top;
+}
+
+.acciones-turno {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lista-cierres {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cierre {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-left: 4px solid var(--peligro);
+}
+
+.resumen-turno {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--fondo-alt);
+}
+
+.resumen-pago {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+
+.resumen-pago div {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--fondo-alt);
+}
+
+.resumen-pago dt {
+  font-size: 0.8rem;
+  color: var(--texto-suave);
+}
+
+.resumen-pago dd {
+  margin: 0;
+}
+
+.lista-pagos,
+.lista-afectados {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lista-pagos li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.lista-afectados li {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--fondo-alt);
+}
+
+.opciones,
+.reglas {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.opciones legend {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.reglas {
+  margin: 8px 0 16px;
+}
+
+.consecuencia {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--fondo-alt);
+}
+
+.consecuencia-perdida {
+  background: var(--aviso-suave);
+  color: var(--aviso);
+  font-weight: 600;
+}
+
+label.chip {
+  cursor: pointer;
+}
+
+.formulario-inline {
+  padding: 20px;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.grilla-tres {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.anteriores {
+  margin-top: 16px;
+}
+
+.desglose {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 0 0 8px;
+}
+
+.columnas-caja {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.lista-caja {
+  padding: 16px 18px;
+}
+
+.lista-caja h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.lista-caja ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lista-caja li {
+  display: flex;
+  flex-direction: column;
+}
+
+.contador-insignia {
+  display: inline-block;
+  min-width: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--fondo-alt);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.campo-chico {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--borde-campo);
+  background: var(--fondo);
+  width: 160px;
+}
+
+/* Reportes: una barra fina por fila, el porcentaje escrito al lado */
+.lectura-reporte {
+  margin: 8px 0 16px;
+}
+
+.columnas-reportes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.reporte {
+  padding: 16px 18px;
+}
+
+.reporte h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.tabla-barras td:first-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.celda-barra {
+  width: 45%;
+  white-space: nowrap;
+}
+
+.celda-barra .numero {
+  display: inline-block;
+  min-width: 52px;
+}
+
+.pista {
+  display: inline-block;
+  vertical-align: middle;
+  width: calc(100% - 60px);
+  height: 8px;
+  border-radius: 4px;
+  background: var(--fondo-alt);
+  overflow: hidden;
+}
+
+.relleno {
+  display: block;
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  background: var(--barra);
+}
+
+.tabla-barras tr:hover .relleno {
+  filter: brightness(1.15);
+}
+
+.nota-reporte {
+  font-size: 0.85rem;
+}
+
+/* Precios de día y de noche, condiciones de reserva */
+.precios-cancha {
+  display: flex;
+  flex-direction: column;
+}
+
+.precio-noche {
+  font-size: 1rem;
+}
+
+.condiciones-reserva {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.pasos-sena {
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--aviso-suave);
+}
+
+.pasos-sena p {
+  margin: 0 0 6px;
+}
+
+.lista-condiciones {
+  padding-left: 18px;
+  margin: 0 0 12px;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 800px) {
+  .columnas-caja,
+  .columnas-reportes,
+  .grilla-tres,
+  .resumen-pago {
+    grid-template-columns: 1fr;
+  }
+
+  .cierre {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

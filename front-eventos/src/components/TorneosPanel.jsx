@@ -4,9 +4,12 @@ import TorneoModal from "./TorneoModal";
 import { TarjetaTorneo } from "./Torneo";
 import { crearTorneo, obtenerTorneos } from "../service/complejoService";
 import { mensajeDeError } from "../service/api";
+import { esDueno, useAuth } from "../context/auth";
 
 // Torneos y campeonatos que organiza el complejo
 export default function TorneosPanel() {
+  // Qué torneos se organizan lo decide el dueño
+  const dueno = esDueno(useAuth().empresa);
   const navigate = useNavigate();
   const [torneos, setTorneos] = useState(null);
   const [error, setError] = useState("");
@@ -33,7 +36,7 @@ export default function TorneosPanel() {
         <p className="texto-suave sin-margen">
           Armá torneos por eliminación o campeonatos todos contra todos, de fútbol o pádel.
         </p>
-        <button className="boton" onClick={() => setNuevo(true)}>+ Nuevo torneo</button>
+        {dueno && <button className="boton" onClick={() => setNuevo(true)}>+ Nuevo torneo</button>}
       </div>
 
       {error && <p className="alerta">{error}</p>}
@@ -42,7 +45,7 @@ export default function TorneosPanel() {
       ) : torneos.length === 0 ? (
         <div className="tarjeta vacio">
           <p>Todavía no organizaste torneos.</p>
-          <button className="boton" onClick={() => setNuevo(true)}>Crear el primero</button>
+          {dueno && <button className="boton" onClick={() => setNuevo(true)}>Crear el primero</button>}
         </div>
       ) : (
         <div className="grilla-torneos">

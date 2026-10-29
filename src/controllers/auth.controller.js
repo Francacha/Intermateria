@@ -15,29 +15,48 @@ const cantidadValida = (n) => Number.isInteger(n) && n >= 0 && n <= MAX_CANCHAS;
 const emailValido = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email ?? "");
 
 // El email es el usuario para iniciar sesión: no puede repetirse entre
-// administradores, empresas y clientes.
+// administradores, empresas, encargados y clientes.
 export const emailEnUso = async (db, email) => {
   const { rows } = await db.query(
     `SELECT 1 FROM administradores WHERE email = LOWER($1)
      UNION ALL SELECT 1 FROM empresas WHERE email = LOWER($1)
+     UNION ALL SELECT 1 FROM encargados WHERE email = LOWER($1)
      UNION ALL SELECT 1 FROM clientes WHERE email = LOWER($1)`,
     [email]
   );
   return rows.length > 0;
 };
 
-// Datos del usuario logueado que se mandan al front (sin contraseña)
-const datosUsuario = async (rol, id) => {
+// Datos del usuario logueado que se mandan al front (sin contraseña).
+// En un complejo, además: quién es la persona (dueño o encargado) y su puesto.
+const datosUsuario = async (rol, id, idEncargado = null) => {
   const consultas = {
     admin: "SELECT id_admin, nombre, email FROM administradores WHERE id_admin = $1",
     empresa: `SELECT ${COLUMNAS_EMPRESA} FROM empresas WHERE id_empresa = $1`,
     cliente: `SELECT ${COLUMNAS_CLIENTE} FROM clientes WHERE id_cliente = $1`
   };
   const { rows } = await pool.query(consultas[rol], [id]);
-  return rows[0] ? { rol, ...rows[0] } : null;
+  if (!rows[0]) return null;
+  if (rol !== "empresa") return { rol, ...rows[0] };
+  if (!idEncargado) return { rol, ...rows[0], puesto: "dueno", persona: "Dueño" };
+
+  const { rows: [encargado] } = await pool.query(
+    "SELECT id_encargado, nombre, email, turno FROM encargados WHERE id_encargado = $1 AND id_empresa = $2",
+    [idEncargado, id]
+  );
+  if (!encargado) return null;
+  return {
+    rol,
+    ...rows[0],
+    puesto: "encargado",
+    persona: encargado.nombre,
+    id_encargado: encargado.id_encargado,
+    email_encargado: encargado.email,
+    turno: encargado.turno
+  };
 };
 
-const sesion = (rol, id, nombre, usuario) => ({ token: crearToken(rol, id, nombre), usuario });
+const sesion = (rol, id, nombre, usuario, extra = {}) => ({ token: crearToken(rol, id, nombre, extra), usuario });
 
 // Registro de un complejo: la empresa y sus canchas se crean juntas
 export const registrar = async (req, res) => {
@@ -103,7 +122,9 @@ export const registrar = async (req, res) => {
     }
 
     await cliente.query("COMMIT");
-    res.status(201).json(sesion("empresa", empresa.id_empresa, empresa.nombre, { rol: "empresa", ...empresa }));
+    res.status(201).json(
+      sesion("empresa", empresa.id_empresa, empresa.nombre, { rol: "empresa", ...empresa, puesto: "dueno", persona: "Dueño" }, { puesto: "dueno" })
+    );
   } catch (error) {
     await cliente.query("ROLLBACK");
     if (error.code === "23505") {
@@ -156,7 +177,8 @@ export const registrarCliente = async (req, res) => {
   }
 };
 
-// Un único login para los tres tipos de usuario: se busca el email en las tres tablas
+// Un único login para todos: se busca el email en administradores, empresas
+// (dueños), encargados y clientes
 export const iniciarSesion = async (req, res) => {
   const { email, password } = req.body ?? {};
   if (!email || !password) {
@@ -165,13 +187,17 @@ export const iniciarSesion = async (req, res) => {
 
   try {
     const { rows } = await pool.query(
-      `SELECT 'admin' AS rol, id_admin AS id, nombre, password_hash, TRUE AS activo
+      `SELECT 'admin' AS rol, id_admin AS id, nombre, password_hash, TRUE AS activo, NULL::int AS id_encargado, TRUE AS persona_activa
          FROM administradores WHERE email = LOWER($1)
        UNION ALL
-       SELECT 'empresa', id_empresa, nombre, password_hash, activo
+       SELECT 'empresa', id_empresa, nombre, password_hash, activo, NULL, TRUE
          FROM empresas WHERE email = LOWER($1)
        UNION ALL
-       SELECT 'cliente', id_cliente, nombre || ' ' || apellido, password_hash, TRUE
+       SELECT 'empresa', e.id_empresa, e.nombre, enc.password_hash, e.activo, enc.id_encargado, enc.activo
+         FROM encargados enc JOIN empresas e ON e.id_empresa = enc.id_empresa
+        WHERE enc.email = LOWER($1)
+       UNION ALL
+       SELECT 'cliente', id_cliente, nombre || ' ' || apellido, password_hash, TRUE, NULL, TRUE
          FROM clientes WHERE email = LOWER($1)`,
       [email]
     );
@@ -190,9 +216,18 @@ export const iniciarSesion = async (req, res) => {
     if (!encontrado.activo) {
       return res.status(403).json({ mensaje: "La empresa está dada de baja" });
     }
+    if (!encontrado.persona_activa) {
+      return res.status(403).json({ mensaje: "Tu usuario de encargado está dado de baja. Hablá con el dueño del complejo." });
+    }
 
-    const usuario = await datosUsuario(encontrado.rol, encontrado.id);
-    res.json(sesion(encontrado.rol, encontrado.id, encontrado.nombre, usuario));
+    const usuario = await datosUsuario(encontrado.rol, encontrado.id, encontrado.id_encargado);
+    const extra =
+      encontrado.rol !== "empresa"
+        ? {}
+        : encontrado.id_encargado
+          ? { puesto: "encargado", id_encargado: encontrado.id_encargado }
+          : { puesto: "dueno" };
+    res.json(sesion(encontrado.rol, encontrado.id, encontrado.nombre, usuario, extra));
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al iniciar sesión" });
@@ -201,7 +236,7 @@ export const iniciarSesion = async (req, res) => {
 
 export const obtenerSesion = async (req, res) => {
   try {
-    const usuario = await datosUsuario(req.usuario.rol, req.usuario.id);
+    const usuario = await datosUsuario(req.usuario.rol, req.usuario.id, req.usuario.id_encargado);
     if (!usuario) {
       return res.status(401).json({ mensaje: "El usuario ya no existe" });
     }
@@ -228,15 +263,18 @@ export const cambiarPassword = async (req, res) => {
   if (String(nueva).length < 8) {
     return res.status(400).json({ mensaje: "La contraseña nueva debe tener al menos 8 caracteres" });
   }
-  const [tabla, columna] = TABLA_DEL_ROL[req.usuario.rol];
+  // Un encargado cambia su propia contraseña, no la del complejo
+  const encargado = req.usuario.puesto === "encargado";
+  const [tabla, columna] = encargado ? ["encargados", "id_encargado"] : TABLA_DEL_ROL[req.usuario.rol];
+  const id = encargado ? req.usuario.id_encargado : req.usuario.id;
   try {
-    const { rows } = await pool.query(`SELECT password_hash FROM ${tabla} WHERE ${columna} = $1`, [req.usuario.id]);
+    const { rows } = await pool.query(`SELECT password_hash FROM ${tabla} WHERE ${columna} = $1`, [id]);
     if (rows.length === 0) return res.status(404).json({ mensaje: "No encontramos tu cuenta" });
     if (!rows[0].password_hash || !(await bcrypt.compare(String(actual), rows[0].password_hash))) {
       return res.status(400).json({ mensaje: "La contraseña actual no es correcta" });
     }
     const hash = await bcrypt.hash(String(nueva), 10);
-    await pool.query(`UPDATE ${tabla} SET password_hash = $1 WHERE ${columna} = $2`, [hash, req.usuario.id]);
+    await pool.query(`UPDATE ${tabla} SET password_hash = $1 WHERE ${columna} = $2`, [hash, id]);
     res.json({ mensaje: "Contraseña actualizada" });
   } catch (error) {
     console.error(error);

@@ -5,8 +5,33 @@ Plataforma de canchas de **fútbol y pádel** con tres tipos de usuario:
 | Rol | Qué hace |
 | --- | --- |
 | **Cliente** (jugador) | Se registra, ve **todos los complejos con sus canchas**, saca turnos en cualquiera (grilla de horarios libres), los cancela, e inscribe a su equipo/pareja en torneos. |
-| **Empresa** (complejo) | Se registra indicando sus canchas y administra desde su panel: **agenda de turnos** (confirmar, marcar jugado, cancelar, seña, cargar turnos por teléfono), canchas, perfil (horarios = cuándo se puede reservar) y **torneos y campeonatos**. |
+| **Empresa** (complejo) | Se registra indicando sus canchas y administra desde su panel. Trabajan el **dueño** y sus **encargados** (ver abajo). |
 | **Administrador** | Gestiona las empresas: alta, edición, **baja/reactivación** (una empresa de baja no puede ingresar ni aparece en el sitio) y eliminación. |
+
+**Gestión del complejo** (según la [entrevista al cliente](docs/entrevista-cliente.md)):
+- **Agenda única** sin turnos superpuestos (la base lo impide, aunque reserven a la vez en dos droplets).
+  Turnos de **1 hora en fútbol y 1 h 30 en pádel**.
+- **Turnos fijos**: grupos que juegan siempre el mismo día y horario. Cada semana
+  queda reservada en la agenda; si avisan que una semana no vienen, se **libera
+  esa fecha** y conservan el horario.
+- **Pagos**: cada seña y cada saldo se registran con su **medio** (efectivo o
+  transferencia) y quién lo cargó. Se ve cuánto falta pagar de cada turno. El
+  sistema no cobra ni verifica transferencias: lo carga el encargado.
+- **Caja del día**: cobrado (señas y saldos, por medio), saldos pendientes,
+  señas que faltan, señas a resolver y quiénes no vinieron.
+- **Cancelación con la regla de las 24 h**: si el jugador cancela con menos de
+  24 horas pierde la seña; con más, queda a resolver (se devuelve o queda a
+  favor). Si cancela el complejo (lluvia, cierre), no la pierde.
+- **No vino** (inasistencia), distinto de cancelado. La agenda avisa si esa
+  persona ya faltó antes.
+- **Cierres de canchas** por lluvia o mantenimiento (unas horas o varios días):
+  la cancha deja de ofrecerse y se listan los turnos afectados para avisarles.
+- **Precio de día y de noche** por cancha (de noche desde las 19).
+- **Reportes** para el dueño: ocupación por cancha, por día y por horario;
+  turnos jugados, cancelados y ausentes; cobrado y señas perdidas.
+- **Dueño y encargados**: el dueño decide precios, horarios, reglas (seña, horas
+  para cancelar, hora de noche), torneos y equipo. Los encargados toman reservas,
+  cobran, cancelan, cierran canchas, inscriben equipos y cargan resultados.
 
 **Torneos y campeonatos** (fútbol o pádel):
 - **Torneo**: eliminación directa. Al cerrar la inscripción se sortea la llave (si
@@ -16,6 +41,8 @@ Plataforma de canchas de **fútbol y pádel** con tres tipos de usuario:
   posiciones** (3 pts ganado, 1 empate).
 - Cada partido se puede programar en una cancha del complejo: queda guardado
   como un turno, así ningún cliente puede reservar ese horario.
+- **Incomparecencia**: el equipo que no se presenta pierde el partido (en la
+  tabla: 3 puntos al que vino, sin goles).
 
 Todo se guarda en **PostgreSQL** (única base de datos). API en Node.js +
 Express, front en React, todo en Docker, replicado en 3 droplets de
@@ -26,13 +53,14 @@ DigitalOcean con **Nginx** como balanceador.
 | Rol | Email | Contraseña |
 | --- | --- | --- |
 | Administrador | `admin@canchas.com` | `admin1234` |
-| Empresa (fútbol) | `contacto@eventosdelcentro.com` | `demo1234` |
+| Empresa (fútbol), dueño | `contacto@eventosdelcentro.com` | `demo1234` |
+| Encargados de esa empresa | `manana@eventosdelcentro.com`, `noche@eventosdelcentro.com` | `demo1234` |
 | Empresa (pádel) | `info@fiestasnorte.com` | `demo1234` |
 | Empresa (ambos) | `hola@produccionessur.com` | `demo1234` |
 | Cliente | `lucas@mail.com`, `sofia@mail.com` | `demo1234` |
 
-Hay un único login: según el email, la API reconoce si es admin, empresa o
-cliente y el front lleva a cada uno a su panel.
+Hay un único login: según el email, la API reconoce si es admin, dueño o
+encargado de un complejo, o cliente, y el front lleva a cada uno a su panel.
 
 ## Arquitectura
 
@@ -118,10 +146,20 @@ docker compose up -d --build     # usa docker-compose.yml de la raíz
 
 Abrir http://localhost:8080.
 
+Si ya tenés PostgreSQL instalado en la PC usando el puerto 5432, cambiá el
+puerto que publica el contenedor: `DB_PUERTO_LOCAL=5433 docker compose up -d --build`
+(o poné `DB_PUERTO_LOCAL=5433` en el `.env` de la raíz).
+
 Los scripts SQL solo se ejecutan cuando el volumen de PostgreSQL está vacío.
-Si venías de una versión anterior (o querés volver a los datos de demo), borrá
-el volumen: `docker compose down -v && docker compose up -d --build`. En el
-droplet 1 lo mismo, dentro de `deploy/droplet-1`.
+Para volver a los datos de demo: `docker compose down -v && docker compose up -d --build`.
+
+**Actualizar una base que ya tiene datos** (por ejemplo, la del droplet 1) sin
+perderlos: `database/gestion.sql` solo agrega lo que falta y se puede correr
+más de una vez:
+
+```bash
+docker exec -i canchas-db psql -U postgres -d canchas < database/gestion.sql
+```
 
 ## Qué mostrar en la defensa
 
@@ -186,24 +224,36 @@ Las rutas marcadas con rol requieren `Authorization: Bearer <token>` de ese tipo
 | GET | `/api/publico/complejos/:id` | — | ficha: perfil, canchas y torneos |
 | GET | `/api/publico/canchas/:id/disponibilidad?fecha=` | — | horario del día y turnos ocupados |
 | GET | `/api/publico/torneos`, `/api/publico/torneos/:id` | — | torneos, fixture, tabla y campeón |
-| GET, POST | `/api/reservas` | cliente | mis turnos / reservar (`id_cancha, fecha, hora_inicio, duracion`) |
-| PUT | `/api/reservas/:id/cancelar` | cliente | cancelar un turno que no empezó |
+| GET, POST | `/api/reservas` | cliente | mis turnos / reservar (`id_cancha, fecha, hora_inicio`; la duración la fija el deporte) |
+| PUT | `/api/reservas/:id/cancelar` | cliente | cancelar un turno que no empezó (aplica la regla de la seña) |
 | GET, POST | `/api/inscripciones` | cliente | mis equipos / inscribir equipo en un torneo |
 | DELETE | `/api/inscripciones/:id` | cliente | darse de baja (con la inscripción abierta) |
-| GET, POST | `/api/canchas` | empresa | canchas del complejo |
-| PUT, DELETE | `/api/canchas/:id` | empresa | solo canchas propias |
-| GET, PUT | `/api/perfil` | empresa | perfil del complejo |
-| GET | `/api/turnos?fecha=` | empresa | agenda del día |
-| POST | `/api/turnos` | empresa | cargar turno a mano |
-| PUT | `/api/turnos/:id` | empresa | cambiar estado o seña |
-| GET, POST | `/api/torneos` | empresa | torneos del complejo / crear |
-| GET, PUT, DELETE | `/api/torneos/:id` | empresa | ver, editar o cancelar (`estado: "cancelado"`), eliminar |
+| GET | `/api/canchas` | empresa | canchas del complejo |
+| POST, PUT, DELETE | `/api/canchas[/:id]` | dueño | crear, editar (precio de día y de noche), eliminar |
+| GET | `/api/perfil` | empresa | perfil y reglas del complejo |
+| PUT | `/api/perfil` | dueño | horarios, servicios y reglas (seña %, horas para cancelar, hora de noche, datos para transferir) |
+| GET | `/api/turnos?fecha=` | empresa | agenda del día (con seña pedida, pagada y saldo) |
+| POST | `/api/turnos` | empresa | cargar turno a mano (con seña y su medio, opcional) |
+| PUT | `/api/turnos/:id` | empresa | estado: reservada, confirmada, jugada, ausente (no vino) |
+| PUT | `/api/turnos/:id/cancelar` | empresa | cancelar, o liberar la semana de un turno fijo (`motivo`, `por_el_complejo`) |
+| PUT | `/api/turnos/:id/sena` | empresa | seña a resolver: `devuelta`, `a_favor` o `perdida` |
+| POST | `/api/turnos/:id/pagos` | empresa | registrar seña o saldo (`tipo`, `medio`, `monto`) |
+| DELETE | `/api/turnos/:id/pagos/:idPago` | dueño | anular un pago cargado por error |
+| GET, POST | `/api/turnos-fijos` | empresa | turnos fijos / crear (avisa si alguna semana choca) |
+| PUT | `/api/turnos-fijos/:id` | empresa | editar contacto o dar de baja (`activo: false`) |
+| GET, POST | `/api/cierres` | empresa | canchas cerradas / cerrar (`canchas, desde, hasta, motivo, cancelar_afectados`) |
+| DELETE | `/api/cierres/:id` | empresa | reabrir la cancha |
+| GET | `/api/caja?fecha=` | empresa | caja del día |
+| GET | `/api/reportes?desde=&hasta=` | dueño | ocupación y actividad del período |
+| GET, POST, PUT | `/api/encargados[/:id]` | dueño | equipo: alta, baja, contraseña |
+| GET, POST | `/api/torneos` | empresa (crear: dueño) | torneos del complejo / crear |
+| GET, PUT, DELETE | `/api/torneos/:id` | empresa (cambiar: dueño) | ver, editar o cancelar (`estado: "cancelado"`), eliminar |
 | POST, DELETE | `/api/torneos/:id/equipos[/:idEquipo]` | empresa | agregar / quitar equipo |
-| POST | `/api/torneos/:id/grupos/sorteo` | empresa | sortear los grupos al azar (formato grupos) |
-| PUT | `/api/torneos/:id/equipos/:idEquipo/grupo` | empresa | mover un equipo de grupo (`{ grupo: "B" }` o `null`) |
-| POST | `/api/torneos/:id/fixture` | empresa | cerrar inscripción y armar fixture, llave o fase de grupos |
-| POST | `/api/torneos/:id/llave` | empresa | cerrar la fase de grupos y armar la llave con los clasificados |
-| PUT | `/api/torneos/:id/partidos/:idPartido` | empresa | resultado y/o cancha, día y hora |
+| POST | `/api/torneos/:id/grupos/sorteo` | dueño | sortear los grupos al azar (formato grupos) |
+| PUT | `/api/torneos/:id/equipos/:idEquipo/grupo` | dueño | mover un equipo de grupo (`{ grupo: "B" }` o `null`) |
+| POST | `/api/torneos/:id/fixture` | dueño | cerrar inscripción y armar fixture, llave o fase de grupos |
+| POST | `/api/torneos/:id/llave` | dueño | cerrar la fase de grupos y armar la llave con los clasificados |
+| PUT | `/api/torneos/:id/partidos/:idPartido` | empresa | resultado, incomparecencia (`"local"` o `"visitante"`) y/o cancha, día y hora |
 | GET | `/api/empresas`, `/api/empresas/resumen` | admin | empresas con su actividad / totales |
 | GET, POST | `/api/empresas`, `/api/empresas/:id` | admin | ver / crear (con contraseña opcional) |
 | PUT, DELETE | `/api/empresas/:id` | admin | editar, dar de baja (`activo: false`), eliminar |

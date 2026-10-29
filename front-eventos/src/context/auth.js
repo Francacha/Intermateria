@@ -7,6 +7,10 @@ export const AuthContext = createContext(null);
 // usuario.rol: "admin" | "empresa" | "cliente"
 export const useAuth = () => useContext(AuthContext);
 
+// En un complejo trabajan el dueño y sus encargados: precios, horarios, reglas,
+// torneos, reportes y equipo los maneja solo el dueño
+export const esDueno = (usuario) => usuario?.rol === "empresa" && usuario?.puesto !== "encargado";
+
 // Página principal de cada tipo de usuario
 export const inicioDe = (usuario) =>
   ({ admin: "/admin", empresa: "/panel", cliente: "/complejos" })[usuario?.rol] ?? "/";

@@ -326,8 +326,8 @@ export const actualizarPartido = async (req, res) => {
         await programarPartido(db, torneo, partido, programa);
       }
 
-      // Resultado
-      if (body.resultado_local !== undefined || body.resultado_visitante !== undefined) {
+      // Resultado (o incomparecencia: { incomparecencia: "local" | "visitante" | null })
+      if (body.resultado_local !== undefined || body.resultado_visitante !== undefined || body.incomparecencia !== undefined) {
         // Partido de la fase de grupos: se puede corregir hasta que se arma la llave.
         // Partido de llave: solo los de la última ronda (las anteriores ya armaron la siguiente).
         const deGrupos = partido.grupo !== null;
@@ -347,11 +347,17 @@ export const actualizarPartido = async (req, res) => {
         const vacio = (v) => v === null || v === undefined || v === "";
         let local = null;
         let visitante = null;
+        if (body.incomparecencia && !["local", "visitante"].includes(body.incomparecencia)) {
+          throw new ErrorHttp(400, "Indicá qué equipo no se presentó");
+        }
+        const ausente = body.incomparecencia
+          ? body.incomparecencia === "local" ? partido.id_local : partido.id_visitante
+          : null;
         // Un solo lado cargado no es un resultado (antes se tomaba el vacío como 0 y cerraba la ronda)
-        if (vacio(body.resultado_local) !== vacio(body.resultado_visitante)) {
+        if (!ausente && vacio(body.resultado_local) !== vacio(body.resultado_visitante)) {
           throw new ErrorHttp(400, `Cargá el resultado de ${torneo.deporte === "padel" ? "las dos parejas" : "los dos equipos"}`);
         }
-        if (!vacio(body.resultado_local)) {
+        if (!ausente && !vacio(body.resultado_local)) {
           local = Number(body.resultado_local);
           visitante = Number(body.resultado_visitante);
           if (![local, visitante].every((n) => Number.isInteger(n) && n >= 0 && n <= 99)) {
@@ -363,10 +369,11 @@ export const actualizarPartido = async (req, res) => {
           }
         }
 
-        const estado = local === null ? "pendiente" : "jugado";
+        const estado = local === null && !ausente ? "pendiente" : "jugado";
         await db.query(
-          `UPDATE partidos SET resultado_local = $1, resultado_visitante = $2, estado = $3 WHERE id_partido = $4`,
-          [local, visitante, estado, partido.id_partido]
+          `UPDATE partidos SET resultado_local = $1, resultado_visitante = $2, estado = $3, incomparecencia = $4
+            WHERE id_partido = $5`,
+          [local, visitante, estado, ausente, partido.id_partido]
         );
         await db.query("UPDATE reservas SET estado = $1 WHERE id_partido = $2", [
           estado === "jugado" ? "jugada" : "confirmada",

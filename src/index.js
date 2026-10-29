@@ -12,6 +12,13 @@ import torneosRoutes from "./routes/torneos.routes.js";
 import reservasRoutes from "./routes/reservas.routes.js";
 import inscripcionesRoutes from "./routes/inscripciones.routes.js";
 import publicoRoutes from "./routes/publico.routes.js";
+import turnosFijosRoutes from "./routes/turnosFijos.routes.js";
+import cierresRoutes from "./routes/cierres.routes.js";
+import cajaRoutes from "./routes/caja.routes.js";
+import reportesRoutes from "./routes/reportes.routes.js";
+import encargadosRoutes from "./routes/encargados.routes.js";
+import pool from "./data/db.js";
+import { extenderTurnosFijos } from "./data/turnosFijos.js";
 
 if (!process.env.JWT_SECRET) {
   console.error("Falta la variable de entorno JWT_SECRET");
@@ -43,6 +50,11 @@ app.use("/api/canchas", canchasRoutes);               // complejo
 app.use("/api/perfil", perfilRoutes);                 // complejo
 app.use("/api/turnos", turnosRoutes);                 // complejo
 app.use("/api/torneos", torneosRoutes);               // complejo
+app.use("/api/turnos-fijos", turnosFijosRoutes);      // complejo
+app.use("/api/cierres", cierresRoutes);               // complejo
+app.use("/api/caja", cajaRoutes);                     // complejo
+app.use("/api/reportes", reportesRoutes);             // dueño del complejo
+app.use("/api/encargados", encargadosRoutes);         // dueño del complejo
 app.use("/api/reservas", reservasRoutes);             // cliente
 app.use("/api/inscripciones", inscripcionesRoutes);   // cliente
 
@@ -54,3 +66,10 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`API en ${DROPLET} corriendo en el puerto ${PORT}`);
 });
+
+// Turnos fijos: cada hora se generan las semanas que se van habilitando. Lo
+// hacen las tres réplicas, pero la base ignora las semanas que ya existen.
+const generarTurnosFijos = () =>
+  extenderTurnosFijos(pool).catch((error) => console.error("No se pudieron generar los turnos fijos:", error.message));
+generarTurnosFijos();
+setInterval(generarTurnosFijos, 60 * 60 * 1000);

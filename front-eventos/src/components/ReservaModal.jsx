@@ -6,18 +6,20 @@ import { reservar } from "../service/clienteService";
 import { mensajeDeError } from "../service/api";
 import {
   DEPORTE,
+  DURACION_TURNO,
   aHora,
   aMinutos,
-  duracionPorDefecto,
+  duracionTexto,
   etiquetaDia,
   fechaLarga,
   horariosDelDia,
   hoyISO,
   pesos,
-  sumarDias
+  precioTurno,
+  sumarDias,
+  textoPrecio
 } from "../utils/formato";
 
-const DURACIONES = [60, 90, 120];
 const DIAS_VISIBLES = 14;
 
 // Días que se pueden reservar, desde hoy
@@ -28,7 +30,8 @@ const diasVisibles = () => Array.from({ length: DIAS_VISIBLES }, (_, i) => sumar
 export default function ReservaModal({ cancha, complejo, onCerrar, fechaInicial, horaInicial }) {
   const { usuario } = useAuth();
   const [fecha, setFecha] = useState(() => (diasVisibles().includes(fechaInicial) ? fechaInicial : hoyISO()));
-  const [duracion, setDuracion] = useState(duracionPorDefecto(cancha.deporte));
+  // La duración la fija el complejo según el deporte: fútbol 1 hora, pádel 1 h 30
+  const duracion = DURACION_TURNO[cancha.deporte];
   const [disponibilidad, setDisponibilidad] = useState(null);
   const [elegido, setElegido] = useState(horaInicial ?? "");
   const [error, setError] = useState("");
@@ -95,7 +98,11 @@ export default function ReservaModal({ cancha, complejo, onCerrar, fechaInicial,
     if (disponibilidad) document.querySelector(".horario-boton.activo")?.scrollIntoView({ block: "nearest" });
   }, [disponibilidad]);
 
-  const precio = (Number(cancha.precio_hora) * duracion) / 60;
+  // Tarifas y reglas del complejo (llegan con la disponibilidad); el precio depende de la franja
+  const tarifa = disponibilidad?.cancha ?? cancha;
+  const reglas = disponibilidad?.reglas;
+  const precio = seleccion ? precioTurno({ ...tarifa, deporte: cancha.deporte }, seleccion, reglas?.hora_noche) : 0;
+  const sena = reglas ? Math.round((precio * reglas.porcentaje_sena) / 100) : 0;
   // Para ingresar sin perder lo elegido: después del login se vuelve a esta misma reserva
   const volver = `${pathname}?cancha=${cancha.id_cancha}&fecha=${fecha}${seleccion ? `&hora=${seleccion}` : ""}`;
 
@@ -135,6 +142,18 @@ export default function ReservaModal({ cancha, complejo, onCerrar, fechaInicial,
             <br />
             Total: <strong>{pesos(reservado.precio_total)}</strong>
           </p>
+          {Number(reservado.sena_requerida) > 0 && (
+            <div className="pasos-sena">
+              <p>
+                Para confirmarlo, transferí la seña de <strong>{pesos(reservado.sena_requerida)}</strong>
+                {reservado.datos_transferencia ? <> a <strong>{reservado.datos_transferencia}</strong></> : " al complejo"}.
+                El resto ({pesos(Number(reservado.precio_total) - Number(reservado.sena_requerida))}) lo pagás cuando vas a jugar.
+              </p>
+              <p className="texto-suave">
+                Si cancelás con menos de {reservado.horas_cancelacion} horas de anticipación, perdés la seña.
+              </p>
+            </div>
+          )}
           <div className="modal-acciones centrado-flex">
             <button className="boton boton-fantasma" onClick={onCerrar}>Cerrar</button>
             <Link className="boton" to="/mis-reservas">Ver mis reservas</Link>
@@ -159,7 +178,8 @@ export default function ReservaModal({ cancha, complejo, onCerrar, fechaInicial,
           <span className="etiqueta">{complejo}</span>
           <h2 id="titulo-reserva">Reservar {cancha.nombre}</h2>
           <p className="texto-suave">
-            {DEPORTE[cancha.deporte]} · {pesos(cancha.precio_hora)} la hora
+            {DEPORTE[cancha.deporte]} · turnos de {duracionTexto(duracion)} · {textoPrecio(tarifa)}
+            {reglas && tarifa.precio_hora_noche != null && Number(tarifa.precio_hora_noche) !== Number(tarifa.precio_hora) && ` (desde las ${reglas.hora_noche})`}
           </p>
         </div>
 
@@ -176,21 +196,6 @@ export default function ReservaModal({ cancha, complejo, onCerrar, fechaInicial,
           ))}
         </div>
 
-        <div className="segmentado" role="group" aria-label="Duración">
-          {DURACIONES.map((d) => (
-            <button
-              key={d}
-              className={duracion === d ? "activo" : ""}
-              aria-pressed={duracion === d}
-              onClick={() => {
-                setDuracion(d);
-                setElegido("");
-              }}
-            >
-              {d === 60 ? "1 hora" : d === 90 ? "1 h 30" : "2 horas"}
-            </button>
-          ))}
-        </div>
 
         {error && <p className="alerta">{error}</p>}
 
@@ -220,10 +225,20 @@ export default function ReservaModal({ cancha, complejo, onCerrar, fechaInicial,
           </>
         )}
 
+        {reglas && (
+          <p className="condiciones-reserva">
+            {reglas.porcentaje_sena > 0
+              ? `Para confirmar se pide una seña del ${reglas.porcentaje_sena} % por transferencia; el resto se paga en el complejo. `
+              : "El turno se paga en el complejo. "}
+            Si cancelás con menos de {reglas.horas_cancelacion} horas de anticipación, perdés la seña.
+          </p>
+        )}
+
         <div className="modal-acciones reserva-pie">
           {seleccion && (
             <span>
               {seleccion} a {aHora(aMinutos(seleccion) + duracion)} · <strong>{pesos(precio)}</strong>
+              {sena > 0 && ` · seña ${pesos(sena)}`}
             </span>
           )}
           <button className="boton boton-fantasma" onClick={onCerrar}>Cancelar</button>

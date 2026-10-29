@@ -6,6 +6,13 @@ import pool from "../data/db.js";
 const DEPORTES = ["futbol", "padel"];
 const idValido = (id) => /^\d+$/.test(id);
 
+// Precio de noche: vacío o null = el mismo precio todo el día
+const precioNoche = (valor) => (valor === undefined || valor === null || valor === "" ? null : Number(valor));
+const precioNocheValido = (valor) => {
+  const n = precioNoche(valor);
+  return n === null || n >= 0;
+};
+
 export const obtenerCanchas = async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -20,8 +27,11 @@ export const obtenerCanchas = async (req, res) => {
 };
 
 export const crearCancha = async (req, res) => {
-  const { nombre, deporte, jugadores, superficie, techada, precio_hora } = req.body ?? {};
+  const { nombre, deporte, jugadores, superficie, techada, precio_hora, precio_hora_noche } = req.body ?? {};
 
+  if (!precioNocheValido(precio_hora_noche)) {
+    return res.status(400).json({ mensaje: "El precio de noche debe ser un número mayor o igual a 0" });
+  }
   if (!nombre || !DEPORTES.includes(deporte)) {
     return res.status(400).json({ mensaje: "El nombre y el deporte (fútbol o pádel) son obligatorios" });
   }
@@ -31,8 +41,8 @@ export const crearCancha = async (req, res) => {
 
   try {
     const { rows } = await pool.query(
-      `INSERT INTO canchas (id_empresa, nombre, deporte, jugadores, superficie, techada, precio_hora)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      `INSERT INTO canchas (id_empresa, nombre, deporte, jugadores, superficie, techada, precio_hora, precio_hora_noche)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [
         req.empresa.id_empresa,
         nombre,
@@ -40,7 +50,8 @@ export const crearCancha = async (req, res) => {
         jugadores || (deporte === "padel" ? 4 : 5),
         superficie || null,
         Boolean(techada),
-        precio_hora
+        precio_hora,
+        precioNoche(precio_hora_noche)
       ]
     );
     res.status(201).json(rows[0]);
@@ -55,8 +66,11 @@ export const crearCancha = async (req, res) => {
 
 export const actualizarCancha = async (req, res) => {
   const { id } = req.params;
-  const { nombre, deporte, jugadores, superficie, techada, precio_hora, activa } = req.body ?? {};
+  const { nombre, deporte, jugadores, superficie, techada, precio_hora, precio_hora_noche, activa } = req.body ?? {};
 
+  if (!precioNocheValido(precio_hora_noche)) {
+    return res.status(400).json({ mensaje: "El precio de noche debe ser un número mayor o igual a 0" });
+  }
   if (!idValido(id)) {
     return res.status(404).json({ mensaje: "Cancha no encontrada" });
   }
@@ -76,7 +90,8 @@ export const actualizarCancha = async (req, res) => {
          superficie = COALESCE($4, superficie),
          techada = COALESCE($5, techada),
          precio_hora = COALESCE($6, precio_hora),
-         activa = COALESCE($7, activa)
+         activa = COALESCE($7, activa),
+         precio_hora_noche = CASE WHEN $10::boolean THEN $11 ELSE precio_hora_noche END
        WHERE id_cancha = $8 AND id_empresa = $9 RETURNING *`,
       [
         nombre || null,
@@ -87,7 +102,9 @@ export const actualizarCancha = async (req, res) => {
         precio_hora ?? null,
         activa ?? null,
         id,
-        req.empresa.id_empresa
+        req.empresa.id_empresa,
+        precio_hora_noche !== undefined,
+        precioNoche(precio_hora_noche)
       ]
     );
     if (rows.length === 0) {

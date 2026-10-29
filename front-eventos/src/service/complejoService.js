@@ -21,6 +21,29 @@ export const guardarPerfil = (perfil) => api.put("/perfil", perfil);
 export const obtenerTurnos = (fecha) => api.get("/turnos", { params: { fecha } });
 export const crearTurno = (turno) => api.post("/turnos", turno);
 export const actualizarTurno = (id, datos) => api.put(`/turnos/${id}`, datos);
+export const cancelarTurno = (id, datos) => api.put(`/turnos/${id}/cancelar`, datos);
+export const resolverSena = (id, resultado) => api.put(`/turnos/${id}/sena`, { resultado });
+export const registrarPago = (id, pago) => api.post(`/turnos/${id}/pagos`, pago);
+export const anularPago = (id, idPago) => api.delete(`/turnos/${id}/pagos/${idPago}`);
+
+// Turnos fijos (para liberar una semana se cancela ese turno en la agenda)
+export const obtenerTurnosFijos = () => api.get("/turnos-fijos");
+export const crearTurnoFijo = (datos) => api.post("/turnos-fijos", datos);
+export const actualizarTurnoFijo = (id, datos) => api.put(`/turnos-fijos/${id}`, datos);
+
+// Cierres de canchas (lluvia, mantenimiento)
+export const obtenerCierres = (fecha) => api.get("/cierres", { params: fecha ? { fecha } : {} });
+export const crearCierre = (datos) => api.post("/cierres", datos);
+export const reabrirCancha = (id) => api.delete(`/cierres/${id}`);
+
+// Caja del día y reportes del dueño
+export const obtenerCaja = (fecha) => api.get("/caja", { params: { fecha } });
+export const obtenerReportes = (desde, hasta) => api.get("/reportes", { params: { desde, hasta } });
+
+// Encargados (solo el dueño)
+export const obtenerEncargados = () => api.get("/encargados");
+export const crearEncargado = (datos) => api.post("/encargados", datos);
+export const actualizarEncargado = (id, datos) => api.put(`/encargados/${id}`, datos);
 
 // Torneos y campeonatos
 export const obtenerTorneos = () => api.get("/torneos");
