@@ -1,11 +1,20 @@
 import { useRef, useState } from "react";
 import useDialogo from "../service/useDialogo";
-import { hoyISO } from "../utils/formato";
+import { describirGrupos, hoyISO, letrasDeGrupos, maximoDeGrupos, maximoQuePasan } from "../utils/formato";
 
 const TIPOS = [
   { id: "torneo", nombre: "Torneo", detalle: "Eliminación directa: el que pierde queda afuera" },
-  { id: "campeonato", nombre: "Campeonato", detalle: "Todos contra todos, con tabla de posiciones" }
+  { id: "campeonato", nombre: "Campeonato", detalle: "Todos contra todos, con tabla de posiciones" },
+  { id: "grupos", nombre: "Grupos + eliminación", detalle: "Fase de grupos y los mejores pasan a la llave" }
 ];
+
+// Con fase de grupos, que la cantidad de grupos y los que pasan sigan siendo válidos para el cupo.
+// Se aplica al mostrar y al guardar (no al escribir: el cupo pasa por "1" antes de llegar a "16")
+const ajustarGrupos = (datos) => {
+  const cupo = Math.max(2, Math.min(64, Number(datos.cupo) || 2));
+  const grupos = Math.max(2, Math.min(datos.cantidad_grupos, maximoDeGrupos(cupo)));
+  return { ...datos, cantidad_grupos: grupos, clasifican_por_grupo: Math.min(datos.clasifican_por_grupo, maximoQuePasan(cupo, grupos)) };
+};
 
 // Formulario para crear o editar un torneo / campeonato (torneo = null → nuevo)
 export default function TorneoModal({ torneo, onGuardar, onCerrar }) {
@@ -19,7 +28,10 @@ export default function TorneoModal({ torneo, onGuardar, onCerrar }) {
     fecha_fin: torneo?.fecha_fin ?? "",
     cupo: torneo?.cupo ?? 8,
     precio_inscripcion: torneo ? Number(torneo.precio_inscripcion) : "",
-    premio: torneo?.premio ?? ""
+    premio: torneo?.premio ?? "",
+    cantidad_grupos: torneo?.cantidad_grupos ?? 2,
+    clasifican_por_grupo: torneo?.clasifican_por_grupo ?? 2,
+    ida_vuelta: torneo?.ida_vuelta ?? false
   });
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
@@ -31,14 +43,24 @@ export default function TorneoModal({ torneo, onGuardar, onCerrar }) {
 
   const cambiar = (campo, valor) => setDatos({ ...datos, [campo]: valor });
 
+  const formato = ajustarGrupos(datos);
+  const conGrupos = datos.tipo === "grupos";
+  const varios = datos.deporte === "padel" ? "parejas" : "equipos";
+  const cupo = Number(datos.cupo) || 0;
+  const alcanzaParaGrupos = cupo >= 4;
+
   const enviar = async (e) => {
     e.preventDefault();
     if (guardando) return;
+    if (conGrupos && !alcanzaParaGrupos) {
+      setError(`Para jugar con fase de grupos el cupo tiene que ser de al menos 4 ${varios}.`);
+      return;
+    }
     setGuardando(true);
     setError("");
     try {
       await onGuardar({
-        ...datos,
+        ...formato,
         cupo: Number(datos.cupo),
         precio_inscripcion: Number(datos.precio_inscripcion) || 0,
         fecha_fin: datos.fecha_fin || null
@@ -64,7 +86,7 @@ export default function TorneoModal({ torneo, onGuardar, onCerrar }) {
         <h2 id="torneo-modal-titulo">{torneo ? `Editar ${torneo.tipo === "campeonato" ? "campeonato" : "torneo"}` : "Nuevo torneo o campeonato"}</h2>
         {error && <p className="alerta" role="alert">{error}</p>}
 
-        <div className="deportes">
+        <div className="formatos">
           {TIPOS.map((tipo) => (
             <button
               type="button"
@@ -113,6 +135,52 @@ export default function TorneoModal({ torneo, onGuardar, onCerrar }) {
             <input type="number" min="0" step="500" value={datos.precio_inscripcion} onChange={(e) => cambiar("precio_inscripcion", e.target.value)} placeholder="0 = gratis" />
           </label>
         </div>
+        {conGrupos && (
+          <fieldset className="config-formato" disabled={bloqueado}>
+            <legend>Fase de grupos</legend>
+            {alcanzaParaGrupos ? (
+              <>
+                <OpcionesNumericas
+                  titulo="Cantidad de grupos"
+                  valores={Array.from({ length: maximoDeGrupos(cupo) - 1 }, (_, i) => i + 2)}
+                  elegido={formato.cantidad_grupos}
+                  etiqueta={(n) => `${n} grupos (${letrasDeGrupos(n).join(", ")})`}
+                  onElegir={(n) => cambiar("cantidad_grupos", n)}
+                />
+                <OpcionesNumericas
+                  titulo="Pasan a la llave por grupo"
+                  valores={Array.from({ length: maximoQuePasan(cupo, formato.cantidad_grupos) }, (_, i) => i + 1)}
+                  elegido={formato.clasifican_por_grupo}
+                  etiqueta={(n) => (n === 1 ? "Pasa el primero" : `Pasan los ${n} primeros`)}
+                  onElegir={(n) => cambiar("clasifican_por_grupo", n)}
+                />
+                <IdaVuelta valor={datos.ida_vuelta} onCambiar={(v) => cambiar("ida_vuelta", v)} />
+                <p className="vista-formato" aria-live="polite">
+                  Con el cupo lleno:{" "}
+                  {describirGrupos({
+                    equipos: cupo,
+                    grupos: formato.cantidad_grupos,
+                    pasan: formato.clasifican_por_grupo,
+                    idaVuelta: datos.ida_vuelta,
+                    varios
+                  })}
+                </p>
+                <p className="texto-suave sin-margen">
+                  Los grupos los sorteás vos o los armás a mano antes de cerrar la inscripción.
+                </p>
+              </>
+            ) : (
+              <p className="campo-aviso sin-margen">Para jugar con fase de grupos el cupo tiene que ser de al menos 4 {varios}.</p>
+            )}
+          </fieldset>
+        )}
+        {datos.tipo === "campeonato" && (
+          <fieldset className="config-formato" disabled={bloqueado}>
+            <legend>Partidos</legend>
+            <IdaVuelta valor={datos.ida_vuelta} onCambiar={(v) => cambiar("ida_vuelta", v)} />
+          </fieldset>
+        )}
+
         <label className="campo">
           Premio
           <input value={datos.premio} onChange={(e) => cambiar("premio", e.target.value)} maxLength={150} />
@@ -127,6 +195,34 @@ export default function TorneoModal({ torneo, onGuardar, onCerrar }) {
           <button className="boton" aria-disabled={guardando} aria-busy={guardando}>{guardando ? "Guardando…" : "Guardar"}</button>
         </div>
       </form>
+    </div>
+  );
+}
+
+// Botones para elegir un número (grupos, cuántos pasan): solo aparecen los que sirven para el cupo
+function OpcionesNumericas({ titulo, valores, elegido, etiqueta, onElegir }) {
+  return (
+    <div className="campo">
+      <span className="campo-titulo-chico">{titulo}</span>
+      <div className="segmentado segmentado-numeros" role="group" aria-label={titulo}>
+        {valores.map((n) => (
+          <button type="button" key={n} className={elegido === n ? "activo" : ""} aria-pressed={elegido === n} aria-label={etiqueta(n)} onClick={() => onElegir(n)}>
+            {n}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function IdaVuelta({ valor, onCambiar }) {
+  return (
+    <div className="campo">
+      <span className="campo-titulo-chico">Cada cruce se juega</span>
+      <div className="segmentado" role="group" aria-label="Cada cruce se juega">
+        <button type="button" className={!valor ? "activo" : ""} aria-pressed={!valor} onClick={() => onCambiar(false)}>Una vez</button>
+        <button type="button" className={valor ? "activo" : ""} aria-pressed={valor} onClick={() => onCambiar(true)}>Ida y vuelta</button>
+      </div>
     </div>
   );
 }

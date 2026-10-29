@@ -3143,7 +3143,12 @@
     grid-template-columns: 2ch minmax(0, 1fr);
   }
 
+  .renglon-equipo.con-grupo {
+    grid-template-columns: 2ch minmax(0, 1fr);
+  }
+
   .renglon-equipo .pastilla-origen,
+  .renglon-equipo .selector-grupo,
   .renglon-equipo .accion-texto {
     grid-column: 2;
     justify-self: start;
@@ -3213,6 +3218,157 @@
 .segmentado button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+/* Formato del torneo: tres tarjetas, que bajan una debajo de otra si no entran */
+.formatos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+/* Opciones de la fase de grupos (o de ida y vuelta) dentro del modal */
+.config-formato {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--fondo);
+}
+
+.config-formato legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.campo-titulo-chico {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.config-formato .segmentado {
+  align-self: flex-start;
+}
+
+.segmentado-numeros {
+  flex-wrap: wrap;
+}
+
+.segmentado-numeros button {
+  min-width: 44px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Cómo queda el torneo con lo elegido, en palabras */
+.vista-formato {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--primario);
+  border-radius: 0 10px 10px 0;
+  background: var(--futbol-suave);
+  line-height: 1.5;
+}
+
+/* Armado de grupos mientras está abierta la inscripción */
+.armado-grupos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.barra-grupos {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+}
+
+.barra-grupos p {
+  max-width: 70ch;
+}
+
+.grilla-grupos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.grupo-armado {
+  padding: 14px 16px;
+}
+
+.grupo-armado h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.grupo-armado ul {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.renglon-equipo.con-grupo {
+  grid-template-columns: 2ch minmax(0, 1fr) auto auto auto;
+}
+
+.selector-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.selector-grupo select {
+  min-height: 36px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--borde-campo);
+  background: var(--fondo);
+  font-size: 0.9rem;
+}
+
+/* Fase de grupos ya armada: cada grupo con su tabla y sus fechas */
+.fase-grupos {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.grupo-titulo {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* Los que pasan a la llave */
+.tabla-posiciones tr.clasifica td:first-child {
+  color: var(--primario);
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 var(--primario);
+}
+
+.clasificados {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 /* ---------- Catálogo de complejos ---------- */

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import { Cargando, ConError } from "../components/Estados";
-import { Campeon, EstadoTorneo, Fixture, InfoTorneo, TablaPosiciones } from "../components/Torneo";
+import { Campeon, EstadoTorneo, FaseDeGrupos, Fixture, InfoTorneo, TablaPosiciones } from "../components/Torneo";
 import { obtenerTorneoPublico } from "../service/publicoService";
 import { inscribirEquipo } from "../service/clienteService";
 import { mensajeDeError } from "../service/api";
@@ -45,6 +45,8 @@ export default function TorneoDetalle() {
   const quien = torneo.deporte === "padel" ? "pareja" : "equipo";
   // Para ingresar o crear la cuenta sin perder el torneo: después se vuelve acá
   const volver = encodeURIComponent(`/torneos/${torneo.id_torneo}`);
+  const conGrupos = torneo.tipo === "grupos" && torneo.partidos.length > 0;
+  const llave = torneo.partidos.filter((p) => p.grupo === null);
 
   return (
     <main className="contenedor panel">
@@ -89,8 +91,23 @@ export default function TorneoDetalle() {
 
       <div className="detalle-grilla">
         <section>
-          <h2 className="seccion-titulo con-margen">{torneo.tipo === "campeonato" ? "Fixture" : "Llave"}</h2>
-          <Fixture torneo={torneo} />
+          {conGrupos ? (
+            <>
+              {llave.length > 0 && (
+                <>
+                  <h2 className="seccion-titulo con-margen">Llave</h2>
+                  <Fixture torneo={torneo} partidos={llave} />
+                </>
+              )}
+              <h2 className="seccion-titulo con-margen">Fase de grupos</h2>
+              <FaseDeGrupos torneo={torneo} />
+            </>
+          ) : (
+            <>
+              <h2 className="seccion-titulo con-margen">{{ campeonato: "Fixture", grupos: "Fase de grupos" }[torneo.tipo] ?? "Llave"}</h2>
+              <Fixture torneo={torneo} />
+            </>
+          )}
           {torneo.tabla && torneo.partidos.length > 0 && (
             <>
               <h2 className="seccion-titulo con-margen">Tabla de posiciones</h2>

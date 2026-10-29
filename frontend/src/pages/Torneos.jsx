@@ -16,7 +16,8 @@ const DEPORTES = [
 const FORMATOS = [
   ["", "Cualquier formato"],
   ["torneo", FORMATO.torneo],
-  ["campeonato", FORMATO.campeonato]
+  ["campeonato", FORMATO.campeonato],
+  ["grupos", FORMATO.grupos]
 ];
 
 const CUANDO = [

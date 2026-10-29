@@ -1,17 +1,21 @@
 import pool from "../data/db.js";
 import {
+  LETRAS,
   actualizarAvance,
   agregarEquipo,
+  armarLlave,
+  asignarGrupo,
   detalleTorneo,
   generarFixture,
-  programarPartido
+  programarPartido,
+  sortearGrupos
 } from "../data/torneos.js";
 import { DEPORTES, ErrorHttp, fechaValida, horaValida, idValido, responderError } from "../utils/comun.js";
 
 // Torneos y campeonatos del complejo logueado (rol empresa).
 // Todas las consultas filtran por req.empresa.id_empresa.
 
-const TIPOS = ["torneo", "campeonato"];
+const TIPOS = ["torneo", "campeonato", "grupos"];
 
 const texto = (valor, max) => {
   const limpio = String(valor ?? "").trim().slice(0, max);
@@ -57,7 +61,10 @@ const validarDatos = (body, actual = null) => {
     fecha_fin: body.fecha_fin !== undefined ? body.fecha_fin || null : actual?.fecha_fin ?? null,
     cupo: Number(body.cupo ?? actual?.cupo),
     precio_inscripcion: Number(body.precio_inscripcion ?? actual?.precio_inscripcion ?? 0),
-    premio: body.premio !== undefined ? texto(body.premio, 150) : actual?.premio ?? null
+    premio: body.premio !== undefined ? texto(body.premio, 150) : actual?.premio ?? null,
+    cantidad_grupos: Number(body.cantidad_grupos ?? actual?.cantidad_grupos),
+    clasifican_por_grupo: Number(body.clasifican_por_grupo ?? actual?.clasifican_por_grupo),
+    ida_vuelta: Boolean(body.ida_vuelta ?? actual?.ida_vuelta ?? false)
   };
 
   if (!datos.nombre) throw new ErrorHttp(400, "El nombre es obligatorio");
@@ -71,6 +78,30 @@ const validarDatos = (body, actual = null) => {
     throw new ErrorHttp(400, "El cupo tiene que ser entre 2 y 64 equipos");
   }
   if (!(datos.precio_inscripcion >= 0)) throw new ErrorHttp(400, "El precio de inscripción no puede ser negativo");
+
+  // Fase de grupos: con el cupo lleno, cada grupo tiene que tener al menos 2 equipos
+  // y tiene que quedar alguno afuera (si pasan todos, los grupos no definen nada)
+  if (datos.tipo === "grupos") {
+    const { cantidad_grupos: grupos, clasifican_por_grupo: pasan } = datos;
+    if (!Number.isInteger(grupos) || grupos < 2 || grupos > LETRAS.length) {
+      throw new ErrorHttp(400, `La cantidad de grupos tiene que ser entre 2 y ${LETRAS.length}`);
+    }
+    const porGrupo = Math.floor(datos.cupo / grupos);
+    if (porGrupo < 2) throw new ErrorHttp(400, `Con un cupo de ${datos.cupo} no alcanza para ${grupos} grupos`);
+    if (!Number.isInteger(pasan) || pasan < 1 || pasan >= porGrupo) {
+      throw new ErrorHttp(
+        400,
+        porGrupo === 2
+          ? "Con grupos de 2, pasa solo 1 por grupo"
+          : `Con grupos de ${porGrupo}, pueden pasar entre 1 y ${porGrupo - 1} por grupo`
+      );
+    }
+  } else {
+    datos.cantidad_grupos = null;
+    datos.clasifican_por_grupo = null;
+  }
+  // La eliminación directa no tiene ida y vuelta
+  if (datos.tipo === "torneo") datos.ida_vuelta = false;
   return datos;
 };
 
@@ -106,11 +137,12 @@ export const crearTorneo = async (req, res) => {
     const d = validarDatos(req.body ?? {});
     const { rows } = await pool.query(
       `INSERT INTO torneos (id_empresa, nombre, tipo, deporte, categoria, descripcion, fecha_inicio,
-                            fecha_fin, cupo, precio_inscripcion, premio)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id_torneo`,
+                            fecha_fin, cupo, precio_inscripcion, premio, cantidad_grupos, clasifican_por_grupo, ida_vuelta)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id_torneo`,
       [
         req.empresa.id_empresa, d.nombre, d.tipo, d.deporte, d.categoria, d.descripcion,
-        d.fecha_inicio, d.fecha_fin, d.cupo, d.precio_inscripcion, d.premio
+        d.fecha_inicio, d.fecha_fin, d.cupo, d.precio_inscripcion, d.premio,
+        d.cantidad_grupos, d.clasifican_por_grupo, d.ida_vuelta
       ]
     );
     res.status(201).json(await detalleTorneo(pool, rows[0].id_torneo, { privado: true }));
@@ -138,8 +170,14 @@ export const actualizarTorneo = async (req, res) => {
       if (body.estado !== undefined) throw new ErrorHttp(400, "El estado cambia solo al generar el fixture y cargar resultados");
 
       const d = validarDatos(body, actual);
-      if (actual.estado !== "inscripcion" && (d.tipo !== actual.tipo || d.deporte !== actual.deporte)) {
-        throw new ErrorHttp(400, "El tipo y el deporte solo se pueden cambiar mientras está abierta la inscripción");
+      const cambiaFormato =
+        d.tipo !== actual.tipo ||
+        d.deporte !== actual.deporte ||
+        d.cantidad_grupos !== actual.cantidad_grupos ||
+        d.clasifican_por_grupo !== actual.clasifican_por_grupo ||
+        d.ida_vuelta !== actual.ida_vuelta;
+      if (actual.estado !== "inscripcion" && cambiaFormato) {
+        throw new ErrorHttp(400, "El formato y el deporte solo se pueden cambiar mientras está abierta la inscripción");
       }
       const { rows: [{ total }] } = await db.query(
         "SELECT COUNT(*)::int AS total FROM equipos WHERE id_torneo = $1",
@@ -151,12 +189,19 @@ export const actualizarTorneo = async (req, res) => {
 
       await db.query(
         `UPDATE torneos SET nombre = $1, tipo = $2, deporte = $3, categoria = $4, descripcion = $5,
-                fecha_inicio = $6, fecha_fin = $7, cupo = $8, precio_inscripcion = $9, premio = $10
-          WHERE id_torneo = $11`,
+                fecha_inicio = $6, fecha_fin = $7, cupo = $8, precio_inscripcion = $9, premio = $10,
+                cantidad_grupos = $11, clasifican_por_grupo = $12, ida_vuelta = $13
+          WHERE id_torneo = $14`,
         [
           d.nombre, d.tipo, d.deporte, d.categoria, d.descripcion, d.fecha_inicio,
-          d.fecha_fin, d.cupo, d.precio_inscripcion, d.premio, actual.id_torneo
+          d.fecha_fin, d.cupo, d.precio_inscripcion, d.premio,
+          d.cantidad_grupos, d.clasifican_por_grupo, d.ida_vuelta, actual.id_torneo
         ]
+      );
+      // Si hay menos grupos (o ya no hay fase de grupos), los equipos de los grupos que no existen quedan sin grupo
+      await db.query(
+        "UPDATE equipos SET grupo = NULL WHERE id_torneo = $1 AND grupo IS NOT NULL AND ($2::text IS NULL OR grupo > $2)",
+        [actual.id_torneo, d.cantidad_grupos ? LETRAS[d.cantidad_grupos - 1] : null]
       );
     });
     res.json(await detalleTorneo(pool, req.params.id, { privado: true }));
@@ -211,6 +256,40 @@ export const quitarEquipo = async (req, res) => {
   }
 };
 
+// Sortea los grupos al azar (después se pueden mover equipos a mano)
+export const sortearLosGrupos = async (req, res) => {
+  try {
+    await enTransaccion(async (db) => sortearGrupos(db, await torneoPropio(db, req)));
+    res.json(await detalleTorneo(pool, req.params.id, { privado: true }));
+  } catch (error) {
+    responderError(res, error, "Error al sortear los grupos");
+  }
+};
+
+// Mueve un equipo a otro grupo ({ grupo: "B" }) o lo deja sin grupo ({ grupo: null })
+export const cambiarGrupo = async (req, res) => {
+  try {
+    await enTransaccion(async (db) => {
+      const torneo = await torneoPropio(db, req);
+      if (!idValido(req.params.idEquipo)) throw new ErrorHttp(404, "Equipo no encontrado");
+      await asignarGrupo(db, torneo, req.params.idEquipo, req.body?.grupo || null);
+    });
+    res.json(await detalleTorneo(pool, req.params.id, { privado: true }));
+  } catch (error) {
+    responderError(res, error, "Error al cambiar el grupo");
+  }
+};
+
+// Cierra la fase de grupos y arma la llave con los clasificados
+export const armarLaLlave = async (req, res) => {
+  try {
+    await enTransaccion(async (db) => armarLlave(db, await torneoPropio(db, req)));
+    res.json(await detalleTorneo(pool, req.params.id, { privado: true }));
+  } catch (error) {
+    responderError(res, error, "Error al armar la llave");
+  }
+};
+
 export const armarFixture = async (req, res) => {
   try {
     await enTransaccion(async (db) => generarFixture(db, await torneoPropio(db, req)));
@@ -249,12 +328,20 @@ export const actualizarPartido = async (req, res) => {
 
       // Resultado (o incomparecencia: { incomparecencia: "local" | "visitante" | null })
       if (body.resultado_local !== undefined || body.resultado_visitante !== undefined || body.incomparecencia !== undefined) {
+        // Partido de la fase de grupos: se puede corregir hasta que se arma la llave.
+        // Partido de llave: solo los de la última ronda (las anteriores ya armaron la siguiente).
+        const deGrupos = partido.grupo !== null;
         const { rows: [{ ultima }] } = await db.query(
-          "SELECT MAX(ronda) AS ultima FROM partidos WHERE id_torneo = $1",
+          "SELECT MAX(ronda) AS ultima FROM partidos WHERE id_torneo = $1 AND grupo IS NULL",
           [torneo.id_torneo]
         );
-        if (torneo.tipo === "torneo" && partido.ronda !== ultima) {
-          throw new ErrorHttp(400, "Esa ronda ya está cerrada: no se puede cambiar el resultado");
+        if (torneo.tipo !== "campeonato") {
+          if (deGrupos && ultima !== null) {
+            throw new ErrorHttp(400, "La fase de grupos ya está cerrada: no se puede cambiar el resultado");
+          }
+          if (!deGrupos && partido.ronda !== ultima) {
+            throw new ErrorHttp(400, "Esa ronda ya está cerrada: no se puede cambiar el resultado");
+          }
         }
 
         const vacio = (v) => v === null || v === undefined || v === "";
@@ -276,8 +363,9 @@ export const actualizarPartido = async (req, res) => {
           if (![local, visitante].every((n) => Number.isInteger(n) && n >= 0 && n <= 99)) {
             throw new ErrorHttp(400, "El resultado tiene que ser un número entre 0 y 99");
           }
-          if (local === visitante && (torneo.tipo === "torneo" || torneo.deporte === "padel")) {
-            throw new ErrorHttp(400, "En este torneo no puede haber empate");
+          const conEmpate = torneo.tipo === "campeonato" || deGrupos;
+          if (local === visitante && (!conEmpate || torneo.deporte === "padel")) {
+            throw new ErrorHttp(400, torneo.tipo === "grupos" && !deGrupos ? "En la llave no puede haber empate" : "En este torneo no puede haber empate");
           }
         }
 
