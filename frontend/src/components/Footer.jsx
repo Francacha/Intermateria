@@ -1,36 +1,48 @@
 import { useEffect, useState } from "react";
-import { useDroplet } from "../service/droplet";
 import { obtenerInstancia } from "../service/empresasService";
 import Icono from "./Icono";
 
+// Muestra qué droplet atiende. Se consulta al abrir o recargar la página y con
+// el botón: Nginx manda cada consulta al droplet siguiente (round-robin).
 export default function Footer() {
-  const droplet = useDroplet();
+  const [droplet, setDroplet] = useState("");
   // "consultando" hasta que responde la API; "error" solo si la consulta falló
   const [estado, setEstado] = useState("consultando");
 
   const consultar = () => {
     setEstado("consultando");
-    obtenerInstancia()
-      .then(() => setEstado("ok"))
+    return obtenerInstancia()
+      .then(({ data }) => {
+        setDroplet(data.droplet);
+        setEstado("ok");
+      })
       .catch(() => setEstado("error"));
   };
 
-  // Al abrir la app se consulta qué droplet atiende, aunque la página no pida datos
   useEffect(() => {
+    let vigente = true;
     obtenerInstancia()
-      .then(() => setEstado("ok"))
-      .catch(() => setEstado("error"));
+      .then(({ data }) => {
+        if (!vigente) return;
+        setDroplet(data.droplet);
+        setEstado("ok");
+      })
+      .catch(() => vigente && setEstado("error"));
+    return () => {
+      vigente = false;
+    };
   }, []);
 
-  const sinConexion = !droplet && estado === "error";
+  const sinConexion = estado === "error";
+  const texto = sinConexion ? "sin conexión" : estado === "consultando" && !droplet ? "consultando…" : droplet;
 
   return (
     <footer className="footer">
       <div className="contenedor footer-interno">
         <span className="footer-marca">Reservas de Canchas · pádel y fútbol</span>
         <span className="droplet" aria-live="polite">
-          <span className={`droplet-punto ${droplet ? "activo" : sinConexion ? "caido" : ""}`} aria-hidden="true" />
-          Atendido por <strong>{droplet || (sinConexion ? "sin conexión" : "consultando…")}</strong>
+          <span className={`droplet-punto ${sinConexion ? "caido" : droplet ? "activo" : ""}`} aria-hidden="true" />
+          Atendido por <strong>{texto}</strong>
           <button
             className="droplet-boton"
             onClick={consultar}

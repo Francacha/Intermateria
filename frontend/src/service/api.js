@@ -1,5 +1,4 @@
 import axios from "axios";
-import { setDroplet } from "./droplet";
 
 export const CLAVE_SESION = "sesion";
 
@@ -18,14 +17,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Cada respuesta trae la cabecera X-Droplet con el droplet que la atendió
+// Sesión vencida: se avisa a la app para que cierre la sesión
 api.interceptors.response.use(
-  (respuesta) => {
-    setDroplet(respuesta.headers["x-droplet"]);
-    return respuesta;
-  },
+  (respuesta) => respuesta,
   (error) => {
-    setDroplet(error.response?.headers["x-droplet"]);
     // Token vencido o inválido en una ruta protegida: se cierra la sesión
     if (error.response?.status === 401 && error.config?.headers?.Authorization) {
       window.dispatchEvent(new Event("sesion-expirada"));

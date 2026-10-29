@@ -38,7 +38,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Qué droplet atiende: el front lo consulta al cargar la página. Sin caché, para
+// que cada recarga pregunte de nuevo y Nginx la mande al droplet siguiente.
 app.get("/api/instancia", (req, res) => {
+  res.set("Cache-Control", "no-store");
   res.json({ droplet: DROPLET });
 });
 
