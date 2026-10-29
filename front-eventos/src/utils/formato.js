@@ -29,8 +29,49 @@ export const ESTADO_TURNO = {
   reservada: "Reservada",
   confirmada: "Confirmada",
   jugada: "Jugada",
+  ausente: "No vino",
   cancelada: "Cancelada"
 };
+
+// Qué pasó con la seña de un turno cancelado o en el que no vinieron
+export const RESULTADO_SENA = {
+  sin_sena: "Sin seña",
+  perdida: "Seña perdida",
+  a_resolver: "Seña a resolver",
+  devuelta: "Seña devuelta",
+  a_favor: "Seña a favor"
+};
+
+export const MEDIO_PAGO = { transferencia: "Transferencia", efectivo: "Efectivo" };
+
+// Duración de cada turno según el deporte (regla del complejo)
+export const DURACION_TURNO = { futbol: 60, padel: 90 };
+
+// Mismo cálculo que la API: de día rige precio_hora y desde la hora de noche
+// rige precio_hora_noche. Si el turno cruza ese horario, cada parte paga su tarifa.
+export const precioTurno = (cancha, inicio, horaNoche = "19:00") => {
+  const desde = aMinutos(inicio);
+  const hasta = desde + DURACION_TURNO[cancha.deporte];
+  const dia = Number(cancha.precio_hora);
+  const noche = cancha.precio_hora_noche == null ? dia : Number(cancha.precio_hora_noche);
+  const minutosNoche = Math.max(0, hasta - Math.max(desde, aMinutos(horaNoche)));
+  return Math.round((dia * (hasta - desde - minutosNoche) + noche * minutosNoche) / 60);
+};
+
+// "$30.000 la hora" o "$30.000 la hora · $36.000 de noche"
+export const textoPrecio = (cancha) =>
+  cancha.precio_hora_noche != null && Number(cancha.precio_hora_noche) !== Number(cancha.precio_hora)
+    ? `${pesos(cancha.precio_hora)} la hora · ${pesos(cancha.precio_hora_noche)} de noche`
+    : `${pesos(cancha.precio_hora)} la hora`;
+
+// Días de la semana como los guarda la API (1 = lunes)
+export const DIA_SEMANA = { 1: "Lunes", 2: "Martes", 3: "Miércoles", 4: "Jueves", 5: "Viernes", 6: "Sábado", 7: "Domingo" };
+
+// "2026-10-14" → 3 (miércoles)
+export const diaDeLaSemana = (fecha) => ((new Date(`${fecha}T12:00:00`).getDay() + 6) % 7) + 1;
+
+// Horas que faltan para un turno (negativo si ya empezó)
+export const horasHasta = (fecha, hora) => (new Date(`${fecha}T${hora.slice(0, 5)}:00`) - new Date()) / 3600000;
 
 // "2026-10-14" de hoy en la hora local del navegador
 export const hoyISO = () => {

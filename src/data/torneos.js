@@ -1,4 +1,5 @@
 import { ErrorHttp, aHora, aMinutos } from "../utils/comun.js";
+import { cierreQueSuperpone } from "./cierres.js";
 
 // Lógica de torneos (eliminación directa) y campeonatos (todos contra todos).
 // Todas las funciones reciben "db": el pool o un cliente dentro de una transacción.
@@ -16,8 +17,10 @@ const mezclar = (lista) => {
 };
 
 // Ganador de un partido jugado (o del que pasa libre). null si no se jugó o empataron.
+// Si un equipo no se presentó, gana el otro (regla del dueño: pierde por incomparecencia).
 export const ganador = (p) => {
   if (p.id_visitante === null) return p.id_local;
+  if (p.incomparecencia) return p.incomparecencia === p.id_local ? p.id_visitante : p.id_local;
   if (p.estado !== "jugado" || p.resultado_local === p.resultado_visitante) return null;
   return p.resultado_local > p.resultado_visitante ? p.id_local : p.id_visitante;
 };
@@ -32,6 +35,13 @@ export const calcularTabla = (equipos, partidos) => {
     const local = filas.get(p.id_local);
     const visitante = filas.get(p.id_visitante);
     if (!local || !visitante) continue;
+    // Incomparecencia: el que vino gana los 3 puntos; no se suman goles
+    if (p.incomparecencia) {
+      const [gana, pierde] = p.incomparecencia === p.id_local ? [visitante, local] : [local, visitante];
+      gana.pj++; gana.pg++; gana.pts += 3;
+      pierde.pj++; pierde.pp++;
+      continue;
+    }
     const lados = [
       [local, p.resultado_local, p.resultado_visitante],
       [visitante, p.resultado_visitante, p.resultado_local]
@@ -217,6 +227,9 @@ export const programarPartido = async (db, torneo, partido, { id_cancha, fecha, 
 
   const fin = aMinutos(hora) + DURACION_PARTIDO[torneo.deporte];
   if (fin > 1440) throw new ErrorHttp(400, "El partido no puede terminar después de la medianoche");
+  if (await cierreQueSuperpone(db, cancha.id_cancha, fecha, hora, aHora(fin))) {
+    throw new ErrorHttp(409, "La cancha está cerrada en ese horario (lluvia o mantenimiento)");
+  }
 
   await db.query("UPDATE partidos SET id_cancha = $1, fecha = $2, hora = $3 WHERE id_partido = $4", [
     cancha.id_cancha,

@@ -39,7 +39,8 @@ One place that covers both sides of the court. Players see every complex's open 
 - Domain vocabulary must match how complexes talk: turno, seña, cancha, complejo, torneo, campeonato, fixture, llave, tabla de posiciones, encargado, turno fijo.
 - The database rejects overlapping bookings on the same court (an EXCLUDE constraint), so double-booking cannot happen even across droplets.
 - A deactivated complex can't log in and doesn't appear on the public site.
-- Open (not built yet): online payments, recurring bookings (turnos fijos), promotions.
+- Built from the client interview (docs/entrevista-cliente.md): turnos fijos, payments per turno (seña and saldo, cash or transfer, entered by staff), daily caja, the 24-hour cancellation rule, no-shows, court closures, day/night pricing, owner reports, owner vs encargado roles, and walkovers in tournaments.
+- Open (not built yet): online payments (the client does not want the system to charge or verify transfers), promotions and loyalty benefits.
 
 ## Brand Commitments
 

@@ -1,19 +1,24 @@
-import pool from "../data/db.js";
-import { CONSULTA_TURNOS, crearTurno } from "../data/turnos.js";
-import { ErrorHttp, ahora, fechaValida, idValido, responderError } from "../utils/comun.js";
-
-const ESTADOS = ["reservada", "confirmada", "cancelada", "jugada"];
+import pool, { enTransaccion } from "../data/db.js";
+import {
+  CONSULTA_TURNOS,
+  anularPago,
+  cancelarTurno,
+  crearTurno,
+  marcarTurno,
+  registrarPago,
+  resolverSena
+} from "../data/turnos.js";
+import { ErrorHttp, ahora, fechaValida, responderError } from "../utils/comun.js";
 
 // ---------- Cliente: sus reservas ----------
 
 export const reservar = async (req, res) => {
-  const { id_cancha, fecha, hora_inicio, duracion } = req.body ?? {};
+  const { id_cancha, fecha, hora_inicio } = req.body ?? {};
   try {
     const turno = await crearTurno(pool, {
       idCancha: id_cancha,
       fecha,
       horaInicio: hora_inicio,
-      duracion,
       idCliente: req.usuario.id
     });
     res.status(201).json(turno);
@@ -34,22 +39,14 @@ export const misReservas = async (req, res) => {
   }
 };
 
-// El cliente puede cancelar un turno suyo que todavía no empezó
+// El cliente puede cancelar un turno suyo que todavía no empezó. Si avisa con
+// menos horas de las que fija el complejo y dejó seña, la pierde.
 export const cancelarMiReserva = async (req, res) => {
-  const { id } = req.params;
   try {
-    if (!idValido(id)) throw new ErrorHttp(404, "Reserva no encontrada");
-    const hoy = ahora();
-    const { rows } = await pool.query(
-      `UPDATE reservas SET estado = 'cancelada'
-        WHERE id_reserva = $1 AND id_cliente = $2 AND estado IN ('reservada', 'confirmada')
-          AND (fecha > $3 OR (fecha = $3 AND hora_inicio > $4))
-        RETURNING id_reserva`,
-      [id, req.usuario.id, hoy.fecha, hoy.hora]
+    const turno = await enTransaccion((db) =>
+      cancelarTurno(db, req.params.id, { idCliente: req.usuario.id, motivo: "Cancelado por el jugador desde la web" })
     );
-    if (rows.length === 0) throw new ErrorHttp(400, "Esa reserva ya no se puede cancelar");
-    const { rows: turno } = await pool.query(`${CONSULTA_TURNOS} WHERE r.id_reserva = $1`, [id]);
-    res.json(turno[0]);
+    res.json(turno);
   } catch (error) {
     responderError(res, error, "Error al cancelar la reserva");
   }
@@ -74,46 +71,89 @@ export const turnosDelDia = async (req, res) => {
 
 // Turno cargado a mano por el complejo (cliente que llama por teléfono, mostrador...)
 export const crearTurnoManual = async (req, res) => {
-  const { id_cancha, fecha, hora_inicio, duracion, contacto_nombre, contacto_telefono, sena } = req.body ?? {};
+  const { id_cancha, fecha, hora_inicio, contacto_nombre, contacto_telefono, sena, medio_sena } = req.body ?? {};
   try {
     if (!contacto_nombre?.trim()) throw new ErrorHttp(400, "Indicá a nombre de quién es el turno");
-    const turno = await crearTurno(pool, {
-      idCancha: id_cancha,
-      fecha,
-      horaInicio: hora_inicio,
-      duracion,
-      sena,
-      contactoNombre: contacto_nombre.trim().slice(0, 100),
-      contactoTelefono: contacto_telefono?.trim().slice(0, 30),
-      idEmpresa: req.empresa.id_empresa
-    });
+    const turno = await enTransaccion((db) =>
+      crearTurno(db, {
+        idCancha: id_cancha,
+        fecha,
+        horaInicio: hora_inicio,
+        sena,
+        medioSena: medio_sena,
+        quien: req.empresa.quien,
+        contactoNombre: contacto_nombre.trim().slice(0, 100),
+        contactoTelefono: contacto_telefono?.trim().slice(0, 30),
+        idEmpresa: req.empresa.id_empresa
+      })
+    );
     res.status(201).json(turno);
   } catch (error) {
     responderError(res, error, "Error al cargar el turno");
   }
 };
 
-// Cambiar el estado (confirmar, marcar como jugado, cancelar) o la seña
+// Cambiar el estado: reservado, confirmado, jugado o "no vino"
 export const actualizarTurno = async (req, res) => {
-  const { id } = req.params;
-  const { estado, sena } = req.body ?? {};
   try {
-    if (!idValido(id)) throw new ErrorHttp(404, "Turno no encontrado");
-    if (estado !== undefined && !ESTADOS.includes(estado)) throw new ErrorHttp(400, "Estado inválido");
-    if (sena !== undefined && !(Number(sena) >= 0)) throw new ErrorHttp(400, "La seña no puede ser negativa");
-
-    const { rows } = await pool.query(
-      `UPDATE reservas SET estado = COALESCE($1, estado), sena = COALESCE($2, sena)
-        WHERE id_reserva = $3 AND id_empresa = $4 AND id_partido IS NULL
-        RETURNING id_reserva`,
-      [estado ?? null, sena ?? null, id, req.empresa.id_empresa]
+    const turno = await enTransaccion((db) =>
+      marcarTurno(db, req.params.id, req.empresa.id_empresa, (req.body ?? {}).estado)
     );
-    if (rows.length === 0) {
-      throw new ErrorHttp(404, "Turno no encontrado (los partidos de torneos se manejan desde el torneo)");
-    }
-    const { rows: turno } = await pool.query(`${CONSULTA_TURNOS} WHERE r.id_reserva = $1`, [id]);
-    res.json(turno[0]);
+    res.json(turno);
   } catch (error) {
     responderError(res, error, "Error al actualizar el turno");
+  }
+};
+
+// Cancelar desde el mostrador. por_el_complejo: lluvia, cierre u otro motivo
+// del complejo (el jugador no pierde la seña). Si no, avisó el jugador y rige
+// la regla de las horas de anticipación. Un turno fijo cancelado = esa semana liberada.
+export const cancelarTurnoComplejo = async (req, res) => {
+  const { motivo, por_el_complejo } = req.body ?? {};
+  try {
+    const turno = await enTransaccion((db) =>
+      cancelarTurno(db, req.params.id, {
+        idEmpresa: req.empresa.id_empresa,
+        porElComplejo: por_el_complejo === true,
+        motivo: [motivo, `(registró ${req.empresa.quien})`].filter(Boolean).join(" ")
+      })
+    );
+    res.json(turno);
+  } catch (error) {
+    responderError(res, error, "Error al cancelar el turno");
+  }
+};
+
+export const resolverSenaTurno = async (req, res) => {
+  try {
+    const turno = await enTransaccion((db) =>
+      resolverSena(db, req.params.id, req.empresa.id_empresa, (req.body ?? {}).resultado)
+    );
+    res.json(turno);
+  } catch (error) {
+    responderError(res, error, "Error al resolver la seña");
+  }
+};
+
+export const registrarPagoTurno = async (req, res) => {
+  const { tipo, medio, monto } = req.body ?? {};
+  try {
+    const turno = await enTransaccion((db) =>
+      registrarPago(db, req.params.id, req.empresa.id_empresa, { tipo, medio, monto, quien: req.empresa.quien })
+    );
+    res.status(201).json(turno);
+  } catch (error) {
+    responderError(res, error, "Error al registrar el pago");
+  }
+};
+
+export const anularPagoTurno = async (req, res) => {
+  try {
+    const turno = await enTransaccion((db) =>
+      anularPago(db, req.params.id, req.params.idPago, req.empresa.id_empresa)
+    );
+    res.json(turno);
+  } catch (error) {
+    responderError(res, error, "Error al anular el pago");
   }
 };

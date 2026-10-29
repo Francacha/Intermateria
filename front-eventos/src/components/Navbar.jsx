@@ -82,7 +82,11 @@ export default function Navbar() {
           {usuario ? (
             <>
               <span className="navbar-empresa">
-                {rol === "cliente" ? `${usuario.nombre} ${usuario.apellido}` : usuario.nombre}
+                {rol === "cliente"
+                  ? `${usuario.nombre} ${usuario.apellido}`
+                  : usuario.puesto === "encargado"
+                    ? `${usuario.nombre} · ${usuario.persona}`
+                    : usuario.nombre}
               </span>
               <button className="boton boton-fantasma" onClick={cerrarSesion}>Salir</button>
             </>

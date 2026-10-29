@@ -10,7 +10,7 @@ import { obtenerMisReservas } from "../service/clienteService";
 import { obtenerTurnos } from "../service/complejoService";
 import { obtenerComplejos, obtenerHorariosLibres, obtenerTorneosPublicos } from "../service/publicoService";
 import useCarga from "../service/useCarga";
-import { DEPORTE, fechaCorta, fechaLarga, hora, hoyISO, pesos, sumarDias, tipoDeCancha } from "../utils/formato";
+import { DEPORTE, fechaCorta, fechaLarga, hora, hoyISO, pesos, sumarDias, textoPrecio, tipoDeCancha } from "../utils/formato";
 
 const CANCHAS_EN_TABLERO = 6;
 
@@ -244,7 +244,7 @@ function FilaCancha({ cancha, fecha }) {
       <div className="renglon-info">
         <strong>{cancha.nombre}</strong>
         <span className="texto-suave">
-          {cancha.complejo} · {tipoDeCancha(cancha)} · {pesos(cancha.precio_hora)} la hora
+          {cancha.complejo} · {tipoDeCancha(cancha)} · {textoPrecio(cancha)}
         </span>
       </div>
       <HorariosLibres cancha={cancha} idEmpresa={cancha.id_empresa} fecha={fecha} libres={cancha.libres} cerrado={cancha.cerrado} />
@@ -420,7 +420,7 @@ function HoyEnTuComplejo({ empresa }) {
                     <strong>{t.cancha}</strong>
                     <span className="texto-suave">
                       {t.id_partido ? "Partido de torneo" : t.cliente || "Sin nombre"}
-                      {Number(t.sena) > 0 && ` · seña ${pesos(t.sena)}`}
+                      {Number(t.sena_pagada) > 0 ? ` · seña ${pesos(t.sena_pagada)}` : !t.id_partido && " · sin seña"}
                     </span>
                   </div>
                   <span className={`insignia turno-${t.estado}`}>

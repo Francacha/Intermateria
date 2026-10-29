@@ -1,5 +1,6 @@
 import pool from "../data/db.js";
-import { buscarPerfil, horarioDeFecha } from "../data/perfiles.js";
+import { buscarPerfil, horarioDeFecha, reglasPorDefecto } from "../data/perfiles.js";
+import { ocupadosPorCierres } from "../data/cierres.js";
 import { detalleTorneo } from "../data/torneos.js";
 import { DEPORTES, ErrorHttp, fechaValida, idValido, responderError } from "../utils/comun.js";
 
@@ -18,8 +19,9 @@ export const listarComplejos = async (req, res) => {
               json_agg(json_build_object(
                 'id_cancha', c.id_cancha, 'nombre', c.nombre, 'deporte', c.deporte,
                 'jugadores', c.jugadores, 'superficie', c.superficie, 'techada', c.techada,
-                'precio_hora', c.precio_hora
+                'precio_hora', c.precio_hora, 'precio_hora_noche', c.precio_hora_noche
               ) ORDER BY c.deporte, c.nombre) AS canchas,
+              to_char(COALESCE(p.hora_noche, '19:00'), 'HH24:MI') AS hora_noche,
               (SELECT COUNT(*) FROM torneos t
                 WHERE t.id_empresa = e.id_empresa AND t.estado IN ('inscripcion', 'en_curso'))::int AS torneos_activos
          FROM empresas e
@@ -51,7 +53,7 @@ export const obtenerComplejo = async (req, res) => {
     const [perfil, canchas, torneos] = await Promise.all([
       buscarPerfil(empresa.id_empresa),
       pool.query(
-        `SELECT id_cancha, nombre, deporte, jugadores, superficie, techada, precio_hora
+        `SELECT id_cancha, nombre, deporte, jugadores, superficie, techada, precio_hora, precio_hora_noche
            FROM canchas WHERE id_empresa = $1 AND activa ORDER BY deporte, nombre`,
         [id]
       ),
@@ -78,7 +80,8 @@ export const disponibilidad = async (req, res) => {
     if (!fechaValida(fecha)) throw new ErrorHttp(400, "La fecha no es válida");
 
     const { rows: [cancha] } = await pool.query(
-      `SELECT c.id_cancha, c.id_empresa FROM canchas c JOIN empresas e ON e.id_empresa = c.id_empresa
+      `SELECT c.id_cancha, c.id_empresa, c.deporte, c.precio_hora, c.precio_hora_noche
+         FROM canchas c JOIN empresas e ON e.id_empresa = c.id_empresa
         WHERE c.id_cancha = $1 AND c.activa AND e.activo`,
       [id]
     );
@@ -92,7 +95,20 @@ export const disponibilidad = async (req, res) => {
         ORDER BY hora_inicio`,
       [id, fecha]
     );
-    res.json({ fecha, horario: horarioDeFecha(perfil.horarios, fecha), ocupados });
+    // Una cancha cerrada (lluvia, mantenimiento) se ve ocupada en ese horario
+    const cerrada = await ocupadosPorCierres(pool, fecha, cancha.id_cancha);
+    res.json({
+      fecha,
+      horario: horarioDeFecha(perfil.horarios, fecha),
+      ocupados: [...ocupados, ...cerrada.map(({ desde, hasta }) => ({ desde, hasta }))],
+      // Para que el jugador sepa cuánto paga y en qué condiciones antes de reservar
+      cancha: {
+        deporte: cancha.deporte,
+        precio_hora: cancha.precio_hora,
+        precio_hora_noche: cancha.precio_hora_noche
+      },
+      reglas: perfil.reglas ?? reglasPorDefecto()
+    });
   } catch (error) {
     responderError(res, error, "Error al consultar la disponibilidad");
   }
@@ -122,11 +138,15 @@ export const disponibilidadDelDia = async (req, res) => {
         GROUP BY c.id_cancha, p.horarios`,
       [fecha, deporte]
     );
+    const cierres = await ocupadosPorCierres(pool, fecha);
     res.json(
       rows.map((fila) => ({
         id_cancha: fila.id_cancha,
         horario: horarioDeFecha(fila.horarios, fecha),
-        ocupados: fila.ocupados
+        ocupados: [
+          ...fila.ocupados,
+          ...cierres.filter((c) => c.id_cancha === fila.id_cancha).map(({ desde, hasta }) => ({ desde, hasta }))
+        ]
       }))
     );
   } catch (error) {

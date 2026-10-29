@@ -7,14 +7,16 @@ const SUPERFICIES = {
 const JUGADORES = { futbol: [5, 7, 11], padel: [4] };
 
 // Formulario para crear o editar una cancha (cancha = null → nueva)
-export default function CanchaModal({ cancha, onGuardar, onCerrar }) {
+export default function CanchaModal({ cancha, horaNoche = "19:00", onGuardar, onCerrar }) {
   const [datos, setDatos] = useState({
     nombre: cancha?.nombre ?? "",
     deporte: cancha?.deporte ?? "futbol",
     jugadores: cancha?.jugadores ?? 5,
     superficie: cancha?.superficie ?? "sintetico",
     techada: cancha?.techada ?? false,
-    precio_hora: cancha ? Number(cancha.precio_hora) : ""
+    precio_hora: cancha ? Number(cancha.precio_hora) : "",
+    // Vacío = el mismo precio todo el día
+    precio_hora_noche: cancha?.precio_hora_noche != null ? Number(cancha.precio_hora_noche) : ""
   });
   const [error, setError] = useState("");
   const [guardando, setGuardando] = useState(false);
@@ -29,7 +31,12 @@ export default function CanchaModal({ cancha, onGuardar, onCerrar }) {
     setGuardando(true);
     setError("");
     try {
-      await onGuardar({ ...datos, jugadores: Number(datos.jugadores), precio_hora: Number(datos.precio_hora) || 0 });
+      await onGuardar({
+        ...datos,
+        jugadores: Number(datos.jugadores),
+        precio_hora: Number(datos.precio_hora) || 0,
+        precio_hora_noche: datos.precio_hora_noche === "" ? null : Number(datos.precio_hora_noche)
+      });
     } catch (mensaje) {
       setError(mensaje);
       setGuardando(false);
@@ -77,8 +84,19 @@ export default function CanchaModal({ cancha, onGuardar, onCerrar }) {
             </select>
           </label>
           <label className="campo">
-            Precio por hora ($)
+            Precio por hora de día ($)
             <input type="number" min="0" step="500" value={datos.precio_hora} onChange={(e) => cambiar("precio_hora", e.target.value)} required />
+          </label>
+          <label className="campo">
+            Precio por hora de noche ($) <small>desde las {horaNoche}; vacío = el mismo</small>
+            <input
+              type="number"
+              min="0"
+              step="500"
+              value={datos.precio_hora_noche}
+              placeholder={datos.precio_hora === "" ? "" : String(datos.precio_hora)}
+              onChange={(e) => cambiar("precio_hora_noche", e.target.value)}
+            />
           </label>
           <label className="campo campo-check">
             <input type="checkbox" checked={datos.techada} onChange={(e) => cambiar("techada", e.target.checked)} />

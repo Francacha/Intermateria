@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS reservas (
     estado VARCHAR(20) NOT NULL DEFAULT 'reservada'
         CHECK (estado IN ('reservada', 'confirmada', 'cancelada', 'jugada')),
     precio_total NUMERIC(10, 2) NOT NULL CHECK (precio_total >= 0),
-    sena NUMERIC(10, 2) DEFAULT 0 CHECK (sena >= 0),
+    -- Las señas y los saldos cobrados están en la tabla pagos (gestion.sql)
     fecha_creacion TIMESTAMP DEFAULT NOW(),
     CHECK (hora_fin > hora_inicio),
     -- FK compuesta: la cancha tiene que ser de la MISMA empresa del turno

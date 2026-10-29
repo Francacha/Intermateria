@@ -15,3 +15,19 @@ const pool = new pg.Pool({
 });
 
 export default pool;
+
+// Ejecuta "trabajo" dentro de una transacción: o se guarda todo o nada
+export const enTransaccion = async (trabajo) => {
+  const cliente = await pool.connect();
+  try {
+    await cliente.query("BEGIN");
+    const resultado = await trabajo(cliente);
+    await cliente.query("COMMIT");
+    return resultado;
+  } catch (error) {
+    await cliente.query("ROLLBACK");
+    throw error;
+  } finally {
+    cliente.release();
+  }
+};

@@ -29,7 +29,7 @@ export const idValido = (id) => /^\d+$/.test(String(id ?? ""));
 export const DEPORTES = ["futbol", "padel"];
 
 // Los droplets corren en UTC; "hoy" y "ahora" se calculan en la hora de Argentina
-const ZONA = process.env.ZONA_HORARIA || "America/Argentina/Buenos_Aires";
+export const ZONA = process.env.ZONA_HORARIA || "America/Argentina/Buenos_Aires";
 
 export const ahora = () => {
   const partes = Object.fromEntries(
@@ -78,4 +78,36 @@ export const normalizarCuit = (valor) => {
   const verificador = resto === 11 ? 0 : resto;
   if (verificador === 10 || verificador !== Number(digitos[10])) return null;
   return `${digitos.slice(0, 2)}-${digitos.slice(2, 10)}-${digitos[10]}`;
+};
+
+// Duración de cada turno según el deporte (regla del complejo: fútbol 1 hora, pádel 1 hora y media)
+export const DURACION_TURNO = { futbol: 60, padel: 90 };
+
+// Importe de un turno: de día rige precio_hora y desde la hora de "noche" del
+// complejo rige precio_hora_noche. Un turno que cruza ese horario paga cada
+// parte a su tarifa. inicio y fin en minutos.
+export const precioTurno = (cancha, inicio, fin, horaNoche = "19:00") => {
+  const dia = Number(cancha.precio_hora);
+  const noche = cancha.precio_hora_noche == null ? dia : Number(cancha.precio_hora_noche);
+  const minutosNoche = Math.max(0, fin - Math.max(inicio, aMinutos(horaNoche)));
+  const minutosDia = fin - inicio - minutosNoche;
+  return Math.round((dia * minutosDia + noche * minutosNoche) / 60);
+};
+
+// Minutos que faltan para que empiece un turno (negativo si ya empezó), en hora de Argentina
+export const minutosHasta = (fecha, hora) => {
+  const hoy = ahora();
+  const dias = (Date.parse(`${fecha}T00:00:00Z`) - Date.parse(`${hoy.fecha}T00:00:00Z`)) / 86400000;
+  return dias * 1440 + aMinutos(hora) - aMinutos(hoy.hora);
+};
+
+// Qué pasa con la seña cuando se cancela un turno (regla del dueño):
+//   - sin seña pagada: no hay nada que resolver
+//   - cancela el complejo (lluvia, cierre): el jugador no la pierde, se resuelve con él
+//   - cancela el jugador con menos de "horas" de anticipación: la pierde
+//   - cancela con tiempo: se coordina con el encargado
+export const resultadoDeSena = ({ senaPagada, porElComplejo, minutosAntes, horas }) => {
+  if (!(Number(senaPagada) > 0)) return "sin_sena";
+  if (porElComplejo) return "a_resolver";
+  return minutosAntes < horas * 60 ? "perdida" : "a_resolver";
 };

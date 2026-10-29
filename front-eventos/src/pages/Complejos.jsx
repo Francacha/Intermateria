@@ -16,8 +16,8 @@ import {
   etiquetaDia,
   franjaPorDefecto,
   hoyISO,
-  pesos,
   proximosDias,
+  textoPrecio,
   sumarDias,
   tipoDeCancha
 } from "../utils/formato";
@@ -257,7 +257,7 @@ function BloqueComplejo({ complejo, fecha, franja, nombreFranja }) {
                 <div className="renglon-info">
                   <strong>{cancha.nombre}</strong>
                   <span className="texto-suave">
-                    {tipoDeCancha(cancha)} · {detalleDeCancha(cancha)} · {pesos(cancha.precio_hora)} la hora
+                    {tipoDeCancha(cancha)} · {detalleDeCancha(cancha)} · {textoPrecio(cancha)}
                   </span>
                   <span className="renglon-duracion">Turnos de {duracionTexto(duracionPorDefecto(cancha.deporte))}</span>
                 </div>

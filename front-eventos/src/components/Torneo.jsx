@@ -212,16 +212,22 @@ export function Partido({ partido }) {
     );
   }
   const jugado = partido.estado === "jugado";
+  // Si un equipo no se presentó, pierde (no hay goles)
+  const ausente = partido.incomparecencia == null ? null : partido.incomparecencia === partido.id_local ? "local" : "visitante";
   const gana = (lado) =>
     jugado &&
-    (lado === "local"
-      ? partido.resultado_local > partido.resultado_visitante
-      : partido.resultado_visitante > partido.resultado_local);
+    (ausente
+      ? ausente !== lado
+      : lado === "local"
+        ? partido.resultado_local > partido.resultado_visitante
+        : partido.resultado_visitante > partido.resultado_local);
   return (
     <div className="partido">
       <span className={`partido-equipo ${gana("local") ? "ganador" : ""}`}>{partido.local}</span>
       <span className="partido-resultado">
-        {jugado ? `${partido.resultado_local} - ${partido.resultado_visitante}` : "vs"}
+        {ausente
+          ? `No se presentó ${ausente === "local" ? partido.local : partido.visitante}`
+          : jugado ? `${partido.resultado_local} - ${partido.resultado_visitante}` : "vs"}
       </span>
       <span className={`partido-equipo derecha ${gana("visitante") ? "ganador" : ""}`}>{partido.visitante}</span>
       <span className="partido-programa">

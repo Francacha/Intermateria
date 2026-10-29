@@ -39,7 +39,8 @@ const mensajeDeIngreso = (err) => {
   const estado = err.response?.status;
   if (!err.response) return "No pudimos conectarnos. Revisá tu conexión y probá de nuevo.";
   if (estado === 401) return "El email o la contraseña no coinciden. Revisalos y probá de nuevo.";
-  if (estado === 403) return "Tu complejo está dado de baja. Pedile al administrador del sitio que lo reactive.";
+  // Complejo dado de baja (lo reactiva el administrador) o encargado dado de baja (lo reactiva el dueño)
+  if (estado === 403) return err.response.data?.mensaje ?? "Tu cuenta está dada de baja.";
   if (estado === 400) return err.response.data?.mensaje ?? "Completá el email y la contraseña.";
   return "Hubo un problema de nuestro lado. Probá de nuevo en un rato.";
 };

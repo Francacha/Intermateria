@@ -12,7 +12,8 @@ const DIAS = [
 ];
 
 // Perfil del complejo: descripción, servicios, horarios (definen cuándo se puede reservar) y redes
-export default function PerfilComplejo() {
+// onReglas: avisa al panel cuando cambian las reglas (la agenda las usa para la seña y el precio)
+export default function PerfilComplejo({ onReglas }) {
   const [perfil, setPerfil] = useState(null);
   const [error, setError] = useState("");
   const [aviso, setAviso] = useState("");
@@ -44,6 +45,7 @@ export default function PerfilComplejo() {
     try {
       const { data } = await guardarPerfil(perfil);
       setPerfil(data);
+      onReglas?.(data.reglas);
       setAviso("Perfil guardado");
     } catch (err) {
       setError(mensajeDeError(err, "No se pudo guardar el perfil"));
@@ -79,6 +81,11 @@ export default function PerfilComplejo() {
             </button>
           ))}
         </div>
+
+        <ReglasReserva
+          reglas={perfil.reglas}
+          onCambiar={(campo, valor) => setPerfil({ ...perfil, reglas: { ...perfil.reglas, [campo]: valor } })}
+        />
 
         <div className="grilla-campos">
           <label className="campo">
@@ -137,5 +144,42 @@ export default function PerfilComplejo() {
         </button>
       </div>
     </div>
+  );
+}
+
+// Reglas que ven los jugadores antes de reservar y que la agenda aplica sola:
+// la seña sugerida, la anticipación para cancelar sin perderla y desde qué hora rige el precio de noche
+function ReglasReserva({ reglas, onCambiar }) {
+  return (
+    <fieldset className="reglas">
+      <legend className="campo-titulo">Reglas de reserva</legend>
+      <div className="grilla-campos">
+        <label className="campo">
+          Seña (% del turno)
+          <input type="number" min="0" max="100" value={reglas.porcentaje_sena} onChange={(e) => onCambiar("porcentaje_sena", e.target.value)} />
+        </label>
+        <label className="campo">
+          Horas de aviso para no perder la seña
+          <input type="number" min="0" max="168" value={reglas.horas_cancelacion} onChange={(e) => onCambiar("horas_cancelacion", e.target.value)} />
+        </label>
+        <label className="campo">
+          Precio de noche desde las
+          <input type="time" step="1800" value={reglas.hora_noche} onChange={(e) => onCambiar("hora_noche", e.target.value)} />
+        </label>
+        <label className="campo">
+          Datos para transferir la seña
+          <input
+            value={reglas.datos_transferencia}
+            maxLength={120}
+            placeholder="Alias o CBU y a nombre de quién"
+            onChange={(e) => onCambiar("datos_transferencia", e.target.value)}
+          />
+        </label>
+      </div>
+      <small className="texto-suave">
+        Si cancelan con menos de {reglas.horas_cancelacion || 0} horas, pierden la seña. Si cancela el complejo (lluvia,
+        cierre), no la pierden.
+      </small>
+    </fieldset>
   );
 }

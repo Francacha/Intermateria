@@ -26,6 +26,8 @@
   --aviso: #854d0e;
   --aviso-suave: rgba(234, 179, 8, 0.18);
   --ok: #15803d;
+  /* Barras de los reportes (validado: contraste ≥ 3:1 con la superficie) */
+  --barra: #15803d;
   --sombra: 0 1px 2px rgba(16, 32, 24, 0.06), 0 8px 24px rgba(16, 32, 24, 0.06);
   --radio: 14px;
   --banda-fondo: #0f2a1b;
@@ -69,6 +71,7 @@
     --aviso: #facc15;
     --aviso-suave: rgba(250, 204, 21, 0.14);
     --ok: #4ade80;
+    --barra: #16a34a;
     --sombra: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
     --banda-fondo: #17392a;
     --banda-superficie: #1e4633;
