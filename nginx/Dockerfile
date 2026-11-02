@@ -14,7 +14,10 @@ FROM nginx:1.27-alpine
 # con la lista NODOS y el resultado se escribe en /etc/nginx/nginx.conf
 ENV NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx
 COPY nginx/nginx.conf /etc/nginx/templates/nginx.conf.template
+COPY nginx/sitio.conf /etc/nginx/templates/sitio.conf.template
 COPY nginx/nodos.envsh /docker-entrypoint.d/15-nodos.envsh
-RUN chmod +x /docker-entrypoint.d/15-nodos.envsh
+# https.envsh decide si se sirve por HTTPS (si hay certificado para DOMINIO)
+COPY nginx/https.envsh /docker-entrypoint.d/16-https.envsh
+RUN chmod +x /docker-entrypoint.d/15-nodos.envsh /docker-entrypoint.d/16-https.envsh
 COPY --from=build /front/dist /usr/share/nginx/html
-EXPOSE 80
+EXPOSE 80 443

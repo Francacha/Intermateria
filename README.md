@@ -133,7 +133,7 @@ usuario: por eso `JWT_SECRET` tiene que ser **el mismo en los 3 droplets**.
 
 ## Despliegue en los droplets
 
-**Desplegado ahora en 1 droplet, sin balanceo:** http://134.122.120.239.nip.io
+**Desplegado ahora en 1 droplet, sin balanceo:** https://134.122.120.239.nip.io
 
 | Droplet | IP pública | IP privada (VPC) | Corre |
 | --- | --- | --- | --- |
@@ -168,8 +168,34 @@ docker compose up -d --build
 
 Entrar a `http://<IP pública del droplet 1>`.
 
-Firewall recomendado (Cloud Firewall de DigitalOcean): puerto 80 abierto a
-todos en el droplet 1; puertos 3000 y 5432 solo desde la VPC; 22 para SSH.
+**Dominio y HTTPS gratis** (droplet 1): `<IP pública>.nip.io` ya apunta al
+droplet, no hay que registrar nada. Con `DOMINIO=<IP pública>.nip.io` en el `.env`:
+
+```bash
+cd deploy/droplet-1 && sh https.sh
+```
+
+[https.sh](deploy/droplet-1/https.sh) saca un certificado de Let's Encrypt,
+reinicia Nginx (que al encontrar el certificado activa el puerto 443 y redirige
+el 80 a `https://`, ver [nginx/https.envsh](nginx/https.envsh)) y programa la
+renovación automática (cron diario en `/etc/cron.d/certificado-canchas`). Sin
+`DOMINIO` o sin certificado, Nginx sirve por HTTP como en la PC.
+
+**Firewall** (en cada droplet):
+
+```bash
+ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp && ufw --force enable
+```
+
+La base (5432) y la API (3000) además escuchan solo en la IP privada.
+
+**Actualizar después de un cambio** (y limpiar lo que queda de compilaciones
+anteriores, para que no se llene el disco):
+
+```bash
+cd ~/Intermateria && git pull && cd deploy/droplet-1
+docker compose up -d --build && docker builder prune -af && docker image prune -f
+```
 
 ## Prueba local (simula los 3 droplets en una máquina)
 

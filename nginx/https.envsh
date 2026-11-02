@@ -1,0 +1,28 @@
+#!/bin/sh
+# Lo carga la imagen oficial de Nginx al arrancar, antes del envsubst.
+# Si DOMINIO tiene certificado de Let's Encrypt (deploy/droplet-1/https.sh),
+# se agrega el servidor HTTPS y el puerto 80 redirige a https://.
+# Si no (por ejemplo en la PC), el sitio se sirve por HTTP como siempre.
+
+DOMINIO="${DOMINIO:-}"
+CERT="/etc/letsencrypt/live/${DOMINIO}"
+
+if [ -n "$DOMINIO" ] && [ -f "$CERT/fullchain.pem" ]; then
+  echo "https.envsh: HTTPS activo para $DOMINIO"
+  SITIO_HTTP='location / { return 301 https://$host$request_uri; }'
+  SERVIDOR_HTTPS="server {
+        listen 443 ssl;
+        http2 on;
+        server_name ${DOMINIO};
+        ssl_certificate     ${CERT}/fullchain.pem;
+        ssl_certificate_key ${CERT}/privkey.pem;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_session_cache shared:SSL:1m;
+        include /etc/nginx/sitio.conf;
+    }"
+else
+  [ -n "$DOMINIO" ] && echo "https.envsh: no hay certificado para $DOMINIO, se sirve solo por HTTP"
+  SITIO_HTTP='include /etc/nginx/sitio.conf;'
+  SERVIDOR_HTTPS=''
+fi
+export SITIO_HTTP SERVIDOR_HTTPS

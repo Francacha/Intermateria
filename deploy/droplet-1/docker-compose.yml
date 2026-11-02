@@ -51,8 +51,14 @@ services:
     environment:
       # API de este mismo droplet + las de los otros droplets (IP privada:3000)
       NODOS: "api:3000 ${NODOS_REMOTOS}"
+      # Dominio con certificado HTTPS (lo saca https.sh). Vacío = solo HTTP
+      DOMINIO: ${DOMINIO:-}
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro         # certificados (Let's Encrypt)
+      - /var/www/certbot:/var/www/certbot:ro         # archivos de verificación del dominio
     depends_on:
       - api
     networks:
