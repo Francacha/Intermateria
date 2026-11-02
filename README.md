@@ -133,15 +133,15 @@ usuario: por eso `JWT_SECRET` tiene que ser **el mismo en los 3 droplets**.
 
 ## Despliegue en los droplets
 
-**Desplegado ahora en 2 droplets:** http://162.243.173.208.nip.io
+**Desplegado ahora en 1 droplet, sin balanceo:** http://134.122.120.239.nip.io
 
 | Droplet | IP pública | IP privada (VPC) | Corre |
 | --- | --- | --- | --- |
-| droplet-1 | 162.243.173.208 | 10.116.0.5 | Nginx (balanceador + front), API, PostgreSQL |
-| droplet-2 | 198.199.91.249 | 10.116.0.6 | API |
+| droplet-1 | 134.122.120.239 | 10.116.0.5 | Nginx (front + entrada a la API), API, PostgreSQL |
 
-Para sumar un tercer droplet: levantar `deploy/droplet-nodo` con `DROPLET=droplet-3`
-y agregar su `IP:3000` a `NODOS_REMOTOS` en el `.env` del droplet 1.
+Con `NODOS_REMOTOS=""` en el `.env`, Nginx manda todo a la API de ese mismo
+droplet. Para volver a balancear: levantar `deploy/droplet-nodo` en otro droplet
+(`DROPLET=droplet-2`) y agregar su `IP privada:3000` a `NODOS_REMOTOS`.
 
 Requisitos: los droplets en la **misma VPC** (red privada) y con Docker
 instalado (`curl -fsSL https://get.docker.com | sh`). En cada uno:
